@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
+import 'package:qnotes/bootstrap/starter.dart';
 
-void main() {
-  runApp(const Placeholder());
-}
-
+void main() => starter();
