@@ -1,1 +1,1 @@
-// Error screen if bootstrap failed
+// Error screen if boot fails and initialization recovery function
