@@ -1,6 +1,6 @@
 // MaterialApp entry point: wires theme, locale and navigator.
 //
-// Reads FakeSettings from AppSettingsScope and maps them to MaterialApp
+// Reads Settings from AppSettingsScope and maps them to MaterialApp
 // parameters (ThemeMode, ThemeData, locale). The GlobalKey ensures
 // Flutter Inspector works correctly across hot reloads.
 
