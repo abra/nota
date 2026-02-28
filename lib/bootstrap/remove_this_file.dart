@@ -14,6 +14,4 @@ class Logger {
 
 class ErrorReporter {}
 
-class SettingsContainer {
-
-}
+class SettingsContainer {}
