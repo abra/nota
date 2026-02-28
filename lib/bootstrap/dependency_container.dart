@@ -11,17 +11,16 @@ class DependenciesContainer {
     required this.config,
     required this.errorReporter,
     required this.packageInfo,
-    // TODO: Add later
-    // required this.settingsContainer,
+    // TODO: Replace with real SettingsContainer from settings feature package.
+    required this.settingsContainer,
   });
 
   final Logger logger;
   final ApplicationConfig config;
   final ErrorReporter errorReporter;
   final PackageInfo packageInfo;
-
-  // TODO: Add later
-  // final SettingsContainer settingsContainer;
+  // TODO: Replace with real SettingsContainer from settings feature package.
+  final SettingsContainer settingsContainer;
 }
 
 /// A special version of [DependenciesContainer] that is used in tests.

@@ -57,7 +57,5 @@ class AppBlocObserver extends BlocObserver {
 
 // TODO: Delete everything below when the logger is actually implemented
 extension on String {
-  String limit(int i) {
-    return "$i";
-  }
+  String limit(int maxLength) => length > maxLength ? substring(0, maxLength) : this;
 }

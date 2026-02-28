@@ -20,7 +20,6 @@ Future<CompositionResult> composeDependencies({
 
   logger.info('Initializing dependencies...');
 
-  // Create the dependencies container using functions.
   final dependencies = await createDependenciesContainer(
     config,
     logger,
@@ -61,47 +60,41 @@ Future<DependenciesContainer> createDependenciesContainer(
   Logger logger,
   ErrorReporter errorReporter,
 ) async {
-  // Create or obtain the shared preferences instance.
   final sharedPreferences = SharedPreferencesAsync();
-
-  // Get package info.
   final packageInfo = await PackageInfo.fromPlatform();
-  // TODO: Add later
-  // final settingsContainer = await SettingsContainer.create(
-  //   sharedPreferences: sharedPreferences,
-  // );
+
+  // TODO: Replace with real SettingsContainer from settings feature package.
+  final settingsContainer = await SettingsContainer.create(
+    sharedPreferences: sharedPreferences,
+  );
 
   return DependenciesContainer(
     logger: logger,
     config: config,
     errorReporter: errorReporter,
     packageInfo: packageInfo,
-    // TODO: Add later
-    // settingsContainer: settingsContainer,
+    settingsContainer: settingsContainer,
   );
 }
 
-/// Creates the [Logger] instance and attaches any provided observers.
-// Logger createAppLogger({List<LogObserver> observers = const []}) {
-//   final logger = Logger();
-//
-//   for (final observer in observers) {
-//     logger.addObserver(observer);
-//   }
-//
-//   return logger;
-// }
+/// TODO: Replace with real Logger creation using observers from packages/monitoring.
+Logger createAppLogger({List<LogObserver> observers = const []}) {
+  final logger = Logger();
 
-/// Creates the [ErrorReporter] instance and initializes it if needed.
-// Future<ErrorReporter> createErrorReporter(ApplicationConfig config) async {
-//   final errorReporter = SentryErrorReporter(
-//     sentryDsn: config.sentryDsn,
-//     environment: config.environment.value,
-//   );
-//
-//   if (config.sentryDsn.isNotEmpty) {
-//     await errorReporter.initialize();
-//   }
-//
-//   return errorReporter;
-// }
+  for (final observer in observers) {
+    logger.addObserver(observer);
+  }
+
+  return logger;
+}
+
+/// TODO: Replace with real ErrorReporter initialization from packages/monitoring.
+Future<ErrorReporter> createErrorReporter(ApplicationConfig config) async {
+  final errorReporter = ErrorReporter();
+
+  if (config.enableSentry) {
+    await errorReporter.initialize();
+  }
+
+  return errorReporter;
+}
