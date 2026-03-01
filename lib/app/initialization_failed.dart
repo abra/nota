@@ -51,25 +51,31 @@ class _InitializationFailedAppState extends State<InitializationFailedApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Initialization failed',
-                    style: typography.headlineMedium,
-                  ),
-                  if (widget.onRetryInitialization != null)
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: _retryInitialization,
-                    ),
-                ],
+              Text(
+                'Initialization failed',
+                style: typography.headlineMedium,
               ),
               const SizedBox(height: 16),
               Text(
                 '${widget.error}',
                 style: typography.bodyLarge?.copyWith(color: colorScheme.error),
               ),
+              const SizedBox(height: 24),
+              if (widget.onRetryInitialization != null)
+                ValueListenableBuilder<bool>(
+                  valueListenable: _inProgress,
+                  builder: (context, inProgress, _) => FilledButton.icon(
+                    onPressed: inProgress ? null : _retryInitialization,
+                    icon: inProgress
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh),
+                    label: Text(inProgress ? 'Retrying...' : 'Retry'),
+                  ),
+                ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.all(8),
