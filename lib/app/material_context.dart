@@ -5,7 +5,6 @@
 // Flutter Inspector works correctly across hot reloads.
 
 import 'package:flutter/material.dart';
-import 'package:qnotes/app/app_scaffold.dart';
 import 'package:qnotes/app/app_settings_scope.dart';
 import 'package:qnotes/app/media_query.dart';
 import 'package:qnotes/bootstrap/remove_this_file.dart';
@@ -43,7 +42,7 @@ class MaterialContext extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       locale: locale,
-      home: const AppScaffold(),
+      home: const Placeholder(), // TODO: Replace with app entry screen
       builder: (context, child) {
         return KeyedSubtree(
           key: _globalKey,
