@@ -5,9 +5,8 @@
 // blocs do not need their own logging logic.
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:monitoring/monitoring.dart';
 import 'package:qnotes/utils/string_extension.dart';
-
-import 'fakes.dart';
 
 /// [BlocObserver] which logs all bloc state changes, errors and events.
 class AppBlocObserver extends BlocObserver {
@@ -15,7 +14,7 @@ class AppBlocObserver extends BlocObserver {
   const AppBlocObserver(this.logger);
 
   /// Logger used to log information during bloc transitions.
-  final FakeLogger logger;
+  final Logger logger;
 
   @override
   void onTransition(
@@ -31,7 +30,6 @@ class AppBlocObserver extends BlocObserver {
       )
       ..write('New State: ${transition.nextState?.toString().limit(100)}');
 
-    // TODO: Replace with real logger
     logger.info(logMessage.toString());
     super.onTransition(bloc, transition);
   }
@@ -43,7 +41,6 @@ class AppBlocObserver extends BlocObserver {
       ..writeln('Event: ${event.runtimeType}')
       ..write('Details: ${event?.toString().limit(200)}');
 
-    // TODO: Replace with real logger
     logger.info(logMessage.toString());
     super.onEvent(bloc, event);
   }
@@ -54,7 +51,6 @@ class AppBlocObserver extends BlocObserver {
       ..writeln('Bloc: ${bloc.runtimeType}')
       ..writeln(error.toString());
 
-    // TODO: Replace with real logger
     logger.error(logMessage.toString(), error: error, stackTrace: stackTrace);
     super.onError(bloc, error, stackTrace);
   }

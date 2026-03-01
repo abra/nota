@@ -4,6 +4,7 @@
 // composeDependencies() can be called independently in tests
 // with substituted implementations.
 
+import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:qnotes/bootstrap/application_config.dart';
 import 'package:qnotes/bootstrap/dependency_container.dart';
@@ -17,8 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Composes dependencies and returns the result of composition.
 Future<CompositionResult> composeDependencies({
   required ApplicationConfig config,
-  required FakeLogger logger,
-  required FakeErrorReporter errorReporter,
+  required Logger logger,
+  required ErrorReportingService errorReporter,
 }) async {
   final stopwatch = Stopwatch()..start();
 
@@ -61,8 +62,8 @@ final class CompositionResult {
 /// Creates the initialized [DependenciesContainer].
 Future<DependenciesContainer> createDependenciesContainer(
   ApplicationConfig config,
-  FakeLogger logger,
-  FakeErrorReporter errorReporter,
+  Logger logger,
+  ErrorReportingService errorReporter,
 ) async {
   final sharedPreferences = SharedPreferencesAsync();
   final packageInfo = await PackageInfo.fromPlatform();
@@ -81,9 +82,9 @@ Future<DependenciesContainer> createDependenciesContainer(
   );
 }
 
-/// TODO: Replace with real Logger creation using observers from packages/monitoring.
-FakeLogger createAppLogger({List<FakeLogObserver> observers = const []}) {
-  final logger = FakeLogger();
+/// Creates the [Logger] instance and attaches any provided observers.
+Logger createAppLogger({List<LogObserver> observers = const []}) {
+  final logger = Logger();
 
   for (final observer in observers) {
     logger.addObserver(observer);
@@ -92,10 +93,12 @@ FakeLogger createAppLogger({List<FakeLogObserver> observers = const []}) {
   return logger;
 }
 
-/// TODO: Replace with real ErrorReporter initialization from packages/monitoring.
-Future<FakeErrorReporter> createErrorReporter(ApplicationConfig config) async {
-  // TODO: Replace FakeNoopErrorReporter with SentryErrorReporter from packages/monitoring.
-  const errorReporter = FakeNoopErrorReporter();
+/// Creates the [ErrorReportingService] instance.
+///
+/// Replace [NoopErrorReporter] with a real implementation (e.g. Crashlytics)
+/// from packages/monitoring when ready.
+Future<ErrorReportingService> createErrorReporter(ApplicationConfig config) async {
+  const errorReporter = NoopErrorReporter();
 
   if (config.enableSentry) {
     await errorReporter.initialize();
