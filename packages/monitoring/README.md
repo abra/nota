@@ -1,49 +1,49 @@
 # monitoring
 
-Пакет для логирования, отчётов об ошибках и аналитики.
+Package for logging, error reporting, and analytics.
 
-Содержит готовую инфраструктуру (Logger, интерфейсы) и заглушки (Noop*),
-которые нужно заменить на реальные реализации перед релизом.
+Provides ready-to-use infrastructure (Logger, interfaces) and no-op stubs (Noop*)
+that should be replaced with real implementations before shipping to production.
 
 ---
 
-## Что внутри
+## What's included
 
-| Класс | Тип | Статус |
+| Class | Type | Status |
 |---|---|---|
-| `Logger` | base class | Готов — работает через наблюдателей (`LogObserver`) |
-| `LogLevel` | enum | Готов |
-| `LogObserver` | mixin | Готов — реализуй чтобы получать лог-сообщения |
-| `LogMessage` | data class | Готов |
-| `PrintingLogObserver` | concrete | Готов — печатает в консоль через `debugPrint` |
-| `ErrorReporterLogObserver` | concrete | Готов — пробрасывает ошибки из Logger в ErrorReportingService |
-| `ErrorReportingService` | interface | Реализуй для продакшна |
-| `NoopErrorReporter` | concrete | Заглушка — ничего не делает, безопасна для разработки |
-| `AnalyticsEvent` | abstract base class | Готов — расширяй для создания типизированных событий |
-| `AnalyticsReporter` | interface | Реализуй для продакшна |
-| `NoopAnalyticsReporter` | concrete | Заглушка — ничего не делает, безопасна для разработки |
+| `Logger` | base class | Ready — dispatches to attached `LogObserver`s |
+| `LogLevel` | enum | Ready |
+| `LogObserver` | mixin | Ready — implement to receive log messages |
+| `LogMessage` | data class | Ready |
+| `PrintingLogObserver` | concrete | Ready — prints to console via `debugPrint` |
+| `ErrorReporterLogObserver` | concrete | Ready — bridges Logger errors into ErrorReportingService |
+| `ErrorReportingService` | interface | Implement for production |
+| `NoopErrorReporter` | concrete | Stub — does nothing, safe for development |
+| `AnalyticsEvent` | abstract base class | Ready — extend to define typed events |
+| `AnalyticsReporter` | interface | Implement for production |
+| `NoopAnalyticsReporter` | concrete | Stub — does nothing, safe for development |
 
 ---
 
-## Logger — как добавлять LogObserver'ы
+## Logger — how to add LogObservers
 
-`Logger` работает через наблюдателей: при каждом `logger.info(...)` он вызывает
-`onLog()` у всех зарегистрированных `LogObserver`'ов. Сам `Logger` не трогаешь —
-только добавляешь/убираешь наблюдателей.
+`Logger` uses the observer pattern: every call to `logger.info(...)` invokes
+`onLog()` on all registered `LogObserver`s. You never modify `Logger` itself —
+you just add or remove observers.
 
-### Уже настроено в starter.dart
+### Already configured in starter.dart
 
 ```dart
 final logger = createAppLogger(
   observers: [
-    ErrorReporterLogObserver(errorReporter), // ошибки идут в ErrorReportingService
+    ErrorReporterLogObserver(errorReporter), // errors go to ErrorReportingService
     if (!kReleaseMode)
-      const PrintingLogObserver(logLevel: LogLevel.trace), // печать в консоль
+      const PrintingLogObserver(logLevel: LogLevel.trace), // print to console
   ],
 );
 ```
 
-### Как написать свой LogObserver
+### How to write a custom LogObserver
 
 ```dart
 // packages/monitoring/lib/src/file_log_observer.dart
@@ -58,37 +58,37 @@ final class FileLogObserver with LogObserver {
 }
 ```
 
-### Как подключить
+### How to register it
 
 ```dart
-// composition.dart — добавляешь в список observers
+// composition.dart — add to the observers list
 observers: [
   ErrorReporterLogObserver(errorReporter),
   if (!kReleaseMode)
     const PrintingLogObserver(logLevel: LogLevel.trace),
-  FileLogObserver(), // ← добавил
+  FileLogObserver(), // <- added
 ],
 ```
 
 ---
 
-## ErrorReportingService — как заменить заглушку
+## ErrorReportingService — how to replace the stub
 
-`NoopErrorReporter` — заглушка: принимает ошибки, но ничего с ними не делает.
-Для продакшна нужно реализовать `ErrorReportingService`.
+`NoopErrorReporter` is a stub: it accepts errors but does nothing with them.
+For production, implement `ErrorReportingService`.
 
-### Сейчас (заглушка)
+### Current (stub)
 
 ```dart
 // composition.dart
 Future<ErrorReportingService> createErrorReporter(ApplicationConfig config) async {
-  const errorReporter = NoopErrorReporter(); // ← ничего не делает
+  const errorReporter = NoopErrorReporter(); // <- does nothing
   if (config.enableSentry) await errorReporter.initialize();
   return errorReporter;
 }
 ```
 
-### Как написать реальную реализацию (пример: Sentry)
+### How to write a real implementation (example: Sentry)
 
 ```dart
 // packages/monitoring/lib/src/sentry_error_reporter.dart
@@ -100,7 +100,7 @@ final class SentryErrorReporter implements ErrorReportingService {
 
   @override
   Future<void> initialize() => SentryFlutter.init((options) {
-    options.dsn = 'твой DSN из sentry.io';
+    options.dsn = 'your DSN from sentry.io';
   });
 
   @override
@@ -114,26 +114,26 @@ final class SentryErrorReporter implements ErrorReportingService {
 }
 ```
 
-### Как подключить — меняешь одну строчку
+### How to plug it in — change one line
 
 ```dart
-// было:
+// before:
 const errorReporter = NoopErrorReporter();
-// стало:
+// after:
 final errorReporter = SentryErrorReporter();
 ```
 
-Всё остальное (`DependenciesContainer`, BLoC, `starter.dart`) не трогаешь —
-они работают через интерфейс `ErrorReportingService`.
+Everything else (`DependenciesContainer`, BLoC, `starter.dart`) stays untouched —
+they all depend on the `ErrorReportingService` interface, not a concrete class.
 
 ---
 
-## AnalyticsReporter — как использовать
+## AnalyticsReporter — how to use
 
-`NoopAnalyticsReporter` — заглушка: принимает события, но не отправляет их.
-Для продакшна нужно реализовать `AnalyticsReporter`.
+`NoopAnalyticsReporter` is a stub: it accepts events but does not send them.
+For production, implement `AnalyticsReporter`.
 
-### 1. Добавь в DependenciesContainer
+### 1. Add to DependenciesContainer
 
 ```dart
 // dependency_container.dart
@@ -141,7 +141,7 @@ class DependenciesContainer {
   const DependenciesContainer({
     required this.logger,
     required this.errorReporter,
-    required this.analyticsReporter, // ← добавил
+    required this.analyticsReporter, // <- add
     // ...
   });
 
@@ -150,11 +150,11 @@ class DependenciesContainer {
 }
 ```
 
-### 2. Создай в composition.dart
+### 2. Create in composition.dart
 
 ```dart
 Future<DependenciesContainer> createDependenciesContainer(...) async {
-  const analyticsReporter = NoopAnalyticsReporter(); // ← заглушка
+  const analyticsReporter = NoopAnalyticsReporter(); // <- stub
   if (config.enableAnalytics) await analyticsReporter.initialize();
 
   return DependenciesContainer(
@@ -164,7 +164,7 @@ Future<DependenciesContainer> createDependenciesContainer(...) async {
 }
 ```
 
-### 3. Создай типизированные события в feature-пакете
+### 3. Define typed events in a feature package
 
 ```dart
 // packages/features/notes/lib/src/analytics/notes_events.dart
@@ -193,7 +193,7 @@ class NoteDeletedEvent extends AnalyticsEvent {
 }
 ```
 
-### 4. Используй в BLoC
+### 4. Use in BLoC
 
 ```dart
 // notes_bloc.dart
@@ -205,13 +205,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   final AnalyticsReporter analyticsReporter;
 
   Future<void> _onNoteCreated(NoteCreated event, Emitter<NotesState> emit) async {
-    // ... логика создания заметки ...
+    // ... note creation logic ...
     await analyticsReporter.logEvent(NoteCreatedEvent(noteId: note.id));
   }
 }
 ```
 
-### Как написать реальную реализацию (пример: Firebase Analytics)
+### How to write a real implementation (example: Firebase Analytics)
 
 ```dart
 // packages/monitoring/lib/src/firebase_analytics_reporter.dart
@@ -243,31 +243,31 @@ final class FirebaseAnalyticsReporter implements AnalyticsReporter {
 }
 ```
 
-### Как подключить — меняешь одну строчку
+### How to plug it in — change one line
 
 ```dart
-// было:
+// before:
 const analyticsReporter = NoopAnalyticsReporter();
-// стало:
+// after:
 final analyticsReporter = FirebaseAnalyticsReporter();
 ```
 
 ---
 
-## Итого
+## Summary
 
 ```
 Logger
-  └── PrintingLogObserver     — уже подключён (консоль, только debug/profile)
-  └── ErrorReporterLogObserver — уже подключён (пробрасывает ошибки в ErrorReporter)
-  └── FileLogObserver          — напишешь сам когда нужно
-  └── SentryLogObserver        — напишешь сам когда нужно
+  └── PrintingLogObserver       — already attached (console, debug/profile only)
+  └── ErrorReporterLogObserver  — already attached (forwards errors to ErrorReporter)
+  └── FileLogObserver           — write when needed
+  └── SentryLogObserver         — write when needed
 
 ErrorReportingService
-  └── NoopErrorReporter        — сейчас (заглушка)
-  └── SentryErrorReporter      — заменишь когда нужно
+  └── NoopErrorReporter         — current (stub)
+  └── SentryErrorReporter       — replace when ready
 
 AnalyticsReporter
-  └── NoopAnalyticsReporter          — сейчас (заглушка)
-  └── FirebaseAnalyticsReporter      — заменишь когда нужно
+  └── NoopAnalyticsReporter     — current (stub)
+  └── FirebaseAnalyticsReporter — replace when ready
 ```
