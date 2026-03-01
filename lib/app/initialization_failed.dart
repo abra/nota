@@ -47,9 +47,10 @@ class _InitializationFailedAppState extends State<InitializationFailedApp> {
 
     return MaterialApp(
       home: Scaffold(
-        body: Center(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Initialization failed',

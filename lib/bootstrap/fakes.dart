@@ -255,6 +255,8 @@ class FakeSettingsService {
     _current = transform(_current);
     _controller.add(_current);
   }
+
+  Future<void> dispose() => _controller.close();
 }
 
 /// TODO: Replace with SettingsContainer from packages/features/settings.

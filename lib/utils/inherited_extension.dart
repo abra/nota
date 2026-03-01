@@ -5,7 +5,7 @@
 // inheritFrom / maybeInheritFrom — typed access to a specific aspect of an
 //                                  InheritedModel for selective rebuilds.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 extension InheritedExtension on BuildContext {
   /// Returns the nearest [T] or null if not found.
