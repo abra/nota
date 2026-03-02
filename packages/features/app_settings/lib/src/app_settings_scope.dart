@@ -16,13 +16,18 @@ class AppSettingsScope extends StatelessWidget {
 
   /// Returns current [AppSettings] and subscribes to changes.
   static AppSettings of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_AppSettingsInherited>()!.settings;
+      context
+          .dependOnInheritedWidgetOfExactType<_AppSettingsInherited>()!
+          .settings;
 
   /// Updates settings without subscribing to changes.
   static Future<void> update(
     BuildContext context,
     AppSettings Function(AppSettings) transform,
-  ) => context.getInheritedWidgetOfExactType<_AppSettingsInherited>()!.service.update(transform);
+  ) => context
+      .getInheritedWidgetOfExactType<_AppSettingsInherited>()!
+      .service
+      .update(transform);
 
   @override
   Widget build(BuildContext context) {
@@ -51,5 +56,6 @@ class _AppSettingsInherited extends InheritedWidget {
   final AppSettingsService service;
 
   @override
-  bool updateShouldNotify(_AppSettingsInherited old) => settings != old.settings;
+  bool updateShouldNotify(_AppSettingsInherited old) =>
+      settings != old.settings;
 }
