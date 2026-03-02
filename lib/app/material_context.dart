@@ -1,13 +1,12 @@
 // MaterialApp entry point: wires theme, locale and navigator.
 //
-// Reads Settings from AppSettingsScope and maps them to MaterialApp
+// Reads AppSettings from AppSettingsScope and maps them to MaterialApp
 // parameters (ThemeMode, ThemeData, locale). The GlobalKey ensures
 // Flutter Inspector works correctly across hot reloads.
 
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:qnotes/app/app_settings_scope.dart';
 import 'package:qnotes/app/media_query.dart';
-import 'package:qnotes/bootstrap/fakes.dart';
 
 /// Entry point for the application that creates [MaterialApp].
 class MaterialContext extends StatelessWidget {
@@ -18,30 +17,19 @@ class MaterialContext extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace FakeSettings with real Settings from settings domain package.
     final settings = AppSettingsScope.of(context);
-    final themeMode = settings.general.themeMode;
-    final seedColor = settings.general.seedColor;
-    final locale = settings.general.locale;
-
-    // TODO: Replace FakeThemeModeVO with real ThemeModeVO from settings domain package.
-    final materialThemeMode = switch (themeMode) {
-      FakeThemeModeVO.system => ThemeMode.system,
-      FakeThemeModeVO.light => ThemeMode.light,
-      FakeThemeModeVO.dark => ThemeMode.dark,
-    };
 
     return MaterialApp(
-      themeMode: materialThemeMode,
+      themeMode: settings.themeMode,
       theme: ThemeData(
-        colorSchemeSeed: seedColor,
+        colorSchemeSeed: settings.seedColor,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: seedColor,
+        colorSchemeSeed: settings.seedColor,
         brightness: Brightness.dark,
       ),
-      locale: locale,
+      locale: settings.locale,
       home: const Placeholder(), // TODO: Replace with app entry screen
       builder: (context, child) {
         // KeyedSubtree with a stable GlobalKey prevents Flutter from

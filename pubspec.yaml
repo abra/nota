@@ -13,6 +13,9 @@ dependencies:
   monitoring:
     path: packages/monitoring
 
+  app_settings:
+    path: packages/features/app_settings
+
   cupertino_icons: ^1.0.8
   flutter_bloc: ^9.1.1
   shared_preferences: ^2.5.4

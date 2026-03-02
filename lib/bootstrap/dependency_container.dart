@@ -4,10 +4,10 @@
 // singletons or a service locator. This keeps dependencies explicit and makes
 // them easy to substitute in tests via TestDependenciesContainer.
 
+import 'package:app_settings/app_settings.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:qnotes/bootstrap/application_config.dart';
-import 'package:qnotes/bootstrap/fakes.dart';
 
 /// Container for global dependencies.
 class DependenciesContainer {
@@ -16,17 +16,14 @@ class DependenciesContainer {
     required this.config,
     required this.errorReporter,
     required this.packageInfo,
-    // TODO: Replace with real SettingsContainer from settings feature package.
-    required this.settingsContainer,
+    required this.appSettingsService,
   });
 
   final Logger logger;
   final ApplicationConfig config;
   final ErrorReportingService errorReporter;
   final PackageInfo packageInfo;
-
-  // TODO: Replace with real SettingsContainer from settings feature package.
-  final FakeSettingsContainer settingsContainer;
+  final AppSettingsService appSettingsService;
 }
 
 /// A special version of [DependenciesContainer] that is used in tests.

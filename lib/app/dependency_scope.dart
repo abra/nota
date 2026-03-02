@@ -4,8 +4,8 @@
 // DependenciesScope.of(context) to access a dependency without
 // it being passed through every intermediate constructor.
 
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/widgets.dart';
-import 'package:qnotes/app/app_settings_scope.dart';
 import 'package:qnotes/bootstrap/dependency_container.dart';
 import 'package:qnotes/utils/inherited_extension.dart';
 
@@ -29,9 +29,11 @@ class DependenciesScope extends StatelessWidget {
     return _DependenciesInherited(
       dependencies: dependencies,
       // AppSettingsScope is nested here so that settings are always available
-      // to any widget that has access to dependencies, without requiring a
-      // separate scope to be placed manually in the widget tree.
-      child: AppSettingsScope(child: child),
+      // to any widget that has access to dependencies.
+      child: AppSettingsScope(
+        service: dependencies.appSettingsService,
+        child: child,
+      ),
     );
   }
 }
@@ -46,7 +48,5 @@ class _DependenciesInherited extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_DependenciesInherited oldWidget) =>
-      // DependenciesContainer is immutable and replaced as a whole, so
-      // identity check is sufficient and more efficient than equality.
       !identical(dependencies, oldWidget.dependencies);
 }

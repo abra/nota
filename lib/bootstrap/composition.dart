@@ -4,11 +4,11 @@
 // composeDependencies() can be called independently in tests
 // with substituted implementations.
 
+import 'package:app_settings/app_settings.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:qnotes/bootstrap/application_config.dart';
 import 'package:qnotes/bootstrap/dependency_container.dart';
-import 'package:qnotes/bootstrap/fakes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A place where Application-Wide dependencies are initialized.
@@ -67,18 +67,14 @@ Future<DependenciesContainer> createDependenciesContainer(
 ) async {
   final sharedPreferences = SharedPreferencesAsync();
   final packageInfo = await PackageInfo.fromPlatform();
-
-  // TODO: Replace with real SettingsContainer from settings feature package.
-  final settingsContainer = await FakeSettingsContainer.create(
-    sharedPreferences: sharedPreferences,
-  );
+  final appSettingsService = await AppSettingsService.create(sharedPreferences);
 
   return DependenciesContainer(
     logger: logger,
     config: config,
     errorReporter: errorReporter,
     packageInfo: packageInfo,
-    settingsContainer: settingsContainer,
+    appSettingsService: appSettingsService,
   );
 }
 

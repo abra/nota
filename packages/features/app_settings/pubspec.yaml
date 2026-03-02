@@ -1,0 +1,12 @@
+name: app_settings
+description: "App settings (theme, color, locale) for qnotes."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.5.4
