@@ -8,7 +8,6 @@ formatter:
 
 analyzer:
   exclude:
-    - "lib/src/core/localization/generated/**"
     - "**/*.*.dart"
     - "**/generated/**"
 
