@@ -93,7 +93,9 @@ Logger createAppLogger({List<LogObserver> observers = const []}) {
 ///
 /// Replace [NoopErrorReporter] with a real implementation (e.g. Crashlytics)
 /// from packages/monitoring when ready.
-Future<ErrorReportingService> createErrorReporter(ApplicationConfig config) async {
+Future<ErrorReportingService> createErrorReporter(
+  ApplicationConfig config,
+) async {
   const errorReporter = NoopErrorReporter();
 
   if (config.enableSentry) {

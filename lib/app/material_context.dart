@@ -30,7 +30,8 @@ class MaterialContext extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       locale: settings.locale,
-      home: const Placeholder(), // TODO: Replace with app entry screen
+      home: const Placeholder(),
+      // TODO: Replace with app entry screen
       builder: (context, child) {
         // KeyedSubtree with a stable GlobalKey prevents Flutter from
         // destroying and recreating the subtree when MaterialApp rebuilds,

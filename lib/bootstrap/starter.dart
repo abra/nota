@@ -10,13 +10,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:monitoring/monitoring.dart';
 import 'package:qnotes/app/initialization_failed.dart';
 import 'package:qnotes/app/root_context.dart';
 import 'package:qnotes/bootstrap/app_bloc_observer.dart';
 import 'package:qnotes/bootstrap/application_config.dart';
 import 'package:qnotes/bootstrap/bloc_transformer.dart';
 import 'package:qnotes/bootstrap/composition.dart';
-import 'package:monitoring/monitoring.dart';
 
 /// Initializes dependencies and runs app.
 Future<void> starter() async {
@@ -27,58 +27,50 @@ Future<void> starter() async {
   final logger = createAppLogger(
     observers: [
       ErrorReporterLogObserver(errorReporter),
-      if (!kReleaseMode)
-        const PrintingLogObserver(logLevel: LogLevel.trace),
+      if (!kReleaseMode) const PrintingLogObserver(logLevel: LogLevel.trace),
     ],
   );
 
-  await runZonedGuarded(
-    () async {
-      // Ensure Flutter is initialized.
-      WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(() async {
+    // Ensure Flutter is initialized.
+    WidgetsFlutterBinding.ensureInitialized();
 
-      // Configure global error interception.
-      FlutterError.onError = logger.logFlutterError;
-      WidgetsBinding.instance.platformDispatcher.onError =
-          logger.logPlatformDispatcherError;
+    // Configure global error interception.
+    FlutterError.onError = logger.logFlutterError;
+    WidgetsBinding.instance.platformDispatcher.onError =
+        logger.logPlatformDispatcherError;
 
-      // Setup bloc observer and transformer.
-      Bloc.observer = AppBlocObserver(logger);
-      Bloc.transformer = SequentialBlocTransformer<Object?>().transform;
+    // Setup bloc observer and transformer.
+    Bloc.observer = AppBlocObserver(logger);
+    Bloc.transformer = SequentialBlocTransformer<Object?>().transform;
 
-      // Defined as a local function so it can pass itself as onRetryInitialization,
-      // allowing the error screen to re-run the full initialization without
-      // restarting the process.
-      Future<void> composeAndRun() async {
-        try {
-          final compositionResult = await composeDependencies(
-            config: config,
-            logger: logger,
-            errorReporter: errorReporter,
-          );
+    // Defined as a local function so it can pass itself as onRetryInitialization,
+    // allowing the error screen to re-run the full initialization without
+    // restarting the process.
+    Future<void> composeAndRun() async {
+      try {
+        final compositionResult = await composeDependencies(
+          config: config,
+          logger: logger,
+          errorReporter: errorReporter,
+        );
 
-          runApp(RootContext(compositionResult: compositionResult));
-        } on Object catch (e, stackTrace) {
-          // Catches both Exception and Error (e.g. OutOfMemoryError),
-          // ensuring no failure silently escapes during initialization.
-          logger.error(
-            'Initialization failed',
+        runApp(RootContext(compositionResult: compositionResult));
+      } on Object catch (e, stackTrace) {
+        // Catches both Exception and Error (e.g. OutOfMemoryError),
+        // ensuring no failure silently escapes during initialization.
+        logger.error('Initialization failed', error: e, stackTrace: stackTrace);
+        runApp(
+          InitializationFailedApp(
             error: e,
             stackTrace: stackTrace,
-          );
-          runApp(
-            InitializationFailedApp(
-              error: e,
-              stackTrace: stackTrace,
-              onRetryInitialization: composeAndRun,
-            ),
-          );
-        }
+            onRetryInitialization: composeAndRun,
+          ),
+        );
       }
+    }
 
-      // Launch the application.
-      await composeAndRun();
-    },
-    logger.logZoneError,
-  );
+    // Launch the application.
+    await composeAndRun();
+  }, logger.logZoneError);
 }

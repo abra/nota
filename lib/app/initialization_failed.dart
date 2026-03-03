@@ -52,10 +52,7 @@ class _InitializationFailedAppState extends State<InitializationFailedApp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Initialization failed',
-                style: typography.headlineMedium,
-              ),
+              Text('Initialization failed', style: typography.headlineMedium),
               const SizedBox(height: 16),
               Text(
                 '${widget.error}',
