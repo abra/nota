@@ -1,0 +1,11 @@
+name: component_library
+description: "UI components and theme for qnotes."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter

@@ -13,6 +13,9 @@ dependencies:
   monitoring:
     path: packages/monitoring
 
+  component_library:
+    path: packages/component_library
+
   app_settings:
     path: packages/features/app_settings
 
