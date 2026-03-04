@@ -6,8 +6,11 @@
 
 import 'package:app_settings/app_settings.dart';
 import 'package:component_library/component_library.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:qnotes/app/media_query.dart';
+import 'package:qnotes/app/screens/playground_screen.dart';
 
 /// Entry point for the application that creates [MaterialApp].
 class MaterialContext extends StatelessWidget {
@@ -31,8 +34,13 @@ class MaterialContext extends StatelessWidget {
         theme: lightTheme.materialThemeData,
         darkTheme: darkTheme.materialThemeData,
         locale: settings.locale,
-        // TODO: Replace with app entry screen
-        home: const Placeholder(),
+        supportedLocales: const [Locale('en'), Locale('ru')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: kReleaseMode ? const Placeholder() : const PlaygroundScreen(),
         builder: (context, child) {
           // KeyedSubtree with a stable GlobalKey prevents Flutter from
           // destroying and recreating the subtree when MaterialApp rebuilds,
