@@ -1,5 +1,5 @@
 name: app_settings
-description: "App settings (theme, color, locale) for qnotes."
+description: "App settings (theme, color, locale)"
 publish_to: none
 version: 0.1.0
 
