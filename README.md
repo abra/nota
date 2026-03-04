@@ -4,5 +4,5 @@ Simple note-taking mobile app.
 
 ## Requirements
 
-- Flutter 3.29+
-- Dart 3.7+
+- Flutter 3.41+
+- Dart 3.11+
