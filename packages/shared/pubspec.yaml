@@ -1,0 +1,7 @@
+name: shared
+description: "Domain models, interfaces and value objects shared across features."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.11.0
