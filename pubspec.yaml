@@ -19,7 +19,7 @@ dependencies:
     path: packages/component_library
 
   app_settings:
-    path: packages/features/app_settings
+    path: packages/app_settings
 
   preferences_storage:
     path: packages/preferences_storage

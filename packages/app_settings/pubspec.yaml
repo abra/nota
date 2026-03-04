@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   preferences_storage:
-    path: ../../preferences_storage
+    path: ../preferences_storage
 
 dev_dependencies:
   flutter_test:
