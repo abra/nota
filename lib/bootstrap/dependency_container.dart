@@ -7,7 +7,7 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:qnotes/bootstrap/application_config.dart';
+import 'package:qnotes/bootstrap/config/application_config.dart';
 
 /// Container for global dependencies.
 class DependenciesContainer {

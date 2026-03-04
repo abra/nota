@@ -5,7 +5,7 @@
 // TestConfig uses noSuchMethod to fail loudly when a test accesses
 // a config value it did not provide.
 
-import 'package:qnotes/bootstrap/environment.dart';
+import 'package:qnotes/bootstrap/config/environment.dart';
 
 /// Application configuration
 class ApplicationConfig {

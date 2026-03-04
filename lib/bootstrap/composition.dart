@@ -8,7 +8,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:preferences_storage/preferences_storage.dart';
-import 'package:qnotes/bootstrap/application_config.dart';
+import 'package:qnotes/bootstrap/config/application_config.dart';
 import 'package:qnotes/bootstrap/dependency_container.dart';
 
 /// A place where Application-Wide dependencies are initialized.
