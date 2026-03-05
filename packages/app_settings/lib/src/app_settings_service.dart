@@ -4,7 +4,7 @@ import 'dart:ui' show Color, Locale;
 
 import 'package:app_settings/src/app_settings.dart';
 import 'package:flutter/material.dart' show ThemeMode;
-import 'package:preferences_storage/preferences_storage.dart';
+import 'package:app_settings/src/preferences_storage.dart';
 
 /// Loads, persists and streams [AppSettings].
 class AppSettingsService {
@@ -16,7 +16,8 @@ class AppSettingsService {
   final _controller = StreamController<AppSettings>.broadcast();
   AppSettings _current;
 
-  static Future<AppSettingsService> create(PreferencesStorage prefs) async {
+  static Future<AppSettingsService> create() async {
+    final prefs = PreferencesStorage();
     final settings = await _load(prefs);
     return AppSettingsService._(prefs, settings);
   }

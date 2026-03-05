@@ -7,7 +7,6 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:preferences_storage/preferences_storage.dart';
 import 'package:nota/bootstrap/config/application_config.dart';
 import 'package:nota/bootstrap/dependency_container.dart';
 
@@ -65,11 +64,8 @@ Future<DependenciesContainer> createDependenciesContainer(
   Logger logger,
   ErrorReportingService errorReporter,
 ) async {
-  final preferencesStorage = PreferencesStorage();
   final packageInfo = await PackageInfo.fromPlatform();
-  final appSettingsService = await AppSettingsService.create(
-    preferencesStorage,
-  );
+  final appSettingsService = await AppSettingsService.create();
 
   return DependenciesContainer(
     logger: logger,

@@ -21,9 +21,6 @@ dependencies:
   app_settings:
     path: packages/app_settings
 
-  preferences_storage:
-    path: packages/preferences_storage
-
   shared:
     path: packages/shared
 
