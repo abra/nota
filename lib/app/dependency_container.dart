@@ -7,7 +7,7 @@
 import 'package:monitoring/monitoring.dart';
 import 'package:nota/app/config/application_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:ui_settings/ui_settings.dart';
+import 'package:app_settings_repository/app_settings_repository.dart';
 
 /// Container for global dependencies.
 class DependenciesContainer {
@@ -16,14 +16,14 @@ class DependenciesContainer {
     required this.config,
     required this.errorReporter,
     required this.packageInfo,
-    required this.uiSettingsService,
+    required this.uiAppSettingsService,
   });
 
   final Logger logger;
   final ApplicationConfig config;
   final ErrorReportingService errorReporter;
   final PackageInfo packageInfo;
-  final UiSettingsService uiSettingsService;
+  final AppSettingsService uiAppSettingsService;
 }
 
 /// A special version of [DependenciesContainer] that is used in tests.

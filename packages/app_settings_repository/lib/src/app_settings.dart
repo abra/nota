@@ -3,8 +3,8 @@ import 'dart:ui' show Locale;
 import 'package:flutter/material.dart' show ThemeMode;
 
 /// Stores user preferences: theme mode and locale.
-final class UiSettings {
-  const UiSettings({
+final class AppSettings {
+  const AppSettings({
     this.themeMode = ThemeMode.system,
     this.locale = const Locale('en'),
   });
@@ -12,10 +12,10 @@ final class UiSettings {
   final ThemeMode themeMode;
   final Locale locale;
 
-  UiSettings copyWith({
+  AppSettings copyWith({
     ThemeMode? themeMode,
     Locale? locale,
-  }) => UiSettings(
+  }) => AppSettings(
     themeMode: themeMode ?? this.themeMode,
     locale: locale ?? this.locale,
   );
@@ -23,7 +23,7 @@ final class UiSettings {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UiSettings &&
+      other is AppSettings &&
           themeMode == other.themeMode &&
           locale == other.locale;
 

@@ -1,10 +1,10 @@
 // MaterialApp entry point: wires theme, locale and navigator.
 //
-// Reads Settings from UiSettingsScope and builds AppThemeData instances
+// Reads AppSettings from AppSettingsScope and builds AppThemeData instances
 // from component_library. Wraps MaterialApp in AppTheme so that all widgets
 // in the tree can access custom theme colors via AppTheme.of(context).
 
-import 'package:nota/app/ui_settings_scope.dart';
+import 'package:nota/app/app_settings_scope.dart';
 import 'package:component_library/component_library.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class MaterialContext extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = UiSettingsScope.of(context);
+    final settings = AppSettingsScope.of(context);
 
     const lightTheme = LightAppThemeData();
     const darkTheme = DarkAppThemeData();
