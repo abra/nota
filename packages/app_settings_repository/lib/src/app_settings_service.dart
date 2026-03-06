@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' show Locale;
 
-import 'package:flutter/material.dart' show ThemeMode;
-import 'package:app_settings_repository/src/preferences_storage.dart';
 import 'package:app_settings_repository/src/app_settings.dart';
+import 'package:app_settings_repository/src/preferences_storage.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 
 /// Loads, persists and streams [AppSettings].
 class AppSettingsService {
