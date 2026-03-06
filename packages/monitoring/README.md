@@ -68,8 +68,7 @@ observers: [
   ErrorReporterLogObserver(errorReporter),
   if (!kReleaseMode) const PrintingLogObserver(logLevel: LogLevel.trace),
   FileLogObserver(), // <- added
-]
-,
+],
 ```
 
 ---
