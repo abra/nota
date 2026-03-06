@@ -1,5 +1,5 @@
-name: app_settings
-description: "App settings (theme, color, locale)"
+name: ui_settings
+description: "UI settings (theme mode, locale)"
 publish_to: none
 version: 0.1.0
 

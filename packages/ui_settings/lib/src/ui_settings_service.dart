@@ -2,53 +2,53 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' show Locale;
 
-import 'package:app_settings/src/app_settings.dart';
 import 'package:flutter/material.dart' show ThemeMode;
-import 'package:app_settings/src/preferences_storage.dart';
+import 'package:ui_settings/src/preferences_storage.dart';
+import 'package:ui_settings/src/ui_settings.dart';
 
-/// Loads, persists and streams [AppSettings].
-class AppSettingsService {
-  AppSettingsService._(this._prefs, this._current);
+/// Loads, persists and streams [UiSettings].
+class UiSettingsService {
+  UiSettingsService._(this._prefs, this._current);
 
   static const _key = 'app_settings';
 
   final PreferencesStorage _prefs;
-  final _controller = StreamController<AppSettings>.broadcast();
-  AppSettings _current;
+  final _controller = StreamController<UiSettings>.broadcast();
+  UiSettings _current;
 
-  static Future<AppSettingsService> create() async {
+  static Future<UiSettingsService> create() async {
     final prefs = PreferencesStorage();
     final settings = await _load(prefs);
-    return AppSettingsService._(prefs, settings);
+    return UiSettingsService._(prefs, settings);
   }
 
-  Stream<AppSettings> get stream => _controller.stream;
+  Stream<UiSettings> get stream => _controller.stream;
 
-  AppSettings get current => _current;
+  UiSettings get current => _current;
 
-  Future<void> update(AppSettings Function(AppSettings) transform) async {
+  Future<void> update(UiSettings Function(UiSettings) transform) async {
     _current = transform(_current);
     await _save(_prefs, _current);
     _controller.add(_current);
   }
 
-  static Future<AppSettings> _load(PreferencesStorage prefs) async {
+  static Future<UiSettings> _load(PreferencesStorage prefs) async {
     final json = await prefs.getString(_key);
-    if (json == null) return const AppSettings();
+    if (json == null) return const UiSettings();
     try {
       final map = jsonDecode(json) as Map<String, Object?>;
-      return AppSettings(
+      return UiSettings(
         themeMode: ThemeMode.values.byName(
           map['themeMode'] as String? ?? 'system',
         ),
         locale: Locale(map['locale'] as String? ?? 'en'),
       );
     } catch (_) {
-      return const AppSettings();
+      return const UiSettings();
     }
   }
 
-  static Future<void> _save(PreferencesStorage prefs, AppSettings s) async {
+  static Future<void> _save(PreferencesStorage prefs, UiSettings s) async {
     final map = <String, Object?>{
       'themeMode': s.themeMode.name,
       'locale': s.locale.languageCode,

@@ -5,6 +5,7 @@
 // initialization logic.
 
 import 'package:flutter/widgets.dart';
+import 'package:nota/app/ui_settings_scope.dart';
 import 'package:nota/app/composition.dart';
 import 'package:nota/app/dependency_scope.dart';
 import 'package:nota/app/material_context.dart';
@@ -16,9 +17,12 @@ class RootContext extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DependenciesScope(
-      dependencies: compositionResult.dependencies,
-      child: const MaterialContext(),
+    return UiSettingsScope(
+      service: compositionResult.dependencies.uiSettingsService,
+      child: DependenciesScope(
+        dependencies: compositionResult.dependencies,
+        child: const MaterialContext(),
+      ),
     );
   }
 }

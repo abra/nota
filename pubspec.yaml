@@ -18,8 +18,8 @@ dependencies:
   component_library:
     path: packages/component_library
 
-  app_settings:
-    path: packages/app_settings
+  ui_settings:
+    path: packages/ui_settings
 
   shared:
     path: packages/shared

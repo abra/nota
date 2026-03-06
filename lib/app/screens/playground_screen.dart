@@ -1,4 +1,4 @@
-import 'package:app_settings/app_settings.dart';
+import 'package:nota/app/ui_settings_scope.dart';
 import 'package:component_library/component_library.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ class PlaygroundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = AppSettingsScope.of(context);
+    final settings = UiSettingsScope.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Playground')),
@@ -40,7 +40,7 @@ class PlaygroundScreen extends StatelessWidget {
               ],
               selected: {settings.themeMode},
               onSelectionChanged: (value) {
-                AppSettingsScope.update(
+                UiSettingsScope.update(
                   context,
                   (s) => s.copyWith(themeMode: value.first),
                 );
@@ -57,7 +57,7 @@ class PlaygroundScreen extends StatelessWidget {
               ],
               selected: {settings.locale},
               onSelectionChanged: (value) {
-                AppSettingsScope.update(
+                UiSettingsScope.update(
                   context,
                   (s) => s.copyWith(locale: value.first),
                 );
@@ -66,7 +66,7 @@ class PlaygroundScreen extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.large),
           _Section(
-            title: 'Current Settings',
+            title: 'Current UiSettings',
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(Spacing.mediumLarge),
@@ -201,7 +201,7 @@ const _strings = {
   'en': {
     'greeting': '👋 Hello, World!',
     'notes': '📝 My Notes',
-    'settings': '⚙️ Settings',
+    'settings': '⚙️ UiSettings',
     'pick_date': 'Pick a date',
   },
   'ru': {
