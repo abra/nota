@@ -65,12 +65,9 @@ final class FileLogObserver with LogObserver {
 ```dart
 // composition.dart — add to the observers list
 observers: [
-ErrorReporterLogObserver
-(
-errorReporter),
-if (!kReleaseMode)
-const PrintingLogObserver(logLevel: LogLevel.trace),
-FileLogObserver(), // <- added
+  ErrorReporterLogObserver(errorReporter),
+  if (!kReleaseMode) const PrintingLogObserver(logLevel: LogLevel.trace),
+  FileLogObserver(), // <- added
 ]
 ,
 ```
