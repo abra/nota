@@ -44,12 +44,14 @@ called `AppSettingsScope.of(context)`.
 
 ## Wiring
 
-`AppSettingsService` is created in `composition.dart` and stored in `DependenciesContainer`.
-`AppSettingsScope` (in `lib/app/`) is placed in `RootContext` and wraps the whole widget tree.
+`AppSettingsService` is created in `composition.dart` and stored in
+`DependenciesContainer`.
+`AppSettingsScope` (in `lib/app/`) is placed in `RootContext` and wraps the whole widget
+tree.
 
 ```
-AppSettingsScope          ← StreamBuilder + InheritedWidget (lib/app/)
-  └─ DependenciesScope
+DependenciesScope
+  └─ AppSettingsScope     ← StreamBuilder + InheritedWidget (lib/app/)
        └─ MaterialContext ← reads theme/locale, passes to MaterialApp
             └─ your app
 ```

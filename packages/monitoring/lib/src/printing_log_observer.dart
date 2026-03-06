@@ -19,8 +19,7 @@ final class PrintingLogObserver with LogObserver {
     if (logMessage.level.index < logLevel.index) return;
 
     final dt = logMessage.timestamp;
-    final timestamp =
-        '${_pad(dt.month)}-${_pad(dt.day)} '
+    final timestamp = '${_pad(dt.month)}-${_pad(dt.day)} '
         '${_pad(dt.hour)}:${_pad(dt.minute)}:${_pad(dt.second)}';
 
     final buffer = StringBuffer()

@@ -19,15 +19,16 @@ class _FakeErrorReporter implements ErrorReportingService {
   Future<void> captureException({
     required Object throwable,
     StackTrace? stackTrace,
-  }) async => captured.add((throwable: throwable, stackTrace: stackTrace));
+  }) async =>
+      captured.add((throwable: throwable, stackTrace: stackTrace));
 }
 
 LogMessage _message(LogLevel level, {Object? error}) => LogMessage(
-  message: 'msg',
-  level: level,
-  timestamp: DateTime.now(),
-  error: error,
-);
+      message: 'msg',
+      level: level,
+      timestamp: DateTime.now(),
+      error: error,
+    );
 
 void main() {
   group('ErrorReporterLogObserver', () {

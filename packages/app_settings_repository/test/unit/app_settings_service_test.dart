@@ -1,9 +1,9 @@
 import 'dart:ui' show Locale;
 
 import 'package:app_settings_repository/app_settings_repository.dart';
+import 'package:app_settings_repository/src/preferences_storage.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app_settings_repository/src/preferences_storage.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 

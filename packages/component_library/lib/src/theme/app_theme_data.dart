@@ -20,8 +20,8 @@ final class LightAppThemeData extends AppThemeData {
 
   @override
   ThemeData get materialThemeData => ThemeData(
-    brightness: Brightness.light,
-  );
+        brightness: Brightness.light,
+      );
 }
 
 /// Dark variant of [AppThemeData].
@@ -30,6 +30,6 @@ final class DarkAppThemeData extends AppThemeData {
 
   @override
   ThemeData get materialThemeData => ThemeData(
-    brightness: Brightness.dark,
-  );
+        brightness: Brightness.dark,
+      );
 }

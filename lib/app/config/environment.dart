@@ -15,8 +15,7 @@ enum Environment {
   staging._('STAGING'),
 
   /// Production environment.
-  prod._('PROD')
-  ;
+  prod._('PROD');
 
   /// The environment value.
   final String value;
@@ -25,9 +24,9 @@ enum Environment {
 
   /// Returns the environment from the given [value].
   static Environment from(String? value) => switch (value) {
-    'DEV' => Environment.dev,
-    'STAGING' => Environment.staging,
-    'PROD' => Environment.prod,
-    _ => kReleaseMode ? Environment.prod : Environment.dev,
-  };
+        'DEV' => Environment.dev,
+        'STAGING' => Environment.staging,
+        'PROD' => Environment.prod,
+        _ => kReleaseMode ? Environment.prod : Environment.dev,
+      };
 }

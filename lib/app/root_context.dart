@@ -17,10 +17,10 @@ class RootContext extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSettingsScope(
-      service: compositionResult.dependencies.appSettingsService,
-      child: DependenciesScope(
-        dependencies: compositionResult.dependencies,
+    return DependenciesScope(
+      dependencies: compositionResult.dependencies,
+      child: AppSettingsScope(
+        service: compositionResult.dependencies.appSettingsService,
         child: const MaterialContext(),
       ),
     );

@@ -15,10 +15,11 @@ final class AppSettings {
   AppSettings copyWith({
     ThemeMode? themeMode,
     Locale? locale,
-  }) => AppSettings(
-    themeMode: themeMode ?? this.themeMode,
-    locale: locale ?? this.locale,
-  );
+  }) =>
+      AppSettings(
+        themeMode: themeMode ?? this.themeMode,
+        locale: locale ?? this.locale,
+      );
 
   @override
   bool operator ==(Object other) =>

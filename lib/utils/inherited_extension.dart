@@ -30,7 +30,8 @@ extension InheritedExtension on BuildContext {
   /// Maybe inherit specific aspect from [InheritedModel].
   T? maybeInheritFrom<A extends Object, T extends InheritedModel<A>>({
     A? aspect,
-  }) => InheritedModel.inheritFrom<T>(this, aspect: aspect);
+  }) =>
+      InheritedModel.inheritFrom<T>(this, aspect: aspect);
 
   /// Inherit specific aspect from [InheritedModel], throws if not found.
   T inheritFrom<A extends Object, T extends InheritedModel<A>>({A? aspect}) =>

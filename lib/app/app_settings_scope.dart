@@ -21,10 +21,11 @@ class AppSettingsScope extends StatelessWidget {
   static Future<void> update(
     BuildContext context,
     AppSettings Function(AppSettings) transform,
-  ) => context
-      .getInheritedWidgetOfExactType<_SettingsInherited>()!
-      .service
-      .update(transform);
+  ) =>
+      context
+          .getInheritedWidgetOfExactType<_SettingsInherited>()!
+          .service
+          .update(transform);
 
   @override
   Widget build(BuildContext context) {

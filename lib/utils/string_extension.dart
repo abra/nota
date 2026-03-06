@@ -10,6 +10,6 @@ extension StringExtension on String {
   String limit(int length) => length < 0
       ? this
       : (length == 0
-            ? ''
-            : (length < this.length ? substring(0, length) : this));
+          ? ''
+          : (length < this.length ? substring(0, length) : this));
 }
