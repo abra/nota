@@ -11,7 +11,10 @@ import 'package:nota/app/dependency_scope.dart';
 import 'package:nota/app/material_context.dart';
 
 class RootContext extends StatelessWidget {
-  const RootContext({required this.compositionResult, super.key});
+  const RootContext({
+    required this.compositionResult,
+    super.key,
+  });
 
   final CompositionResult compositionResult;
 
