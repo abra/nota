@@ -114,17 +114,8 @@ For the full guide with code examples see [.docs/THEMING.md](../../.docs/THEMING
 Use these constants instead of magic numbers:
 
 ```dart
-padding: const EdgeInsets.all
-(
-Spacing
-.
-mediumLarge
-) // 16
-fontSize
-:
-FontSize
-.
-medium // 14
+padding: const EdgeInsets.all(Spacing.mediumLarge) // 16
+fontSize: FontSize.medium // 14
 ```
 
 ---
