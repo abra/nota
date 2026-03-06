@@ -1,6 +1,9 @@
 import 'package:component_library/component_library.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nota/app/app_settings_scope.dart';
+import 'package:nota/app/dependency_scope.dart';
+import 'package:nota/app/router/app_routes.dart';
 
 /// Manual test screen for verifying app-wide settings.
 ///
@@ -11,6 +14,7 @@ class PlaygroundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dependencies = DependenciesScope.of(context);
     final settings = AppSettingsScope.of(context);
 
     return Scaffold(
@@ -109,6 +113,47 @@ class PlaygroundScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+          const SizedBox(height: Spacing.large),
+          _Section(
+            title: 'Routing',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: remove debug logging before release
+                    dependencies.logger.debug(
+                      'PlaygroundScreen: push ${AppRoutes.newNote}',
+                    );
+                    context.push(AppRoutes.newNote);
+                  },
+                  child: const Text('push → /notes/new'),
+                ),
+                const SizedBox(height: Spacing.small),
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: remove debug logging before release
+                    dependencies.logger.debug(
+                      'PlaygroundScreen: push ${AppRoutes.noteEditor('42')}',
+                    );
+                    context.push(AppRoutes.noteEditor('42'));
+                  },
+                  child: const Text('push → /notes/42'),
+                ),
+                const SizedBox(height: Spacing.small),
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: remove debug logging before release
+                    dependencies.logger.debug(
+                      'PlaygroundScreen: go ${AppRoutes.settings}',
+                    );
+                    context.go(AppRoutes.settings);
+                  },
+                  child: const Text('go → /settings'),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: Spacing.large),
