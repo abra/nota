@@ -51,9 +51,8 @@ final logger = createAppLogger(
 final class FileLogObserver with LogObserver {
   @override
   void onLog(LogMessage logMessage) {
-    File('app.log').writeAsStringSync(
-      '${logMessage.timestamp} [${logMessage.level.toShortName()}] ${logMessage
-          .message}\n',
+    File('app.log')
+      .writeAsStringSync('${logMessage.timestamp} [${logMessage.level.toShortName()}] ${logMessage.message}\n',
       mode: FileMode.append,
     );
   }
