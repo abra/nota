@@ -1,4 +1,4 @@
-import 'dart:ui' show Color, Locale;
+import 'dart:ui' show Locale;
 
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart' show ThemeMode;
@@ -52,16 +52,6 @@ void main() {
       final service2 = await AppSettingsService.create();
 
       expect(service2.current.themeMode, ThemeMode.dark);
-    });
-
-    test('persists seedColor correctly', () async {
-      const color = Color(0xFF00FF00);
-      final service = await AppSettingsService.create();
-      await service.update((s) => s.copyWith(seedColor: color));
-
-      final service2 = await AppSettingsService.create();
-
-      expect(service2.current.seedColor, color);
     });
 
     test('persists locale correctly', () async {

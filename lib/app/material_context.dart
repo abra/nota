@@ -22,8 +22,8 @@ class MaterialContext extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = AppSettingsScope.of(context);
 
-    final lightTheme = LightAppThemeData(seedColor: settings.seedColor);
-    final darkTheme = DarkAppThemeData(seedColor: settings.seedColor);
+    const lightTheme = LightAppThemeData();
+    const darkTheme = DarkAppThemeData();
 
     return AppTheme(
       lightTheme: lightTheme,

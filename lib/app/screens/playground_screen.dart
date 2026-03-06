@@ -49,39 +49,6 @@ class PlaygroundScreen extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.large),
           _Section(
-            title: 'Seed Color',
-            child: Wrap(
-              spacing: Spacing.small,
-              children: _seedColors.map((color) {
-                final isSelected = settings.seedColor == color;
-                return GestureDetector(
-                  onTap: () {
-                    AppSettingsScope.update(
-                      context,
-                      (s) => s.copyWith(seedColor: color),
-                    );
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Colors.transparent,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: Spacing.large),
-          _Section(
             title: 'Locale',
             child: SegmentedButton<Locale>(
               segments: const [
@@ -107,10 +74,6 @@ class PlaygroundScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('themeMode: ${settings.themeMode.name}'),
-                    const SizedBox(height: Spacing.small),
-                    Text(
-                      'seedColor: #${settings.seedColor.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
-                    ),
                     const SizedBox(height: Spacing.small),
                     Text('locale: ${settings.locale.languageCode}'),
                   ],
@@ -248,17 +211,6 @@ const _strings = {
     'pick_date': 'Выбрать дату',
   },
 };
-
-const _seedColors = [
-  Color(0xFF6200EE),
-  Color(0xFF03DAC6),
-  Color(0xFFE91E63),
-  Color(0xFF4CAF50),
-  Color(0xFFFF9800),
-  Color(0xFF2196F3),
-  Color(0xFF9C27B0),
-  Color(0xFFF44336),
-];
 
 const _spacingValues = [
   ('xSmall', Spacing.xSmall),

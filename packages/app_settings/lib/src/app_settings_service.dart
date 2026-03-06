@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui' show Color, Locale;
+import 'dart:ui' show Locale;
 
 import 'package:app_settings/src/app_settings.dart';
 import 'package:flutter/material.dart' show ThemeMode;
@@ -37,20 +37,10 @@ class AppSettingsService {
     if (json == null) return const AppSettings();
     try {
       final map = jsonDecode(json) as Map<String, Object?>;
-      final colorMap = map['seedColor'] as Map<String, Object?>?;
       return AppSettings(
         themeMode: ThemeMode.values.byName(
           map['themeMode'] as String? ?? 'system',
         ),
-        seedColor:
-            colorMap != null
-                ? Color.from(
-                  alpha: (colorMap['a'] as num).toDouble(),
-                  red: (colorMap['r'] as num).toDouble(),
-                  green: (colorMap['g'] as num).toDouble(),
-                  blue: (colorMap['b'] as num).toDouble(),
-                )
-                : const Color(0xFF6200EE),
         locale: Locale(map['locale'] as String? ?? 'en'),
       );
     } catch (_) {
@@ -61,12 +51,6 @@ class AppSettingsService {
   static Future<void> _save(PreferencesStorage prefs, AppSettings s) async {
     final map = <String, Object?>{
       'themeMode': s.themeMode.name,
-      'seedColor': {
-        'a': s.seedColor.a,
-        'r': s.seedColor.r,
-        'g': s.seedColor.g,
-        'b': s.seedColor.b,
-      },
       'locale': s.locale.languageCode,
     };
     await prefs.setString(_key, jsonEncode(map));

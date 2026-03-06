@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 /// ```
 /// Then implement the value in [LightAppThemeData] and [DarkAppThemeData].
 abstract class AppThemeData {
-  const AppThemeData({required this.seedColor});
-
-  /// The seed color used to generate the Material 3 color scheme.
-  final Color seedColor;
+  const AppThemeData();
 
   /// The Material [ThemeData] passed to [MaterialApp.theme] or [MaterialApp.darkTheme].
   ThemeData get materialThemeData;
@@ -19,22 +16,20 @@ abstract class AppThemeData {
 
 /// Light variant of [AppThemeData].
 final class LightAppThemeData extends AppThemeData {
-  const LightAppThemeData({required super.seedColor});
+  const LightAppThemeData();
 
   @override
   ThemeData get materialThemeData => ThemeData(
-    colorSchemeSeed: seedColor,
     brightness: Brightness.light,
   );
 }
 
 /// Dark variant of [AppThemeData].
 final class DarkAppThemeData extends AppThemeData {
-  const DarkAppThemeData({required super.seedColor});
+  const DarkAppThemeData();
 
   @override
   ThemeData get materialThemeData => ThemeData(
-    colorSchemeSeed: seedColor,
     brightness: Brightness.dark,
   );
 }
