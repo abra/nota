@@ -72,7 +72,7 @@ Future<DependenciesContainer> createDependenciesContainer(
     config: config,
     errorReporter: errorReporter,
     packageInfo: packageInfo,
-    uiAppSettingsService: appAppSettingsService,
+    appSettingsService: appAppSettingsService,
   );
 }
 
