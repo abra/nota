@@ -18,8 +18,8 @@ dependencies:
   component_library:
     path: packages/component_library
 
-  app_settings_repository:
-    path: packages/app_settings_repository
+  preferences_repository:
+    path: packages/preferences_repository
 
   shared:
     path: packages/shared

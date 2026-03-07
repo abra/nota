@@ -1,5 +1,5 @@
-name: app_settings_repository
-description: "UI settings (theme mode, locale)"
+name: preferences_repository
+description: "User preferences (theme mode, locale)"
 publish_to: none
 version: 0.1.0
 

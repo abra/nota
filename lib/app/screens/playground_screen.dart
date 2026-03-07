@@ -1,7 +1,7 @@
 import 'package:component_library/component_library.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nota/app/app_settings_scope.dart';
+import 'package:nota/app/preferences_scope.dart';
 import 'package:nota/app/dependency_scope.dart';
 import 'package:nota/app/router/app_routes.dart';
 
@@ -15,7 +15,7 @@ class PlaygroundScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dependencies = DependenciesScope.of(context);
-    final settings = AppSettingsScope.of(context);
+    final preferences = PreferencesScope.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Playground')),
@@ -42,11 +42,11 @@ class PlaygroundScreen extends StatelessWidget {
                   label: Text('System'),
                 ),
               ],
-              selected: {settings.themeMode},
+              selected: {preferences.themeMode},
               onSelectionChanged: (value) {
-                AppSettingsScope.update(
+                PreferencesScope.update(
                   context,
-                  (s) => s.copyWith(themeMode: value.first),
+                  (p) => p.copyWith(themeMode: value.first),
                 );
               },
             ),
@@ -59,27 +59,27 @@ class PlaygroundScreen extends StatelessWidget {
                 ButtonSegment(value: Locale('en'), label: Text('English')),
                 ButtonSegment(value: Locale('ru'), label: Text('Русский')),
               ],
-              selected: {settings.locale},
+              selected: {preferences.locale},
               onSelectionChanged: (value) {
-                AppSettingsScope.update(
+                PreferencesScope.update(
                   context,
-                  (s) => s.copyWith(locale: value.first),
+                  (p) => p.copyWith(locale: value.first),
                 );
               },
             ),
           ),
           const SizedBox(height: Spacing.large),
           _Section(
-            title: 'Current AppSettings',
+            title: 'Current Preferences',
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(Spacing.mediumLarge),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('themeMode: ${settings.themeMode.name}'),
+                    Text('themeMode: ${preferences.themeMode.name}'),
                     const SizedBox(height: Spacing.small),
-                    Text('locale: ${settings.locale.languageCode}'),
+                    Text('locale: ${preferences.locale.languageCode}'),
                   ],
                 ),
               ),
@@ -246,7 +246,7 @@ const _strings = {
   'en': {
     'greeting': '👋 Hello, World!',
     'notes': '📝 My Notes',
-    'settings': '⚙️ AppSettings',
+    'settings': '⚙️ Preferences',
     'pick_date': 'Pick a date',
   },
   'ru': {

@@ -4,7 +4,7 @@
 // singletons or a service locator. This keeps dependencies explicit and makes
 // them easy to substitute in tests via TestDependenciesContainer.
 
-import 'package:app_settings_repository/app_settings_repository.dart';
+import 'package:preferences_repository/preferences_repository.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:nota/app/config/application_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -16,14 +16,14 @@ class DependenciesContainer {
     required this.config,
     required this.errorReporter,
     required this.packageInfo,
-    required this.appSettingsService,
+    required this.preferencesService,
   });
 
   final Logger logger;
   final ApplicationConfig config;
   final ErrorReportingService errorReporter;
   final PackageInfo packageInfo;
-  final AppSettingsService appSettingsService;
+  final PreferencesService preferencesService;
 }
 
 /// A special version of [DependenciesContainer] that is used in tests.

@@ -4,7 +4,7 @@
 // composeDependencies() can be called independently in tests
 // with substituted implementations.
 
-import 'package:app_settings_repository/app_settings_repository.dart';
+import 'package:preferences_repository/preferences_repository.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:nota/app/config/application_config.dart';
 import 'package:nota/app/dependency_container.dart';
@@ -65,14 +65,14 @@ Future<DependenciesContainer> createDependenciesContainer(
   ErrorReportingService errorReporter,
 ) async {
   final packageInfo = await PackageInfo.fromPlatform();
-  final appAppSettingsService = await AppSettingsService.create();
+  final preferencesService = await PreferencesService.create();
 
   return DependenciesContainer(
     logger: logger,
     config: config,
     errorReporter: errorReporter,
     packageInfo: packageInfo,
-    appSettingsService: appAppSettingsService,
+    preferencesService: preferencesService,
   );
 }
 
