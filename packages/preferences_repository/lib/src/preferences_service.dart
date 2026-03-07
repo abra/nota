@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' show Locale;
 
+import 'package:flutter/material.dart' show ThemeMode;
+
 import 'preferences.dart';
 import 'preferences_storage.dart';
-import 'package:flutter/material.dart' show ThemeMode;
 
 /// Loads, persists and streams [Preferences].
 class PreferencesService {
   PreferencesService._(this._prefs, this._current);
 
-  static const _key = 'preferences';
+  static const _key = 'app_preferences';
 
   final PreferencesStorage _prefs;
   final _controller = StreamController<Preferences>.broadcast();
