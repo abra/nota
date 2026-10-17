@@ -54,5 +54,6 @@
   "dictationNetworkError": "Die Spracherkennung benötigt eine Netzwerkverbindung",
   "dictationFailed": "Das Diktat wurde wegen eines Fehlers beendet",
   "openSettings": "Einstellungen",
-  "dictateNote": "Notiz diktieren"
+  "dictateNote": "Notiz diktieren",
+  "convertToChecklist": "Absatz in Checkliste"
 }

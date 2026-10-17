@@ -19,6 +19,7 @@ import 'package:smart_keyboard_insets/smart_keyboard_insets.dart';
 import 'package:speech_service/speech_service.dart';
 import 'package:toast_service/toast_service.dart';
 
+import 'checklist/quill_checklist_converter.dart';
 import 'dictation/dictation_cubit.dart';
 import 'dictation/dictation_mode.dart';
 import 'dictation/quill_dictation_sink.dart';
@@ -67,7 +68,7 @@ double _keyboardInsetFor(KeyboardMetrics metrics) {
 
 enum _SecondaryPanelMode { formatting, colors, dictation }
 
-enum _MenuAction { delete }
+enum _MenuAction { convertToChecklist, delete }
 
 /// Keeps the screen from sleeping while [enabled]. Dictation is hands-free,
 /// and the screen lock would otherwise end the session mid-list.
@@ -291,6 +292,12 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
 
   void _onMenuAction(BuildContext context, _MenuAction action) {
     switch (action) {
+      case _MenuAction.convertToChecklist:
+        final converted = convertParagraphToChecklist(
+          _quillController,
+          languageCode: Localizations.localeOf(context).languageCode,
+        );
+        if (converted) HapticFeedback.selectionClick();
       case _MenuAction.delete:
         HapticFeedback.mediumImpact();
         final bloc = context.read<NoteDetailsBloc>();
@@ -865,6 +872,20 @@ class _NoteDetailsAppBar extends StatelessWidget
           onSelected: onMenuAction,
           itemBuilder: (context) => [
             PopupMenuItem(
+              value: _MenuAction.convertToChecklist,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.checklist_rounded,
+                    size: IconSize.medium,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: Spacing.medium),
+                  Flexible(child: Text(l10n.convertToChecklist)),
+                ],
+              ),
+            ),
+            PopupMenuItem(
               value: _MenuAction.delete,
               child: Row(
                 children: [
@@ -874,9 +895,11 @@ class _NoteDetailsAppBar extends StatelessWidget
                     color: colorScheme.error,
                   ),
                   const SizedBox(width: Spacing.medium),
-                  Text(
-                    l10n.deleteNote,
-                    style: TextStyle(color: colorScheme.error),
+                  Flexible(
+                    child: Text(
+                      l10n.deleteNote,
+                      style: TextStyle(color: colorScheme.error),
+                    ),
                   ),
                 ],
               ),

@@ -56,6 +56,10 @@
   words follow
 - Hands-free entry points: hold the "+" button, or use the "Dictate a note"
   home-screen quick action, to open a new note that is already listening
+- On iOS 26 dictation runs on Apple's on-device SpeechAnalyzer with no time
+  limit; older systems and Android use the classic recognisers
+- "Paragraph to checklist" in the editor menu splits a dictated or typed
+  paragraph into checklist items by punctuation and short "and"-phrases
 
 **Note list**
 - Masonry grid or list view, with adjustable list density (2 / 3 / 4 lines)
@@ -96,7 +100,7 @@
 | [toastification](https://pub.dev/packages/toastification) | In-app toast notifications |
 | [flutter_staggered_grid_view](https://pub.dev/packages/flutter_staggered_grid_view) | Masonry note grid |
 | [image_picker](https://pub.dev/packages/image_picker) | Pick images from gallery |
-| [speech_to_text](https://pub.dev/packages/speech_to_text) | System speech recognition for dictation |
+| [speech_to_text](https://pub.dev/packages/speech_to_text) | System speech recognition for dictation (fallback) |
 | [wakelock_plus](https://pub.dev/packages/wakelock_plus) | Keep the screen on while dictating |
 | [quick_actions](https://pub.dev/packages/quick_actions) | Home-screen shortcut into dictation |
 | [smart_keyboard_insets](https://pub.dev/packages/smart_keyboard_insets) | Smooth keyboard inset handling |
@@ -119,6 +123,7 @@ packages/
   image_files/              # Note image file management
   toast_service/            # Toasts with optional inline action
   speech_service/           # Continuous speech recognition for dictation
+  speech_apple/             # iOS 26 SpeechAnalyzer plugin behind speech_service
   monitoring/               # Logger and error-reporting interfaces
   features/
     note_list/              # Note list screen

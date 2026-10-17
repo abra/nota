@@ -54,5 +54,6 @@
   "dictationNetworkError": "يحتاج التعرف على الكلام إلى اتصال بالشبكة",
   "dictationFailed": "توقف الإملاء بسبب خطأ",
   "openSettings": "الإعدادات",
-  "dictateNote": "إملاء ملاحظة"
+  "dictateNote": "إملاء ملاحظة",
+  "convertToChecklist": "تحويل الفقرة إلى قائمة مهام"
 }

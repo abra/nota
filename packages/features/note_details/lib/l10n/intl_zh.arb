@@ -54,5 +54,6 @@
   "dictationNetworkError": "语音识别需要网络连接",
   "dictationFailed": "语音输入因错误而停止",
   "openSettings": "设置",
-  "dictateNote": "语音记笔记"
+  "dictateNote": "语音记笔记",
+  "convertToChecklist": "段落转为清单"
 }

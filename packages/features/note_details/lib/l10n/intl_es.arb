@@ -54,5 +54,6 @@
   "dictationNetworkError": "El reconocimiento de voz necesita conexión de red",
   "dictationFailed": "El dictado se detuvo por un error",
   "openSettings": "Ajustes",
-  "dictateNote": "Dictar una nota"
+  "dictateNote": "Dictar una nota",
+  "convertToChecklist": "Párrafo a lista de tareas"
 }

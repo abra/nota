@@ -87,5 +87,7 @@
   "openSettings": "Settings",
   "@openSettings": {},
   "dictateNote": "Dictate a note",
-  "@dictateNote": {}
+  "@dictateNote": {},
+  "convertToChecklist": "Paragraph to checklist",
+  "@convertToChecklist": {}
 }

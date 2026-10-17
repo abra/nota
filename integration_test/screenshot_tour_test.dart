@@ -14,6 +14,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -47,7 +48,19 @@ Future<void> _snap(
   // Let the raster thread present the settled frame before capturing.
   await Future<void>.delayed(const Duration(milliseconds: 350));
   if (_driverAttached) {
-    await _snap(binding, name);
+    // Android renders Flutter into a surface the screenshot API cannot read
+    // until it is swapped for an image; needed once, after the first frame.
+    if (!_surfaceConverted && defaultTargetPlatform == TargetPlatform.android) {
+      await binding.convertFlutterSurfaceToImage();
+      _surfaceConverted = true;
+    }
+    // On Android the capture waits until Flutter renders a frame into that
+    // image, but the live test binding only renders when pumped (its default
+    // frame policy skips the frame the plugin schedules), so pump one while
+    // the capture is pending; otherwise the plugin retries forever.
+    final capture = binding.takeScreenshot(name);
+    await binding.pump();
+    await capture;
     return;
   }
   final dir = _handshakeDir..createSync(recursive: true);
@@ -93,6 +106,7 @@ const _driverAttached = bool.fromEnvironment(
 );
 
 final _handshakeDir = Directory('${Directory.systemTemp.path}/nota_shots');
+bool _surfaceConverted = false;
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -366,7 +380,11 @@ void main() {
     }
     await tester.tap(find.text('Call the dentist tomorrow at 10:00'));
     await tester.pump();
-    await tester.tap(find.text('“Simplicity is the ultimate sophistication.”'));
+    // The last card sits under the floating bar, where taps do not land.
+    final lastCard = find.text('“Simplicity is the ultimate sophistication.”');
+    await tester.ensureVisible(lastCard);
+    await tester.pumpAndSettle();
+    await tester.tap(lastCard);
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump(const Duration(milliseconds: 600));

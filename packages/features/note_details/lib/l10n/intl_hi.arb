@@ -54,5 +54,6 @@
   "dictationNetworkError": "वाक् पहचान के लिए नेटवर्क कनेक्शन आवश्यक है",
   "dictationFailed": "त्रुटि के कारण डिक्टेशन रुक गया",
   "openSettings": "सेटिंग्स",
-  "dictateNote": "बोलकर नोट लिखें"
+  "dictateNote": "बोलकर नोट लिखें",
+  "convertToChecklist": "अनुच्छेद को चेकलिस्ट में"
 }

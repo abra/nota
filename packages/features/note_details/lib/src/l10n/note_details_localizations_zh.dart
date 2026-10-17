@@ -125,4 +125,7 @@ class NoteDetailsLocalizationsZh extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => '语音记笔记';
+
+  @override
+  String get convertToChecklist => '段落转为清单';
 }

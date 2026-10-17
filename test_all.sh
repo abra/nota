@@ -25,6 +25,7 @@ run "shared"                       "dart test test/"    "$SCRIPT_DIR/packages/sh
 run "note_repository"              "flutter test test/" "$SCRIPT_DIR/packages/note_repository"
 run "preferences_service"          "flutter test test/" "$SCRIPT_DIR/packages/preferences_service"
 run "speech_service"               "flutter test test/" "$SCRIPT_DIR/packages/speech_service"
+run "speech_apple"                 "flutter test test/" "$SCRIPT_DIR/packages/speech_apple"
 run "component_library"            "flutter test test/" "$SCRIPT_DIR/packages/component_library"
 run "monitoring"                   "flutter test test/" "$SCRIPT_DIR/packages/monitoring"
 run "note_list"                    "flutter test test/" "$SCRIPT_DIR/packages/features/note_list"

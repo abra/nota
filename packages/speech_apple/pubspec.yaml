@@ -1,0 +1,23 @@
+name: speech_apple
+description: "iOS 26 SpeechAnalyzer bridge: continuous on-device dictation with a configurable pause."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.11.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: SpeechApplePlugin

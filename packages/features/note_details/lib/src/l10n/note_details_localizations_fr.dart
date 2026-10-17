@@ -130,4 +130,7 @@ class NoteDetailsLocalizationsFr extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => 'Dicter une note';
+
+  @override
+  String get convertToChecklist => 'Paragraphe en liste de tâches';
 }

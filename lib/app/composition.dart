@@ -97,8 +97,13 @@ Future<DependenciesContainer> createDependenciesContainer(
   );
   final noteRepository = NoteRepository();
   final imageFiles = ImageFiles();
-  // Permissions are requested lazily, the first time dictation starts.
-  final speechService = SpeechToTextService();
+  // Permissions are requested lazily, the first time dictation starts. The
+  // iOS 26 SpeechAnalyzer is preferred; older systems and Android use the
+  // classic recognisers behind the same interface.
+  final speechService = FallbackSpeechService(
+    primary: AppleSpeechService(),
+    fallback: SpeechToTextService(),
+  );
 
   return DependenciesContainer(
     logger: logger,

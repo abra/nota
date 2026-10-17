@@ -54,5 +54,6 @@
   "dictationNetworkError": "音声認識にはネットワーク接続が必要です",
   "dictationFailed": "エラーのため音声入力を停止しました",
   "openSettings": "設定",
-  "dictateNote": "音声でメモ"
+  "dictateNote": "音声でメモ",
+  "convertToChecklist": "段落をチェックリストに"
 }

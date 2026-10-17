@@ -11,6 +11,16 @@ session that keeps listening until it is stopped, and exposes the pause
 between utterances as a setting because the editor uses it to split dictated
 list items.
 
+## Implementations
+
+- `SpeechToTextService` — the `speech_to_text` plugin (SFSpeechRecognizer,
+  Android SpeechRecognizer) wrapped in a restart loop.
+- `AppleSpeechService` — the iOS 26 SpeechAnalyzer through
+  `package:speech_apple`; one session, no time limit, on-device models.
+- `FallbackSpeechService` — prefers the Apple service and falls back to the
+  classic one when the device, the locale or the model download rules it
+  out, within the same `start` call.
+
 ## API
 
 ```dart

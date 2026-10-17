@@ -54,5 +54,6 @@
   "dictationNetworkError": "Для распознавания речи нужно подключение к сети",
   "dictationFailed": "Диктовка остановлена из-за ошибки",
   "openSettings": "Настройки",
-  "dictateNote": "Надиктовать заметку"
+  "dictateNote": "Надиктовать заметку",
+  "convertToChecklist": "Абзац в чеклист"
 }

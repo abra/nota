@@ -54,5 +54,6 @@
   "dictationNetworkError": "La reconnaissance vocale nécessite une connexion réseau",
   "dictationFailed": "La dictée s’est arrêtée à cause d’une erreur",
   "openSettings": "Réglages",
-  "dictateNote": "Dicter une note"
+  "dictateNote": "Dicter une note",
+  "convertToChecklist": "Paragraphe en liste de tâches"
 }

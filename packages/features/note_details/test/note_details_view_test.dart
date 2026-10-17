@@ -72,6 +72,37 @@ Widget _buildNavigationView(
 }
 
 void main() {
+  group('Paragraph to checklist', () {
+    testWidgets('the overflow menu converts the current paragraph', (
+      tester,
+    ) async {
+      final bloc = NoteDetailsBloc(
+        noteRepository: FakeNoteRepository(),
+        imageFiles: FakeImageFiles(),
+        isNew: true,
+      );
+      addTearDown(bloc.close);
+      await tester.pumpWidget(_buildView(bloc));
+      await tester.pumpAndSettle();
+
+      final editor = tester.widget<QuillEditor>(find.byType(QuillEditor));
+      editor.controller.replaceText(0, 0, 'milk, bread and eggs', null);
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('More'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Paragraph to checklist'));
+      await tester.pumpAndSettle();
+
+      expect(
+        editor.controller.document.toPlainText(),
+        'Milk\nBread\nEggs\n',
+      );
+      expect(bloc.state.content, contains('"list":"unchecked"'));
+      await tester.pump(const Duration(seconds: 1));
+    });
+  });
+
   group('NoteDetailsView', () {
     // --- Initial UI elements ---
 

@@ -129,4 +129,7 @@ class NoteDetailsLocalizationsRu extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => 'Надиктовать заметку';
+
+  @override
+  String get convertToChecklist => 'Абзац в чеклист';
 }

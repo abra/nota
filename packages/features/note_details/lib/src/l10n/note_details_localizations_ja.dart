@@ -125,4 +125,7 @@ class NoteDetailsLocalizationsJa extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => '音声でメモ';
+
+  @override
+  String get convertToChecklist => '段落をチェックリストに';
 }

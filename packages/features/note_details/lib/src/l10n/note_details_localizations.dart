@@ -344,6 +344,12 @@ abstract class NoteDetailsLocalizations {
   /// In en, this message translates to:
   /// **'Dictate a note'**
   String get dictateNote;
+
+  /// No description provided for @convertToChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragraph to checklist'**
+  String get convertToChecklist;
 }
 
 class _NoteDetailsLocalizationsDelegate

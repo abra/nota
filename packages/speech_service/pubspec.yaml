@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   speech_to_text: ^7.3.0
+  speech_apple:
+    path: ../speech_apple
 
 dev_dependencies:
   flutter_test:

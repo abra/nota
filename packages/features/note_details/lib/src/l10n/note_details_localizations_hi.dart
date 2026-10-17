@@ -129,4 +129,7 @@ class NoteDetailsLocalizationsHi extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => 'बोलकर नोट लिखें';
+
+  @override
+  String get convertToChecklist => 'अनुच्छेद को चेकलिस्ट में';
 }

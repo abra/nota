@@ -129,4 +129,7 @@ class NoteDetailsLocalizationsAr extends NoteDetailsLocalizations {
 
   @override
   String get dictateNote => 'إملاء ملاحظة';
+
+  @override
+  String get convertToChecklist => 'تحويل الفقرة إلى قائمة مهام';
 }
