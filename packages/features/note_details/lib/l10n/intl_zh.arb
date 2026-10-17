@@ -36,5 +36,21 @@
   "redo": "重做",
   "@redo": {},
   "newLine": "换行",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "语音输入",
+  "dictationModeText": "文本",
+  "dictationModeList": "列表",
+  "dictationModeChecklist": "清单",
+  "dictationStarting": "正在启动…",
+  "dictationListening": "正在聆听…",
+  "dictationPaused": "已暂停。点按麦克风继续",
+  "dictationHintList": "正在聆听… 条目之间请稍作停顿",
+  "dictationHintNewLine": "正在聆听… 说“{phrase}”可换行",
+  "dictationPause": "暂停语音输入",
+  "dictationResume": "继续语音输入",
+  "dictationPermissionDenied": "请在设置中允许访问麦克风和语音识别",
+  "dictationUnavailable": "此设备不支持语音识别",
+  "dictationLanguageUnsupported": "此语言不支持语音识别",
+  "dictationNetworkError": "语音识别需要网络连接",
+  "dictationFailed": "语音输入因错误而停止"
 }

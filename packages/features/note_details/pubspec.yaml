@@ -28,6 +28,8 @@ dependencies:
     path: ../../image_files
   preferences_service:
     path: ../../preferences_service
+  speech_service:
+    path: ../../speech_service
   smart_keyboard_insets: ^0.0.1
   image_picker: ^1.1.2
 

@@ -36,5 +36,21 @@
   "redo": "फिर से करें",
   "@redo": {},
   "newLine": "नई पंक्ति",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "बोलकर लिखें",
+  "dictationModeText": "टेक्स्ट",
+  "dictationModeList": "सूची",
+  "dictationModeChecklist": "चेकलिस्ट",
+  "dictationStarting": "शुरू हो रहा है…",
+  "dictationListening": "सुन रहा है…",
+  "dictationPaused": "रुका हुआ है। जारी रखने के लिए माइक्रोफ़ोन टैप करें",
+  "dictationHintList": "सुन रहा है… आइटम के बीच थोड़ा रुकें",
+  "dictationHintNewLine": "सुन रहा है… नई पंक्ति के लिए “{phrase}” कहें",
+  "dictationPause": "डिक्टेशन रोकें",
+  "dictationResume": "डिक्टेशन जारी रखें",
+  "dictationPermissionDenied": "सेटिंग्स में माइक्रोफ़ोन और वाक् पहचान की अनुमति दें",
+  "dictationUnavailable": "इस डिवाइस पर वाक् पहचान उपलब्ध नहीं है",
+  "dictationLanguageUnsupported": "इस भाषा के लिए वाक् पहचान उपलब्ध नहीं है",
+  "dictationNetworkError": "वाक् पहचान के लिए नेटवर्क कनेक्शन आवश्यक है",
+  "dictationFailed": "त्रुटि के कारण डिक्टेशन रुक गया"
 }

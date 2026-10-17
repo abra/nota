@@ -45,5 +45,43 @@
   "redo": "Redo",
   "@redo": {},
   "newLine": "New line",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "Dictate",
+  "@dictate": {},
+  "dictationModeText": "Text",
+  "@dictationModeText": {},
+  "dictationModeList": "List",
+  "@dictationModeList": {},
+  "dictationModeChecklist": "Checklist",
+  "@dictationModeChecklist": {},
+  "dictationStarting": "Starting…",
+  "@dictationStarting": {},
+  "dictationListening": "Listening…",
+  "@dictationListening": {},
+  "dictationPaused": "Paused. Tap the microphone to continue",
+  "@dictationPaused": {},
+  "dictationHintList": "Listening… pause between items",
+  "@dictationHintList": {},
+  "dictationHintNewLine": "Listening… say “{phrase}” for a new line",
+  "@dictationHintNewLine": {
+    "placeholders": {
+      "phrase": {
+        "type": "String"
+      }
+    }
+  },
+  "dictationPause": "Pause dictation",
+  "@dictationPause": {},
+  "dictationResume": "Resume dictation",
+  "@dictationResume": {},
+  "dictationPermissionDenied": "Allow microphone and speech recognition access in Settings",
+  "@dictationPermissionDenied": {},
+  "dictationUnavailable": "Speech recognition is not available on this device",
+  "@dictationUnavailable": {},
+  "dictationLanguageUnsupported": "Speech recognition is not available for this language",
+  "@dictationLanguageUnsupported": {},
+  "dictationNetworkError": "Speech recognition needs a network connection",
+  "@dictationNetworkError": {},
+  "dictationFailed": "Dictation stopped because of an error",
+  "@dictationFailed": {}
 }

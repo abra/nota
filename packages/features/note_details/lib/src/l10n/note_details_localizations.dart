@@ -236,6 +236,102 @@ abstract class NoteDetailsLocalizations {
   /// In en, this message translates to:
   /// **'New line'**
   String get newLine;
+
+  /// No description provided for @dictate.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate'**
+  String get dictate;
+
+  /// No description provided for @dictationModeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get dictationModeText;
+
+  /// No description provided for @dictationModeList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get dictationModeList;
+
+  /// No description provided for @dictationModeChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get dictationModeChecklist;
+
+  /// No description provided for @dictationStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting…'**
+  String get dictationStarting;
+
+  /// No description provided for @dictationListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get dictationListening;
+
+  /// No description provided for @dictationPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused. Tap the microphone to continue'**
+  String get dictationPaused;
+
+  /// No description provided for @dictationHintList.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… pause between items'**
+  String get dictationHintList;
+
+  /// No description provided for @dictationHintNewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… say “{phrase}” for a new line'**
+  String dictationHintNewLine(String phrase);
+
+  /// No description provided for @dictationPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause dictation'**
+  String get dictationPause;
+
+  /// No description provided for @dictationResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume dictation'**
+  String get dictationResume;
+
+  /// No description provided for @dictationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone and speech recognition access in Settings'**
+  String get dictationPermissionDenied;
+
+  /// No description provided for @dictationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition is not available on this device'**
+  String get dictationUnavailable;
+
+  /// No description provided for @dictationLanguageUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition is not available for this language'**
+  String get dictationLanguageUnsupported;
+
+  /// No description provided for @dictationNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition needs a network connection'**
+  String get dictationNetworkError;
+
+  /// No description provided for @dictationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation stopped because of an error'**
+  String get dictationFailed;
 }
 
 class _NoteDetailsLocalizationsDelegate

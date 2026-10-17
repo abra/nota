@@ -36,5 +36,21 @@
   "redo": "إعادة",
   "@redo": {},
   "newLine": "سطر جديد",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "إملاء",
+  "dictationModeText": "نص",
+  "dictationModeList": "قائمة",
+  "dictationModeChecklist": "قائمة مهام",
+  "dictationStarting": "جارٍ البدء…",
+  "dictationListening": "جارٍ الاستماع…",
+  "dictationPaused": "متوقف مؤقتًا. انقر على الميكروفون للمتابعة",
+  "dictationHintList": "جارٍ الاستماع… توقف قليلًا بين العناصر",
+  "dictationHintNewLine": "جارٍ الاستماع… قل «{phrase}» لبدء سطر جديد",
+  "dictationPause": "إيقاف الإملاء مؤقتًا",
+  "dictationResume": "استئناف الإملاء",
+  "dictationPermissionDenied": "اسمح بالوصول إلى الميكروفون والتعرف على الكلام في الإعدادات",
+  "dictationUnavailable": "التعرف على الكلام غير متاح على هذا الجهاز",
+  "dictationLanguageUnsupported": "التعرف على الكلام غير متاح لهذه اللغة",
+  "dictationNetworkError": "يحتاج التعرف على الكلام إلى اتصال بالشبكة",
+  "dictationFailed": "توقف الإملاء بسبب خطأ"
 }

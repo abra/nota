@@ -7,6 +7,7 @@ import 'package:note_details/src/l10n/note_details_localizations.dart';
 import 'package:note_details/src/note_details_bloc.dart';
 import 'package:note_details/src/note_details_screen.dart';
 import 'package:shared/shared.dart';
+import 'package:speech_service/testing.dart';
 
 import 'helpers/fake_image_files.dart';
 import 'helpers/fake_note_repository.dart';
@@ -22,7 +23,7 @@ Widget _buildView(NoteDetailsBloc bloc) {
     supportedLocales: const [Locale('en')],
     home: BlocProvider<NoteDetailsBloc>.value(
       value: bloc,
-      child: const NoteDetailsView(),
+      child: NoteDetailsView(speechService: ScriptedSpeechService()),
     ),
   );
 }
@@ -50,7 +51,9 @@ Widget _buildNavigationView(
               MaterialPageRoute<Note?>(
                 builder: (_) => BlocProvider<NoteDetailsBloc>.value(
                   value: bloc,
-                  child: const NoteDetailsView(),
+                  child: NoteDetailsView(
+                    speechService: ScriptedSpeechService(),
+                  ),
                 ),
               ),
             );

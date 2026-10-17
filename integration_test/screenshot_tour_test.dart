@@ -20,8 +20,11 @@ import 'package:integration_test/integration_test.dart';
 import 'package:monitoring/monitoring.dart';
 import 'package:nota/app/composition.dart';
 import 'package:nota/app/config/application_config.dart';
+import 'package:nota/app/dependency_container.dart';
 import 'package:nota/app/root_context.dart';
 import 'package:shared/shared.dart';
+import 'package:speech_service/speech_service.dart';
+import 'package:speech_service/testing.dart';
 
 String _delta(List<Map<String, Object?>> ops) => jsonEncode({'ops': ops});
 
@@ -64,6 +67,25 @@ Future<void> _snap(
   ack.deleteSync();
 }
 
+/// Plays a short grocery dialogue into the scripted speech service so the
+/// dictation panel has something to show. Simulators have no recogniser.
+Future<void> _playDictationDemo(ScriptedSpeechService speech) async {
+  if (speech.startCalls.length > 1) return;
+  Future<void> beat([int ms = 300]) =>
+      Future<void>.delayed(Duration(milliseconds: ms));
+  await beat();
+  speech.partial('Fresh');
+  await beat(250);
+  speech.partial('Fresh basil');
+  await beat(400);
+  speech.finalText('Fresh basil');
+  await beat(600);
+  speech.partial('Olive');
+  await beat(250);
+  speech.partial('Olive oil');
+  speech.level(0.6);
+}
+
 // `flutter drive` sets this define; `flutter test` does not.
 const _driverAttached = bool.fromEnvironment(
   'NOTA_DRIVER',
@@ -85,7 +107,20 @@ void main() {
       logger: logger,
       errorReporter: const NoopErrorReporter(),
     );
-    final deps = result.dependencies;
+    final base = result.dependencies;
+    final deps = DependenciesContainer(
+      logger: base.logger,
+      config: base.config,
+      errorReporter: base.errorReporter,
+      packageInfo: base.packageInfo,
+      preferencesService: base.preferencesService,
+      noteRepository: base.noteRepository,
+      imageFiles: base.imageFiles,
+      speechService: ScriptedSpeechService(
+        locales: const [SpeechLocale(id: 'en_US', name: 'English (US)')],
+        onStart: _playDictationDemo,
+      ),
+    );
     final repo = deps.noteRepository;
     final prefs = deps.preferencesService;
 
@@ -215,7 +250,14 @@ void main() {
       ]),
     );
 
-    await tester.pumpWidget(RootContext(compositionResult: result));
+    await tester.pumpWidget(
+      RootContext(
+        compositionResult: CompositionResult(
+          dependencies: deps,
+          millisecondsSpent: result.millisecondsSpent,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await _snap(binding, '01_list_grid_light');
 
@@ -254,6 +296,14 @@ void main() {
     await tester.tap(find.byTooltip('Note color'));
     await tester.pumpAndSettle();
     await _snap(binding, '07_editor_colors');
+    // Dictation: the scripted service commits "Fresh basil" as a new item
+    // and leaves "Olive oil" in progress.
+    await tester.tap(find.byTooltip('Dictate'));
+    await tester.pump(const Duration(milliseconds: 2000));
+    await tester.pumpAndSettle();
+    await _snap(binding, '08_editor_dictation');
+    await tester.tap(find.byTooltip('Dictate'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
 
@@ -262,7 +312,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Design sync'));
     await tester.pumpAndSettle();
-    await _snap(binding, '08_editor_dark');
+    await _snap(binding, '09_editor_dark');
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     await prefs.update((p) => p.copyWith(themeMode: ThemeMode.light));
@@ -271,17 +321,17 @@ void main() {
     // New note.
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
-    await _snap(binding, '09_editor_new');
+    await _snap(binding, '10_editor_new');
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
 
     // Preferences sheet.
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
-    await _snap(binding, '10_preferences');
+    await _snap(binding, '11_preferences');
     await tester.tap(find.text('English'));
     await tester.pumpAndSettle();
-    await _snap(binding, '11_preferences_language');
+    await _snap(binding, '12_preferences_language');
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.close));
@@ -290,7 +340,7 @@ void main() {
     // Search with no results.
     await tester.enterText(find.byType(TextField), 'zebra');
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
-    await _snap(binding, '12_search_empty');
+    await _snap(binding, '13_search_empty');
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
@@ -312,9 +362,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump(const Duration(milliseconds: 600));
-    await _snap(binding, '13_deleted_undo');
+    await _snap(binding, '14_deleted_undo');
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
-    await _snap(binding, '14_restored');
+    await _snap(binding, '15_restored');
   });
 }

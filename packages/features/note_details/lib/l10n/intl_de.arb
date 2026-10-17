@@ -36,5 +36,21 @@
   "redo": "Wiederholen",
   "@redo": {},
   "newLine": "Neue Zeile",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "Diktieren",
+  "dictationModeText": "Text",
+  "dictationModeList": "Liste",
+  "dictationModeChecklist": "Checkliste",
+  "dictationStarting": "Wird gestartet…",
+  "dictationListening": "Ich höre zu…",
+  "dictationPaused": "Pausiert. Tippen Sie auf das Mikrofon, um fortzufahren",
+  "dictationHintList": "Ich höre zu… machen Sie zwischen den Einträgen eine Pause",
+  "dictationHintNewLine": "Ich höre zu… sagen Sie „{phrase}“ für eine neue Zeile",
+  "dictationPause": "Diktat pausieren",
+  "dictationResume": "Diktat fortsetzen",
+  "dictationPermissionDenied": "Erlauben Sie den Zugriff auf Mikrofon und Spracherkennung in den Einstellungen",
+  "dictationUnavailable": "Spracherkennung ist auf diesem Gerät nicht verfügbar",
+  "dictationLanguageUnsupported": "Spracherkennung ist für diese Sprache nicht verfügbar",
+  "dictationNetworkError": "Die Spracherkennung benötigt eine Netzwerkverbindung",
+  "dictationFailed": "Das Diktat wurde wegen eines Fehlers beendet"
 }

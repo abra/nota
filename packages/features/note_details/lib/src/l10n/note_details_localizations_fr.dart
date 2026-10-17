@@ -69,4 +69,59 @@ class NoteDetailsLocalizationsFr extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'Nouvelle ligne';
+
+  @override
+  String get dictate => 'Dicter';
+
+  @override
+  String get dictationModeText => 'Texte';
+
+  @override
+  String get dictationModeList => 'Liste';
+
+  @override
+  String get dictationModeChecklist => 'Liste de tâches';
+
+  @override
+  String get dictationStarting => 'Démarrage…';
+
+  @override
+  String get dictationListening => 'J’écoute…';
+
+  @override
+  String get dictationPaused => 'En pause. Touchez le micro pour continuer';
+
+  @override
+  String get dictationHintList =>
+      'J’écoute… marquez une pause entre les éléments';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'J’écoute… dites « $phrase » pour une nouvelle ligne';
+  }
+
+  @override
+  String get dictationPause => 'Mettre la dictée en pause';
+
+  @override
+  String get dictationResume => 'Reprendre la dictée';
+
+  @override
+  String get dictationPermissionDenied =>
+      'Autorisez l’accès au micro et à la reconnaissance vocale dans les Réglages';
+
+  @override
+  String get dictationUnavailable =>
+      'La reconnaissance vocale n’est pas disponible sur cet appareil';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'La reconnaissance vocale n’est pas disponible pour cette langue';
+
+  @override
+  String get dictationNetworkError =>
+      'La reconnaissance vocale nécessite une connexion réseau';
+
+  @override
+  String get dictationFailed => 'La dictée s’est arrêtée à cause d’une erreur';
 }

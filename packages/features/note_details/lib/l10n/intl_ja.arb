@@ -36,5 +36,21 @@
   "redo": "やり直す",
   "@redo": {},
   "newLine": "改行",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "音声入力",
+  "dictationModeText": "テキスト",
+  "dictationModeList": "リスト",
+  "dictationModeChecklist": "チェックリスト",
+  "dictationStarting": "開始しています…",
+  "dictationListening": "聞き取り中…",
+  "dictationPaused": "一時停止中。マイクをタップして再開",
+  "dictationHintList": "聞き取り中… 項目の間で少し間を置いてください",
+  "dictationHintNewLine": "聞き取り中… 「{phrase}」と言うと改行します",
+  "dictationPause": "音声入力を一時停止",
+  "dictationResume": "音声入力を再開",
+  "dictationPermissionDenied": "設定でマイクと音声認識へのアクセスを許可してください",
+  "dictationUnavailable": "このデバイスでは音声認識を利用できません",
+  "dictationLanguageUnsupported": "この言語では音声認識を利用できません",
+  "dictationNetworkError": "音声認識にはネットワーク接続が必要です",
+  "dictationFailed": "エラーのため音声入力を停止しました"
 }

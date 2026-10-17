@@ -69,4 +69,54 @@ class NoteDetailsLocalizationsJa extends NoteDetailsLocalizations {
 
   @override
   String get newLine => '改行';
+
+  @override
+  String get dictate => '音声入力';
+
+  @override
+  String get dictationModeText => 'テキスト';
+
+  @override
+  String get dictationModeList => 'リスト';
+
+  @override
+  String get dictationModeChecklist => 'チェックリスト';
+
+  @override
+  String get dictationStarting => '開始しています…';
+
+  @override
+  String get dictationListening => '聞き取り中…';
+
+  @override
+  String get dictationPaused => '一時停止中。マイクをタップして再開';
+
+  @override
+  String get dictationHintList => '聞き取り中… 項目の間で少し間を置いてください';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return '聞き取り中… 「$phrase」と言うと改行します';
+  }
+
+  @override
+  String get dictationPause => '音声入力を一時停止';
+
+  @override
+  String get dictationResume => '音声入力を再開';
+
+  @override
+  String get dictationPermissionDenied => '設定でマイクと音声認識へのアクセスを許可してください';
+
+  @override
+  String get dictationUnavailable => 'このデバイスでは音声認識を利用できません';
+
+  @override
+  String get dictationLanguageUnsupported => 'この言語では音声認識を利用できません';
+
+  @override
+  String get dictationNetworkError => '音声認識にはネットワーク接続が必要です';
+
+  @override
+  String get dictationFailed => 'エラーのため音声入力を停止しました';
 }

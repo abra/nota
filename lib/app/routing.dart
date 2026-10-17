@@ -6,6 +6,7 @@ import 'package:note_details/note_details.dart';
 import 'package:note_list/note_list.dart';
 import 'package:preferences_menu/preferences_menu.dart';
 import 'package:shared/shared.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 abstract final class AppRoutes {
   static const notes = '/notes';
@@ -13,6 +14,10 @@ abstract final class AppRoutes {
 
   static String noteEditor(String id) => '/notes/$id';
 }
+
+/// Keeps the screen on during hands-free dictation.
+Future<void> _keepScreenAwake(bool enabled) =>
+    WakelockPlus.toggle(enable: enabled);
 
 GoRouter buildRouter({required DependenciesContainer dependencies}) {
   dependencies.logger.debug('buildRouter: GoRouter created');
@@ -48,6 +53,8 @@ GoRouter buildRouter({required DependenciesContainer dependencies}) {
             builder: (context, state) => NoteDetailsScreen(
               noteRepository: dependencies.noteRepository,
               imageFiles: dependencies.imageFiles,
+              speechService: dependencies.speechService,
+              keepScreenAwake: _keepScreenAwake,
             ),
           ),
           GoRoute(
@@ -55,6 +62,8 @@ GoRouter buildRouter({required DependenciesContainer dependencies}) {
             builder: (context, state) => NoteDetailsScreen(
               noteRepository: dependencies.noteRepository,
               imageFiles: dependencies.imageFiles,
+              speechService: dependencies.speechService,
+              keepScreenAwake: _keepScreenAwake,
               noteId: state.pathParameters['id'],
             ),
           ),

@@ -69,4 +69,58 @@ class NoteDetailsLocalizationsHi extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'नई पंक्ति';
+
+  @override
+  String get dictate => 'बोलकर लिखें';
+
+  @override
+  String get dictationModeText => 'टेक्स्ट';
+
+  @override
+  String get dictationModeList => 'सूची';
+
+  @override
+  String get dictationModeChecklist => 'चेकलिस्ट';
+
+  @override
+  String get dictationStarting => 'शुरू हो रहा है…';
+
+  @override
+  String get dictationListening => 'सुन रहा है…';
+
+  @override
+  String get dictationPaused =>
+      'रुका हुआ है। जारी रखने के लिए माइक्रोफ़ोन टैप करें';
+
+  @override
+  String get dictationHintList => 'सुन रहा है… आइटम के बीच थोड़ा रुकें';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'सुन रहा है… नई पंक्ति के लिए “$phrase” कहें';
+  }
+
+  @override
+  String get dictationPause => 'डिक्टेशन रोकें';
+
+  @override
+  String get dictationResume => 'डिक्टेशन जारी रखें';
+
+  @override
+  String get dictationPermissionDenied =>
+      'सेटिंग्स में माइक्रोफ़ोन और वाक् पहचान की अनुमति दें';
+
+  @override
+  String get dictationUnavailable => 'इस डिवाइस पर वाक् पहचान उपलब्ध नहीं है';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'इस भाषा के लिए वाक् पहचान उपलब्ध नहीं है';
+
+  @override
+  String get dictationNetworkError =>
+      'वाक् पहचान के लिए नेटवर्क कनेक्शन आवश्यक है';
+
+  @override
+  String get dictationFailed => 'त्रुटि के कारण डिक्टेशन रुक गया';
 }

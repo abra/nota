@@ -69,4 +69,58 @@ class NoteDetailsLocalizationsAr extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'سطر جديد';
+
+  @override
+  String get dictate => 'إملاء';
+
+  @override
+  String get dictationModeText => 'نص';
+
+  @override
+  String get dictationModeList => 'قائمة';
+
+  @override
+  String get dictationModeChecklist => 'قائمة مهام';
+
+  @override
+  String get dictationStarting => 'جارٍ البدء…';
+
+  @override
+  String get dictationListening => 'جارٍ الاستماع…';
+
+  @override
+  String get dictationPaused => 'متوقف مؤقتًا. انقر على الميكروفون للمتابعة';
+
+  @override
+  String get dictationHintList => 'جارٍ الاستماع… توقف قليلًا بين العناصر';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'جارٍ الاستماع… قل «$phrase» لبدء سطر جديد';
+  }
+
+  @override
+  String get dictationPause => 'إيقاف الإملاء مؤقتًا';
+
+  @override
+  String get dictationResume => 'استئناف الإملاء';
+
+  @override
+  String get dictationPermissionDenied =>
+      'اسمح بالوصول إلى الميكروفون والتعرف على الكلام في الإعدادات';
+
+  @override
+  String get dictationUnavailable =>
+      'التعرف على الكلام غير متاح على هذا الجهاز';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'التعرف على الكلام غير متاح لهذه اللغة';
+
+  @override
+  String get dictationNetworkError =>
+      'يحتاج التعرف على الكلام إلى اتصال بالشبكة';
+
+  @override
+  String get dictationFailed => 'توقف الإملاء بسبب خطأ';
 }

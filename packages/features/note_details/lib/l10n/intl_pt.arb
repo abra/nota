@@ -36,5 +36,21 @@
   "redo": "Refazer",
   "@redo": {},
   "newLine": "Nova linha",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "Ditar",
+  "dictationModeText": "Texto",
+  "dictationModeList": "Lista",
+  "dictationModeChecklist": "Lista de tarefas",
+  "dictationStarting": "Iniciando…",
+  "dictationListening": "Ouvindo…",
+  "dictationPaused": "Pausado. Toque no microfone para continuar",
+  "dictationHintList": "Ouvindo… faça uma pausa entre os itens",
+  "dictationHintNewLine": "Ouvindo… diga “{phrase}” para uma nova linha",
+  "dictationPause": "Pausar ditado",
+  "dictationResume": "Retomar ditado",
+  "dictationPermissionDenied": "Permita o acesso ao microfone e ao reconhecimento de voz nos Ajustes",
+  "dictationUnavailable": "O reconhecimento de voz não está disponível neste dispositivo",
+  "dictationLanguageUnsupported": "O reconhecimento de voz não está disponível para este idioma",
+  "dictationNetworkError": "O reconhecimento de voz precisa de conexão de rede",
+  "dictationFailed": "O ditado parou devido a um erro"
 }

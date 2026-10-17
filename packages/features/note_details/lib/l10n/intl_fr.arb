@@ -36,5 +36,21 @@
   "redo": "Rétablir",
   "@redo": {},
   "newLine": "Nouvelle ligne",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "Dicter",
+  "dictationModeText": "Texte",
+  "dictationModeList": "Liste",
+  "dictationModeChecklist": "Liste de tâches",
+  "dictationStarting": "Démarrage…",
+  "dictationListening": "J’écoute…",
+  "dictationPaused": "En pause. Touchez le micro pour continuer",
+  "dictationHintList": "J’écoute… marquez une pause entre les éléments",
+  "dictationHintNewLine": "J’écoute… dites « {phrase} » pour une nouvelle ligne",
+  "dictationPause": "Mettre la dictée en pause",
+  "dictationResume": "Reprendre la dictée",
+  "dictationPermissionDenied": "Autorisez l’accès au micro et à la reconnaissance vocale dans les Réglages",
+  "dictationUnavailable": "La reconnaissance vocale n’est pas disponible sur cet appareil",
+  "dictationLanguageUnsupported": "La reconnaissance vocale n’est pas disponible pour cette langue",
+  "dictationNetworkError": "La reconnaissance vocale nécessite une connexion réseau",
+  "dictationFailed": "La dictée s’est arrêtée à cause d’une erreur"
 }

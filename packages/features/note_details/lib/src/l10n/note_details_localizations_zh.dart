@@ -69,4 +69,54 @@ class NoteDetailsLocalizationsZh extends NoteDetailsLocalizations {
 
   @override
   String get newLine => '换行';
+
+  @override
+  String get dictate => '语音输入';
+
+  @override
+  String get dictationModeText => '文本';
+
+  @override
+  String get dictationModeList => '列表';
+
+  @override
+  String get dictationModeChecklist => '清单';
+
+  @override
+  String get dictationStarting => '正在启动…';
+
+  @override
+  String get dictationListening => '正在聆听…';
+
+  @override
+  String get dictationPaused => '已暂停。点按麦克风继续';
+
+  @override
+  String get dictationHintList => '正在聆听… 条目之间请稍作停顿';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return '正在聆听… 说“$phrase”可换行';
+  }
+
+  @override
+  String get dictationPause => '暂停语音输入';
+
+  @override
+  String get dictationResume => '继续语音输入';
+
+  @override
+  String get dictationPermissionDenied => '请在设置中允许访问麦克风和语音识别';
+
+  @override
+  String get dictationUnavailable => '此设备不支持语音识别';
+
+  @override
+  String get dictationLanguageUnsupported => '此语言不支持语音识别';
+
+  @override
+  String get dictationNetworkError => '语音识别需要网络连接';
+
+  @override
+  String get dictationFailed => '语音输入因错误而停止';
 }

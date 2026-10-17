@@ -69,4 +69,58 @@ class NoteDetailsLocalizationsPt extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'Nova linha';
+
+  @override
+  String get dictate => 'Ditar';
+
+  @override
+  String get dictationModeText => 'Texto';
+
+  @override
+  String get dictationModeList => 'Lista';
+
+  @override
+  String get dictationModeChecklist => 'Lista de tarefas';
+
+  @override
+  String get dictationStarting => 'Iniciando…';
+
+  @override
+  String get dictationListening => 'Ouvindo…';
+
+  @override
+  String get dictationPaused => 'Pausado. Toque no microfone para continuar';
+
+  @override
+  String get dictationHintList => 'Ouvindo… faça uma pausa entre os itens';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'Ouvindo… diga “$phrase” para uma nova linha';
+  }
+
+  @override
+  String get dictationPause => 'Pausar ditado';
+
+  @override
+  String get dictationResume => 'Retomar ditado';
+
+  @override
+  String get dictationPermissionDenied =>
+      'Permita o acesso ao microfone e ao reconhecimento de voz nos Ajustes';
+
+  @override
+  String get dictationUnavailable =>
+      'O reconhecimento de voz não está disponível neste dispositivo';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'O reconhecimento de voz não está disponível para este idioma';
+
+  @override
+  String get dictationNetworkError =>
+      'O reconhecimento de voz precisa de conexão de rede';
+
+  @override
+  String get dictationFailed => 'O ditado parou devido a um erro';
 }

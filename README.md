@@ -11,23 +11,29 @@
   <tr>
     <td align="center"><b>Note list · Light</b></td>
     <td align="center"><b>Note list · Dark</b></td>
-    <td align="center"><b>Rich text editor</b></td>
-    <td align="center"><b>Formatting</b></td>
+    <td align="center"><b>List view</b></td>
   </tr>
   <tr>
     <td><img src="screenshots/note_list_light.png" width="180"/></td>
     <td><img src="screenshots/note_list_dark.png" width="180"/></td>
-    <td><img src="screenshots/editor_checklist.png" width="180"/></td>
-    <td><img src="screenshots/editor_formatting.png" width="180"/></td>
+    <td><img src="screenshots/note_list_list_view.png" width="180"/></td>
   </tr>
   <tr>
-    <td align="center"><b>List view</b></td>
+    <td align="center"><b>Rich text editor</b></td>
+    <td align="center"><b>Formatting</b></td>
+    <td align="center"><b>Voice dictation</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/editor_checklist.png" width="180"/></td>
+    <td><img src="screenshots/editor_formatting.png" width="180"/></td>
+    <td><img src="screenshots/editor_dictation.png" width="180"/></td>
+  </tr>
+  <tr>
     <td align="center"><b>Color picker</b></td>
     <td align="center"><b>Preferences</b></td>
     <td align="center"><b>10 languages</b></td>
   </tr>
   <tr>
-    <td><img src="screenshots/note_list_list_view.png" width="180"/></td>
     <td><img src="screenshots/editor_colors.png" width="180"/></td>
     <td><img src="screenshots/preferences.png" width="180"/></td>
     <td><img src="screenshots/language.png" width="180"/></td>
@@ -43,6 +49,11 @@
 - 16 note colors that tint the whole editor; muted variants in the dark theme
 - Pin important notes; pinned notes get their own section
 - Search across all notes
+- Voice dictation: speak list items one after another and a pause starts the
+  next one; say "new line", "undo" or "stop dictation" (English and Russian)
+  instead of touching the screen. Formatting stays available while you
+  dictate: toggle bold or switch the line to a checklist and the next words
+  follow
 
 **Note list**
 - Masonry grid or list view, with adjustable list density (2 / 3 / 4 lines)
@@ -56,7 +67,8 @@
 
 **Privacy**
 - Fully local — no account, no cloud, no analytics
-- Works completely offline
+- Works completely offline; dictation uses the system speech recogniser, which
+  runs on-device on recent iOS and Android versions
 
 ## Tech stack
 
@@ -81,6 +93,8 @@
 | [toastification](https://pub.dev/packages/toastification) | In-app toast notifications |
 | [flutter_staggered_grid_view](https://pub.dev/packages/flutter_staggered_grid_view) | Masonry note grid |
 | [image_picker](https://pub.dev/packages/image_picker) | Pick images from gallery |
+| [speech_to_text](https://pub.dev/packages/speech_to_text) | System speech recognition for dictation |
+| [wakelock_plus](https://pub.dev/packages/wakelock_plus) | Keep the screen on while dictating |
 | [smart_keyboard_insets](https://pub.dev/packages/smart_keyboard_insets) | Smooth keyboard inset handling |
 | [path_provider](https://pub.dev/packages/path_provider) | App document directory |
 | [package_info_plus](https://pub.dev/packages/package_info_plus) | App version info |
@@ -100,6 +114,7 @@ packages/
   component_library/        # Theme, design tokens, shared widgets
   image_files/              # Note image file management
   toast_service/            # Toasts with optional inline action
+  speech_service/           # Continuous speech recognition for dictation
   monitoring/               # Logger and error-reporting interfaces
   features/
     note_list/              # Note list screen

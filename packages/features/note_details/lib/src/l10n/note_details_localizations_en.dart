@@ -69,4 +69,58 @@ class NoteDetailsLocalizationsEn extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'New line';
+
+  @override
+  String get dictate => 'Dictate';
+
+  @override
+  String get dictationModeText => 'Text';
+
+  @override
+  String get dictationModeList => 'List';
+
+  @override
+  String get dictationModeChecklist => 'Checklist';
+
+  @override
+  String get dictationStarting => 'Starting…';
+
+  @override
+  String get dictationListening => 'Listening…';
+
+  @override
+  String get dictationPaused => 'Paused. Tap the microphone to continue';
+
+  @override
+  String get dictationHintList => 'Listening… pause between items';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'Listening… say “$phrase” for a new line';
+  }
+
+  @override
+  String get dictationPause => 'Pause dictation';
+
+  @override
+  String get dictationResume => 'Resume dictation';
+
+  @override
+  String get dictationPermissionDenied =>
+      'Allow microphone and speech recognition access in Settings';
+
+  @override
+  String get dictationUnavailable =>
+      'Speech recognition is not available on this device';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'Speech recognition is not available for this language';
+
+  @override
+  String get dictationNetworkError =>
+      'Speech recognition needs a network connection';
+
+  @override
+  String get dictationFailed => 'Dictation stopped because of an error';
 }

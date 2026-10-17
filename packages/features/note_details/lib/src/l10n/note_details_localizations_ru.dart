@@ -69,4 +69,58 @@ class NoteDetailsLocalizationsRu extends NoteDetailsLocalizations {
 
   @override
   String get newLine => 'Новая строка';
+
+  @override
+  String get dictate => 'Диктовать';
+
+  @override
+  String get dictationModeText => 'Текст';
+
+  @override
+  String get dictationModeList => 'Список';
+
+  @override
+  String get dictationModeChecklist => 'Чеклист';
+
+  @override
+  String get dictationStarting => 'Запуск…';
+
+  @override
+  String get dictationListening => 'Слушаю…';
+
+  @override
+  String get dictationPaused => 'Пауза. Нажмите микрофон, чтобы продолжить';
+
+  @override
+  String get dictationHintList => 'Слушаю… делайте паузу между пунктами';
+
+  @override
+  String dictationHintNewLine(String phrase) {
+    return 'Слушаю… скажите «$phrase» для новой строки';
+  }
+
+  @override
+  String get dictationPause => 'Приостановить диктовку';
+
+  @override
+  String get dictationResume => 'Продолжить диктовку';
+
+  @override
+  String get dictationPermissionDenied =>
+      'Разрешите доступ к микрофону и распознаванию речи в настройках';
+
+  @override
+  String get dictationUnavailable =>
+      'Распознавание речи недоступно на этом устройстве';
+
+  @override
+  String get dictationLanguageUnsupported =>
+      'Распознавание речи недоступно для этого языка';
+
+  @override
+  String get dictationNetworkError =>
+      'Для распознавания речи нужно подключение к сети';
+
+  @override
+  String get dictationFailed => 'Диктовка остановлена из-за ошибки';
 }

@@ -10,6 +10,7 @@ import 'package:nota/app/config/application_config.dart';
 import 'package:note_repository/note_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:preferences_service/preferences_service.dart';
+import 'package:speech_service/speech_service.dart';
 
 /// Container for global dependencies.
 class DependenciesContainer {
@@ -21,6 +22,7 @@ class DependenciesContainer {
     required this.preferencesService,
     required this.noteRepository,
     required this.imageFiles,
+    required this.speechService,
   });
 
   final Logger logger;
@@ -30,6 +32,7 @@ class DependenciesContainer {
   final PreferencesService preferencesService;
   final NoteRepository noteRepository;
   final ImageFiles imageFiles;
+  final SpeechService speechService;
 }
 
 /// A special version of [DependenciesContainer] that is used in tests.

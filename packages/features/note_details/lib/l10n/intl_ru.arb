@@ -36,5 +36,21 @@
   "redo": "Повторить",
   "@redo": {},
   "newLine": "Новая строка",
-  "@newLine": {}
+  "@newLine": {},
+  "dictate": "Диктовать",
+  "dictationModeText": "Текст",
+  "dictationModeList": "Список",
+  "dictationModeChecklist": "Чеклист",
+  "dictationStarting": "Запуск…",
+  "dictationListening": "Слушаю…",
+  "dictationPaused": "Пауза. Нажмите микрофон, чтобы продолжить",
+  "dictationHintList": "Слушаю… делайте паузу между пунктами",
+  "dictationHintNewLine": "Слушаю… скажите «{phrase}» для новой строки",
+  "dictationPause": "Приостановить диктовку",
+  "dictationResume": "Продолжить диктовку",
+  "dictationPermissionDenied": "Разрешите доступ к микрофону и распознаванию речи в настройках",
+  "dictationUnavailable": "Распознавание речи недоступно на этом устройстве",
+  "dictationLanguageUnsupported": "Распознавание речи недоступно для этого языка",
+  "dictationNetworkError": "Для распознавания речи нужно подключение к сети",
+  "dictationFailed": "Диктовка остановлена из-за ошибки"
 }

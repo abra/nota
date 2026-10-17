@@ -8,18 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:image_files/image_files.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:note_repository/note_repository.dart';
 import 'package:shared/shared.dart';
 import 'package:smart_keyboard_insets/smart_keyboard_insets.dart';
+import 'package:speech_service/speech_service.dart';
 import 'package:toast_service/toast_service.dart';
 
+import 'dictation/dictation_cubit.dart';
+import 'dictation/dictation_mode.dart';
+import 'dictation/quill_dictation_sink.dart';
 import 'l10n/note_details_localizations.dart';
 import 'note_details_bloc.dart';
 import 'quill_content.dart';
 
+part 'dictation_panel.dart';
 part 'note_color_picker.dart';
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -28,8 +34,21 @@ part 'note_color_picker.dart';
 // both screens feel like one app.
 const double _kBarMargin = FloatingBar.margin;
 
-// Secondary panel (formatting or colours) matches the primary toolbar height.
+// Secondary panels (formatting, colours) match the primary toolbar height;
+// dictation needs a second row for its transcript.
 const double _kSecondaryPanelHeight = FloatingBar.height;
+const double _kDictationPanelHeight =
+    FloatingBar.controlSize * 2 + Spacing.small * 3;
+
+double _secondaryPanelHeightFor(_SecondaryPanelMode mode) =>
+    mode == _SecondaryPanelMode.dictation
+    ? _kDictationPanelHeight
+    : _kSecondaryPanelHeight;
+
+// Width the toolbar needs to show every control: seven 40 px buttons, the
+// divider and the panel padding.
+const double _kToolbarFullWidth =
+    FloatingBar.controlSize * 7 + Spacing.mediumLarge + Spacing.small * 2;
 
 // Space reserved under the editor for the primary toolbar.
 const double _kToolbarClearance = FloatingBar.clearance;
@@ -45,20 +64,28 @@ double _keyboardInsetFor(KeyboardMetrics metrics) {
       : metrics.keyboardHeight;
 }
 
-enum _SecondaryPanelMode { formatting, colors }
+enum _SecondaryPanelMode { formatting, colors, dictation }
 
 enum _MenuAction { delete }
+
+/// Keeps the screen from sleeping while [enabled]. Dictation is hands-free,
+/// and the screen lock would otherwise end the session mid-list.
+typedef KeepScreenAwake = Future<void> Function(bool enabled);
 
 class NoteDetailsScreen extends StatelessWidget {
   const NoteDetailsScreen({
     super.key,
     required this.noteRepository,
     required this.imageFiles,
+    required this.speechService,
+    this.keepScreenAwake,
     this.noteId,
   });
 
   final NoteRepository noteRepository;
   final ImageFiles imageFiles;
+  final SpeechService speechService;
+  final KeepScreenAwake? keepScreenAwake;
   final String? noteId;
 
   @override
@@ -69,14 +96,24 @@ class NoteDetailsScreen extends StatelessWidget {
         imageFiles: imageFiles,
         isNew: noteId == null,
       )..add(NoteDetailsStarted(noteId: noteId)),
-      child: const NoteDetailsView(),
+      child: NoteDetailsView(
+        speechService: speechService,
+        keepScreenAwake: keepScreenAwake,
+      ),
     );
   }
 }
 
 @visibleForTesting
 class NoteDetailsView extends StatefulWidget {
-  const NoteDetailsView({super.key});
+  const NoteDetailsView({
+    super.key,
+    required this.speechService,
+    this.keepScreenAwake,
+  });
+
+  final SpeechService speechService;
+  final KeepScreenAwake? keepScreenAwake;
 
   @override
   State<NoteDetailsView> createState() => _NoteDetailsViewState();
@@ -96,6 +133,9 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
   bool _contentInitialized = false;
   _SecondaryPanelMode _activePanel = _SecondaryPanelMode.formatting;
   bool _isPanelOpen = false;
+  late final QuillDictationSink _dictationSink;
+  late final DictationCubit _dictation;
+  late final AppLifecycleListener _lifecycleListener;
 
   // Disable rich-text paste from external apps: HTML from the clipboard
   // brings unwanted styles (background colors, font sizes, etc.).
@@ -121,6 +161,14 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
       reverseCurve: Curves.easeInCubic,
     );
     _subscribeToChanges();
+    _dictationSink = QuillDictationSink(() => _quillController);
+    _dictation = DictationCubit(
+      service: widget.speechService,
+      sink: _dictationSink,
+    );
+    // The recogniser cannot run in the background; stop cleanly instead of
+    // leaving a half-finished session behind.
+    _lifecycleListener = AppLifecycleListener(onHide: _dictation.stop);
   }
 
   @override
@@ -131,6 +179,8 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     _quillFocusNode.dispose();
     _quillScrollController.dispose();
     _toolbarAnimController.dispose();
+    _lifecycleListener.dispose();
+    _dictation.close();
     super.dispose();
   }
 
@@ -143,7 +193,22 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
         'ops': _quillController.document.toDelta().toJson(),
       });
       context.read<NoteDetailsBloc>().add(NoteDetailsContentChanged(json));
+      _syncDictationMode(change.change);
     });
+  }
+
+  /// Formatting applied while dictating steers the dictation mode: turning
+  /// the line into a checklist makes the following utterances checklist
+  /// items, removing the list returns to prose. Inline styles need no help;
+  /// Quill applies the toggled style to whatever is inserted next.
+  void _syncDictationMode(Delta change) {
+    if (!_dictation.state.isActive) return;
+    final touchesList = change.toList().any(
+      (op) =>
+          op.isRetain &&
+          (op.attributes?.containsKey(Attribute.list.key) ?? false),
+    );
+    if (touchesList) _dictation.setMode(_dictationSink.modeAtCursor());
   }
 
   QuillController _controllerFromContent(String content) {
@@ -255,13 +320,15 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
 
   void _togglePanel(_SecondaryPanelMode mode) {
     HapticFeedback.selectionClick();
+    final wasClosed = !_isPanelOpen;
+    final closing = _isPanelOpen && _activePanel == mode;
     setState(() {
-      if (_isPanelOpen && _activePanel == mode) {
+      if (closing) {
         // Tapping the active button closes the panel.
         _isPanelOpen = false;
         _toolbarAnimController.reverse();
       } else {
-        // Switch mode (content snaps instantly) or open if currently closed.
+        // Switch mode (the panel animates its height) or open if closed.
         _activePanel = mode;
         if (!_isPanelOpen) {
           _isPanelOpen = true;
@@ -269,6 +336,25 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
         }
       }
     });
+    // The mic button starts a session when it opens the panel and ends one
+    // when it closes it. Switching to formatting or colours leaves the
+    // session running so styles can change between utterances, and coming
+    // back to a paused session does not resume it unasked.
+    if (mode != _SecondaryPanelMode.dictation) return;
+    if (closing) {
+      _dictation.stop();
+    } else if (wasClosed && !_dictation.state.isActive) {
+      _startDictation();
+    }
+  }
+
+  void _startDictation() {
+    // Without a visible caret the user has no cue where words would land, so
+    // continue at the end of the note; a placed caret is respected.
+    if (!_quillFocusNode.hasFocus) _quillController.moveCursorToEnd();
+    // Dictation is hands-free: hide the keyboard and give the note the room.
+    _quillFocusNode.unfocus();
+    _dictation.start(Localizations.localeOf(context), detectMode: true);
   }
 
   Future<void> _pickImage(BuildContext context) async {
@@ -390,217 +476,293 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
             ? state.color.onColorFor(brightness)
             : theme.colorScheme.onSurface;
         final editedAt = state.note?.updatedAt;
+        final panelHeight = _secondaryPanelHeightFor(_activePanel);
 
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _saveAndPop(context);
           },
-          // The page tint lives behind a transparent Scaffold so colour changes
-          // can animate; the app bar is transparent for the same reason.
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOut,
-            color: pageColor,
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              resizeToAvoidBottomInset: false,
-              appBar: _NoteDetailsAppBar(
-                foregroundColor: foreground,
-                isPinned: state.isPinned,
-                onBack: () => _saveAndPop(context),
-                onPinToggled: () {
-                  HapticFeedback.selectionClick();
-                  context.read<NoteDetailsBloc>().add(NoteDetailsPinToggled());
-                },
-                onMenuAction: (action) => _onMenuAction(context, action),
-              ),
-              body: SafeArea(
-                top: false,
-                child: StreamBuilder<KeyboardMetrics>(
-                  stream: SmartKeyboardInsets.instance.metricsStream,
-                  initialData: KeyboardMetrics.hidden,
-                  builder: (context, snapshot) {
-                    final keyboardInset = _keyboardInsetFor(
-                      snapshot.data ?? KeyboardMetrics.hidden,
-                    );
-                    return Stack(
-                      children: [
-                        CustomScrollView(
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          slivers: [
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(
-                                Spacing.large,
-                                Spacing.small,
-                                Spacing.large,
-                                0,
-                              ),
-                              sliver: SliverToBoxAdapter(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextField(
-                                      controller: _titleController,
-                                      onChanged: (v) => context
-                                          .read<NoteDetailsBloc>()
-                                          .add(NoteDetailsTitleChanged(v)),
-                                      style: theme.textTheme.headlineSmall
-                                          ?.copyWith(color: foreground),
-                                      cursorColor: theme.colorScheme.primary,
-                                      decoration: InputDecoration(
-                                        hintText: l10n.titleHint,
-                                        hintStyle: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              color: foreground.withValues(
-                                                alpha: 0.38,
-                                              ),
-                                            ),
-                                        border: InputBorder.none,
-                                        isDense: true,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              vertical: Spacing.xSmall,
-                                            ),
-                                      ),
-                                      maxLines: null,
-                                      keyboardType: TextInputType.text,
-                                      textCapitalization:
-                                          TextCapitalization.sentences,
-                                      textInputAction: TextInputAction.next,
-                                    ),
-                                    if (editedAt != null)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: Spacing.xSmall,
-                                          bottom: Spacing.small,
-                                        ),
-                                        child: Text(
-                                          l10n.editedAt(
-                                            _formatEdited(context, editedAt),
+          child: BlocProvider<DictationCubit>.value(
+            value: _dictation,
+            child: MultiBlocListener(
+              listeners: [
+                // Keep the screen on while the microphone is in use.
+                BlocListener<DictationCubit, DictationState>(
+                  listenWhen: (prev, curr) => prev.isActive != curr.isActive,
+                  listener: (_, dictation) {
+                    widget.keepScreenAwake?.call(dictation.isActive).ignore();
+                  },
+                ),
+                // A tick for every utterance that landed in the note.
+                BlocListener<DictationCubit, DictationState>(
+                  listenWhen: (prev, curr) =>
+                      curr.committedCount > prev.committedCount,
+                  listener: (_, _) => HapticFeedback.selectionClick(),
+                ),
+              ],
+              // The page tint lives behind a transparent Scaffold so colour changes
+              // can animate; the app bar is transparent for the same reason.
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOut,
+                color: pageColor,
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  resizeToAvoidBottomInset: false,
+                  appBar: _NoteDetailsAppBar(
+                    foregroundColor: foreground,
+                    isPinned: state.isPinned,
+                    onBack: () => _saveAndPop(context),
+                    onPinToggled: () {
+                      HapticFeedback.selectionClick();
+                      context.read<NoteDetailsBloc>().add(
+                        NoteDetailsPinToggled(),
+                      );
+                    },
+                    onMenuAction: (action) => _onMenuAction(context, action),
+                  ),
+                  body: SafeArea(
+                    top: false,
+                    child: StreamBuilder<KeyboardMetrics>(
+                      stream: SmartKeyboardInsets.instance.metricsStream,
+                      initialData: KeyboardMetrics.hidden,
+                      builder: (context, snapshot) {
+                        final keyboardInset = _keyboardInsetFor(
+                          snapshot.data ?? KeyboardMetrics.hidden,
+                        );
+                        return Stack(
+                          children: [
+                            CustomScrollView(
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              slivers: [
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    Spacing.large,
+                                    Spacing.small,
+                                    Spacing.large,
+                                    0,
+                                  ),
+                                  sliver: SliverToBoxAdapter(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextField(
+                                          controller: _titleController,
+                                          onChanged: (v) => context
+                                              .read<NoteDetailsBloc>()
+                                              .add(NoteDetailsTitleChanged(v)),
+                                          style: theme.textTheme.headlineSmall
+                                              ?.copyWith(color: foreground),
+                                          cursorColor:
+                                              theme.colorScheme.primary,
+                                          decoration: InputDecoration(
+                                            hintText: l10n.titleHint,
+                                            hintStyle: theme
+                                                .textTheme
+                                                .headlineSmall
+                                                ?.copyWith(
+                                                  color: foreground.withValues(
+                                                    alpha: 0.38,
+                                                  ),
+                                                ),
+                                            border: InputBorder.none,
+                                            isDense: true,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: Spacing.xSmall,
+                                                ),
                                           ),
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w400,
-                                                color: foreground.withValues(
-                                                  alpha: 0.55,
+                                          maxLines: null,
+                                          keyboardType: TextInputType.text,
+                                          textCapitalization:
+                                              TextCapitalization.sentences,
+                                          textInputAction: TextInputAction.next,
+                                        ),
+                                        if (editedAt != null)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: Spacing.xSmall,
+                                              bottom: Spacing.small,
+                                            ),
+                                            child: Text(
+                                              l10n.editedAt(
+                                                _formatEdited(
+                                                  context,
+                                                  editedAt,
                                                 ),
                                               ),
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w400,
+                                                    color: foreground
+                                                        .withValues(
+                                                          alpha: 0.55,
+                                                        ),
+                                                  ),
+                                            ),
+                                          )
+                                        else
+                                          const SizedBox(height: Spacing.small),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  // Bottom padding grows as the secondary panel
+                                  // slides in, keeping the last line of text above
+                                  // the toolbar stack.
+                                  child: _ToolbarInset(
+                                    animation: _toolbarAnimation,
+                                    panelHeight: panelHeight,
+                                    keyboardInset: keyboardInset,
+                                    builder: (context, inset, child) => Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        Spacing.large,
+                                        0,
+                                        Spacing.large,
+                                        inset,
+                                      ),
+                                      child: child,
+                                    ),
+                                    child: QuillEditor(
+                                      controller: _quillController,
+                                      focusNode: _quillFocusNode,
+                                      scrollController: _quillScrollController,
+                                      config: QuillEditorConfig(
+                                        placeholder: l10n.contentHint,
+                                        scrollable: false,
+                                        expands: false,
+                                        padding: EdgeInsets.zero,
+                                        autoFocus: false,
+                                        customStyles: _buildEditorStyles(
+                                          context,
                                         ),
-                                      )
-                                    else
-                                      const SizedBox(height: Spacing.small),
-                                  ],
+                                        embedBuilders: const [
+                                          _LocalImageEmbedBuilder(),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Gradient fade behind the toolbar so content scrolls
+                            // under smoothly.
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: IgnorePointer(
+                                child: _ToolbarInset(
+                                  animation: _toolbarAnimation,
+                                  panelHeight: panelHeight,
+                                  keyboardInset: keyboardInset,
+                                  builder: (context, inset, _) => Container(
+                                    height: inset,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          pageColor.withValues(alpha: 0),
+                                          pageColor,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                            SliverFillRemaining(
-                              hasScrollBody: false,
-                              // Bottom padding grows as the secondary panel
-                              // slides in, keeping the last line of text above
-                              // the toolbar stack.
-                              child: AnimatedBuilder(
+                            Positioned(
+                              left: _kBarMargin,
+                              right: _kBarMargin,
+                              bottom: _kBarMargin + keyboardInset,
+                              child: _NoteToolbar(
+                                // Key forces a full rebuild when the controller is
+                                // replaced (happens once, on first note load).
+                                key: ObjectKey(_quillController),
+                                controller: _quillController,
                                 animation: _toolbarAnimation,
-                                builder: (context, child) => Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    Spacing.large,
-                                    0,
-                                    Spacing.large,
-                                    _kToolbarClearance +
-                                        _toolbarAnimation.value *
-                                            (_kSecondaryPanelHeight +
-                                                Spacing.small) +
-                                        keyboardInset,
-                                  ),
-                                  child: child,
+                                activePanel: _activePanel,
+                                isSecondaryOpen: _isPanelOpen,
+                                noteColor: state.color,
+                                onToggleFormatting: () => _togglePanel(
+                                  _SecondaryPanelMode.formatting,
                                 ),
-                                child: QuillEditor(
-                                  controller: _quillController,
-                                  focusNode: _quillFocusNode,
-                                  scrollController: _quillScrollController,
-                                  config: QuillEditorConfig(
-                                    placeholder: l10n.contentHint,
-                                    scrollable: false,
-                                    expands: false,
-                                    padding: EdgeInsets.zero,
-                                    autoFocus: false,
-                                    customStyles: _buildEditorStyles(context),
-                                    embedBuilders: const [
-                                      _LocalImageEmbedBuilder(),
-                                    ],
-                                  ),
-                                ),
+                                onToggleColors: () =>
+                                    _togglePanel(_SecondaryPanelMode.colors),
+                                onToggleDictation: () =>
+                                    _togglePanel(_SecondaryPanelMode.dictation),
+                                onImagePressed: () => _pickImage(context),
+                                onColorSelected: (color) {
+                                  HapticFeedback.selectionClick();
+                                  context.read<NoteDetailsBloc>().add(
+                                    NoteDetailsColorChanged(color),
+                                  );
+                                },
+                                onNewLine: _insertNewLine,
                               ),
                             ),
                           ],
-                        ),
-                        // Gradient fade behind the toolbar so content scrolls
-                        // under smoothly.
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: IgnorePointer(
-                            child: AnimatedBuilder(
-                              animation: _toolbarAnimation,
-                              builder: (context, _) => Container(
-                                height:
-                                    _kToolbarClearance +
-                                    _toolbarAnimation.value *
-                                        (_kSecondaryPanelHeight +
-                                            Spacing.small) +
-                                    keyboardInset,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      pageColor.withValues(alpha: 0),
-                                      pageColor,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: _kBarMargin,
-                          right: _kBarMargin,
-                          bottom: _kBarMargin + keyboardInset,
-                          child: _NoteToolbar(
-                            // Key forces a full rebuild when the controller is
-                            // replaced (happens once, on first note load).
-                            key: ObjectKey(_quillController),
-                            controller: _quillController,
-                            animation: _toolbarAnimation,
-                            activePanel: _activePanel,
-                            isSecondaryOpen: _isPanelOpen,
-                            noteColor: state.color,
-                            onToggleFormatting: () =>
-                                _togglePanel(_SecondaryPanelMode.formatting),
-                            onToggleColors: () =>
-                                _togglePanel(_SecondaryPanelMode.colors),
-                            onImagePressed: () => _pickImage(context),
-                            onColorSelected: (color) {
-                              HapticFeedback.selectionClick();
-                              context.read<NoteDetailsBloc>().add(
-                                NoteDetailsColorChanged(color),
-                              );
-                            },
-                            onNewLine: _insertNewLine,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+// ─── Toolbar inset ────────────────────────────────────────────────────────────
+
+/// Space reserved under the editor for the toolbar stack.
+///
+/// Combines the secondary panel's slide progress with its target height,
+/// which differs between panels and so animates on its own, plus the
+/// keyboard inset. [builder] receives the inset in logical pixels.
+class _ToolbarInset extends StatelessWidget {
+  const _ToolbarInset({
+    required this.animation,
+    required this.panelHeight,
+    required this.keyboardInset,
+    required this.builder,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final double panelHeight;
+  final double keyboardInset;
+  final Widget Function(BuildContext context, double inset, Widget? child)
+  builder;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: panelHeight),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      child: child,
+      builder: (context, height, child) => AnimatedBuilder(
+        animation: animation,
+        child: child,
+        builder: (context, child) => builder(
+          context,
+          _kToolbarClearance +
+              animation.value * (height + Spacing.small) +
+              keyboardInset,
+          child,
+        ),
+      ),
     );
   }
 }
@@ -700,6 +862,7 @@ class _NoteToolbar extends StatelessWidget {
     required this.noteColor,
     required this.onToggleFormatting,
     required this.onToggleColors,
+    required this.onToggleDictation,
     required this.onImagePressed,
     required this.onColorSelected,
     required this.onNewLine,
@@ -712,6 +875,7 @@ class _NoteToolbar extends StatelessWidget {
   final NoteColor noteColor;
   final VoidCallback onToggleFormatting;
   final VoidCallback onToggleColors;
+  final VoidCallback onToggleDictation;
   final VoidCallback onImagePressed;
   final ValueChanged<NoteColor> onColorSelected;
   final VoidCallback onNewLine;
@@ -719,6 +883,8 @@ class _NoteToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = NoteDetailsLocalizations.of(context)!;
+    final isDictationPanelOpen =
+        isSecondaryOpen && activePanel == _SecondaryPanelMode.dictation;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -744,58 +910,89 @@ class _NoteToolbar extends StatelessWidget {
           ),
         ),
         // Primary toolbar.
-        FloatingPanel(
-          child: Row(
-            children: [
-              // Undo / redo rebuild on every controller history change.
-              ListenableBuilder(
-                listenable: controller,
-                builder: (context, _) => Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FloatingBarButton(
-                      tooltip: l10n.undo,
-                      icon: Icons.undo_rounded,
-                      onPressed: controller.hasUndo ? controller.undo : null,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final showNewLine = constraints.maxWidth >= _kToolbarFullWidth;
+            return FloatingPanel(
+              child: Row(
+                children: [
+                  // Undo / redo rebuild on every controller history change.
+                  ListenableBuilder(
+                    listenable: controller,
+                    builder: (context, _) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FloatingBarButton(
+                          tooltip: l10n.undo,
+                          icon: Icons.undo_rounded,
+                          onPressed: controller.hasUndo
+                              ? controller.undo
+                              : null,
+                        ),
+                        FloatingBarButton(
+                          tooltip: l10n.redo,
+                          icon: Icons.redo_rounded,
+                          onPressed: controller.hasRedo
+                              ? controller.redo
+                              : null,
+                        ),
+                      ],
                     ),
-                    FloatingBarButton(
-                      tooltip: l10n.redo,
-                      icon: Icons.redo_rounded,
-                      onPressed: controller.hasRedo ? controller.redo : null,
+                  ),
+                  const FloatingBarDivider(),
+                  FloatingBarButton(
+                    tooltip: l10n.formatting,
+                    icon: Icons.text_format_rounded,
+                    active:
+                        isSecondaryOpen &&
+                        activePanel == _SecondaryPanelMode.formatting,
+                    onPressed: onToggleFormatting,
+                  ),
+                  FloatingBarButton(
+                    tooltip: l10n.insertImage,
+                    icon: Icons.image_outlined,
+                    onPressed: onImagePressed,
+                  ),
+                  FloatingBarButton(
+                    tooltip: l10n.noteColor,
+                    active:
+                        isSecondaryOpen &&
+                        activePanel == _SecondaryPanelMode.colors,
+                    onPressed: onToggleColors,
+                    child: _ColorCircleIcon(noteColor: noteColor),
+                  ),
+                  // The glyph goes live while a session runs, whichever
+                  // panel is open; the highlight marks the dictation panel.
+                  BlocSelector<DictationCubit, DictationState, bool>(
+                    selector: (state) => state.isListening,
+                    builder: (context, isListening) => FloatingBarButton(
+                      tooltip: l10n.dictate,
+                      active: isDictationPanelOpen,
+                      onPressed: onToggleDictation,
+                      child: Icon(
+                        isListening
+                            ? Icons.mic_rounded
+                            : Icons.mic_none_rounded,
+                        color: isListening && !isDictationPanelOpen
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  // First control to go on narrow layouts (iPad Slide Over,
+                  // small phones): the keyboard and the dictation panel both
+                  // have a return key.
+                  if (showNewLine)
+                    FloatingBarButton(
+                      tooltip: l10n.newLine,
+                      icon: Icons.keyboard_return_rounded,
+                      onPressed: onNewLine,
+                    ),
+                ],
               ),
-              const FloatingBarDivider(),
-              FloatingBarButton(
-                tooltip: l10n.formatting,
-                icon: Icons.text_format_rounded,
-                active:
-                    isSecondaryOpen &&
-                    activePanel == _SecondaryPanelMode.formatting,
-                onPressed: onToggleFormatting,
-              ),
-              FloatingBarButton(
-                tooltip: l10n.insertImage,
-                icon: Icons.image_outlined,
-                onPressed: onImagePressed,
-              ),
-              FloatingBarButton(
-                tooltip: l10n.noteColor,
-                active:
-                    isSecondaryOpen &&
-                    activePanel == _SecondaryPanelMode.colors,
-                onPressed: onToggleColors,
-                child: _ColorCircleIcon(noteColor: noteColor),
-              ),
-              const Spacer(),
-              FloatingBarButton(
-                tooltip: l10n.newLine,
-                icon: Icons.keyboard_return_rounded,
-                onPressed: onNewLine,
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ],
     );
@@ -931,15 +1128,26 @@ class _SecondaryPanel extends StatelessWidget {
   final ValueChanged<NoteColor> onColorSelected;
 
   @override
-  Widget build(BuildContext context) => switch (mode) {
-    _SecondaryPanelMode.formatting => _FormattingPanel(
-      controller: controller,
-    ),
-    _SecondaryPanelMode.colors => _InlineColorPanel(
-      selected: noteColor,
-      onSelected: onColorSelected,
-    ),
-  };
+  Widget build(BuildContext context) {
+    final panel = switch (mode) {
+      _SecondaryPanelMode.formatting => _FormattingPanel(
+        controller: controller,
+      ),
+      _SecondaryPanelMode.colors => _InlineColorPanel(
+        selected: noteColor,
+        onSelected: onColorSelected,
+      ),
+      _SecondaryPanelMode.dictation => const _DictationPanel(),
+    };
+    // Panels differ in height (dictation has two rows): grow from the
+    // toolbar upwards instead of jumping.
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.bottomCenter,
+      child: panel,
+    );
+  }
 }
 
 // ─── Image embed ──────────────────────────────────────────────────────────────
