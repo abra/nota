@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'note_details_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -35,4 +34,39 @@ class NoteDetailsLocalizationsRu extends NoteDetailsLocalizations {
 
   @override
   String get imageInsertFailed => 'Не удалось вставить изображение';
+
+  @override
+  String get deleteNote => 'Удалить заметку';
+
+  @override
+  String get pinNote => 'Закрепить';
+
+  @override
+  String get unpinNote => 'Открепить';
+
+  @override
+  String editedAt(String date) {
+    return 'Изменено $date';
+  }
+
+  @override
+  String get back => 'Назад';
+
+  @override
+  String get moreActions => 'Ещё';
+
+  @override
+  String get formatting => 'Форматирование';
+
+  @override
+  String get insertImage => 'Вставить изображение';
+
+  @override
+  String get undo => 'Отменить';
+
+  @override
+  String get redo => 'Повторить';
+
+  @override
+  String get newLine => 'Новая строка';
 }

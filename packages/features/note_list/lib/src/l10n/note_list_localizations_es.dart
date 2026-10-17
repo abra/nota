@@ -41,4 +41,43 @@ class NoteListLocalizationsEs extends NoteListLocalizations {
 
   @override
   String get retry => 'Reintentar';
+
+  @override
+  String get pinned => 'Fijadas';
+
+  @override
+  String get others => 'Otras';
+
+  @override
+  String get yesterday => 'Ayer';
+
+  @override
+  String get noResults => 'No se encontró nada';
+
+  @override
+  String get noResultsHint => 'Prueba con otra búsqueda';
+
+  @override
+  String get emptyStateHint => 'Toca + para crear tu primera nota';
+
+  @override
+  String get undo => 'Deshacer';
+
+  @override
+  String get addNote => 'Nueva nota';
+
+  @override
+  String get menu => 'Menú';
+
+  @override
+  String get pin => 'Fijar';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get noteRestoreFailed => 'No se pudo restaurar la nota';
 }

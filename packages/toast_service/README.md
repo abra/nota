@@ -19,11 +19,20 @@ showToast(
   message: 'Note deleted',
 );
 
+// Show a toast with an inline action (stays a little longer)
+showToast(
+  context,
+  type: NotificationType.success,
+  message: 'Note deleted',
+  action: ToastAction(label: 'Undo', onPressed: restore),
+);
+
 // Wrap the widget tree (in MaterialContext)
 ToastWrapper(child: child)
 ```
 
-`NotificationType` has two values: `success` and `error`.
+`NotificationType` has three values: `success`, `error` and `info`. Toasts use
+the app theme (surface, shadows and corner radius from `component_library`).
 
 ## Swapping the library
 

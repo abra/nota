@@ -8,8 +8,9 @@ import 'image_files_exception.dart';
 
 /// Manages image files stored in `<appDocuments>/nota_images/`.
 ///
-/// All images are copied into the app's documents directory under a
-/// content-addressed filename so that paths remain stable across moves.
+/// Every picked image is copied into the app's documents directory under a
+/// timestamp-based filename so the original can be removed from the gallery
+/// without affecting the note.
 class ImageFiles {
   static const _folder = 'nota_images';
 
@@ -50,6 +51,41 @@ class ImageFiles {
   Future<void> deleteImage(String imagePath) async {
     final file = File(imagePath);
     if (file.existsSync()) await file.delete();
+  }
+
+  /// Returns the paths of every image currently stored by the app.
+  ///
+  /// Returns an empty list when the directory does not exist yet.
+  /// Throws [ImageFilesException] if the directory cannot be read.
+  Future<List<String>> listImages() async {
+    try {
+      final base = await getApplicationDocumentsDirectory();
+      final dir = Directory(p.join(base.path, _folder));
+      if (!dir.existsSync()) return const [];
+      return [
+        await for (final entity in dir.list(followLinks: false))
+          if (entity is File) entity.path,
+      ];
+    } catch (e, st) {
+      throw ImageFilesException('Failed to list images', e, st);
+    }
+  }
+
+  /// Deletes every stored image whose path is not in [referencedPaths].
+  ///
+  /// Used as an orphan sweep: notes may be deleted or abandoned while their
+  /// images are already on disk. Errors on individual files are ignored so one
+  /// locked file does not stop the sweep.
+  Future<int> deleteUnreferenced(Set<String> referencedPaths) async {
+    var removed = 0;
+    for (final path in await listImages()) {
+      if (referencedPaths.contains(path)) continue;
+      try {
+        await deleteImage(path);
+        removed++;
+      } catch (_) {}
+    }
+    return removed;
   }
 
   /// Deletes all images referenced inside the Quill Delta [content] string.

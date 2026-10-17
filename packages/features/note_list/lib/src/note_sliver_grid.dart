@@ -1,60 +1,51 @@
 import 'package:component_library/component_library.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared/shared.dart';
 
 import 'note_card.dart';
 
-class NotePagedGridView extends StatelessWidget {
-  const NotePagedGridView({
+/// Two-column masonry grid of [NoteCard]s. Returns a sliver.
+class NoteSliverGrid extends StatelessWidget {
+  const NoteSliverGrid({
     super.key,
     required this.notes,
     required this.selectedIds,
     required this.isSelectionMode,
+    required this.dateLabelFor,
     this.onNotePressed,
-    this.onNoteDeleted,
     this.onNoteLongPressed,
-    this.bottomPadding = 0,
   });
 
   final List<Note> notes;
   final Set<String> selectedIds;
   final bool isSelectionMode;
+  final String Function(Note) dateLabelFor;
   final ValueChanged<Note>? onNotePressed;
-  final ValueChanged<String>? onNoteDeleted;
   final ValueChanged<String>? onNoteLongPressed;
-  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: EdgeInsets.fromLTRB(
-        Spacing.medium,
-        Spacing.medium,
-        Spacing.medium,
-        Spacing.medium + bottomPadding,
-      ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: Spacing.small,
-        mainAxisSpacing: Spacing.small,
-        childAspectRatio: 1,
-      ),
-      itemCount: notes.length,
+    return SliverMasonryGrid.count(
+      crossAxisCount: 2,
+      mainAxisSpacing: Spacing.medium,
+      crossAxisSpacing: Spacing.medium,
+      childCount: notes.length,
       itemBuilder: (context, index) {
         final note = notes[index];
-        final isSelected = selectedIds.contains(note.id);
-
         return NoteCard(
           key: ValueKey(note.id),
           note: note,
-          isSelected: isSelected,
+          dateLabel: dateLabelFor(note),
+          isSelected: selectedIds.contains(note.id),
           onPressed: isSelectionMode
               ? () => onNoteLongPressed?.call(note.id)
-              : () => onNotePressed?.call(note),
+              : onNotePressed == null
+              ? null
+              : () => onNotePressed!(note),
           onLongPress: isSelectionMode
               ? null
               : () => onNoteLongPressed?.call(note.id),
-          onDeleted: () => onNoteDeleted?.call(note.id),
         );
       },
     );

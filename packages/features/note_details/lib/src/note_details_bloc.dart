@@ -144,6 +144,7 @@ class NoteDetailsBloc extends Bloc<NoteDetailsEvent, NoteDetailsState> {
   ) async {
     final note = state.note;
     if (note == null) return;
+    if (state.isSaveInProgress) return;
     try {
       await _repository.deleteNote(note.id);
     } on NoteStorageException catch (e, st) {
@@ -160,6 +161,8 @@ class NoteDetailsBloc extends Bloc<NoteDetailsEvent, NoteDetailsState> {
     Emitter<NoteDetailsState> emit,
   ) async {
     if (state.isContentEmpty && state.title.trim().isEmpty) return;
+    // A second back press while saving must not start another save.
+    if (state.isSaveInProgress) return;
 
     emit(state.copyWith(status: NoteDetailsStatus.saving));
     final title = state.title.trim().isEmpty ? null : state.title.trim();
@@ -173,6 +176,7 @@ class NoteDetailsBloc extends Bloc<NoteDetailsEvent, NoteDetailsState> {
           title: title,
           content: content,
           color: state.color,
+          isPinned: state.isPinned,
         );
       } else {
         final note = state.note;

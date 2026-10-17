@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  component_library:
+    path: ../component_library
   toastification: ^3.0.3
 
 dev_dependencies:

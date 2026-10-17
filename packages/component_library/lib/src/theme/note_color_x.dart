@@ -4,7 +4,12 @@ import 'package:shared/shared.dart';
 import 'nord.dart';
 
 /// Maps [NoteColor] domain values to Flutter [Color].
+///
+/// Light theme uses soft pastels. Dark theme re-derives each swatch in HSL
+/// with low saturation and lightness so a coloured note reads as a tinted
+/// dark card instead of a glowing pastel on a dark background.
 extension NoteColorX on NoteColor {
+  /// Pastel swatch used in the light theme.
   Color get color => switch (this) {
     NoteColor.none => Colors.transparent,
     NoteColor.red => const Color(0xFFF5A29D),
@@ -24,9 +29,21 @@ extension NoteColorX on NoteColor {
     NoteColor.sand => const Color(0xFFEDDB99),
   };
 
-  Color forBrightness(Brightness brightness) => color;
+  /// Muted swatch used in the dark theme. Same hue, low saturation and
+  /// lightness tuned so [NordSnowStorm.nord6] text stays above 4.5:1 contrast.
+  Color get darkColor {
+    if (this == NoteColor.none) return Colors.transparent;
+    return HSLColor.fromColor(
+      color,
+    ).withSaturation(0.28).withLightness(0.31).toColor();
+  }
 
-  /// Returns a legible text/icon color for content drawn on top of this
-  /// note color.
-  Color get onColor => NordPolarNight.nord0;
+  /// Swatch for the given [brightness].
+  Color forBrightness(Brightness brightness) =>
+      brightness == Brightness.dark ? darkColor : color;
+
+  /// Legible foreground for content drawn on top of [forBrightness].
+  Color onColorFor(Brightness brightness) => brightness == Brightness.dark
+      ? NordSnowStorm.nord6
+      : NordPolarNight.nord0;
 }

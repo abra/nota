@@ -5,5 +5,31 @@
   "notesView": "笔记视图",
   "listDensity": "列表密度",
   "language": "语言",
-  "searchHint": "搜索"
+  "searchHint": "搜索",
+  "version": "版本 {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "跟随系统",
+  "@themeSystem": {},
+  "themeLight": "浅色",
+  "@themeLight": {},
+  "themeDark": "深色",
+  "@themeDark": {},
+  "viewGrid": "网格",
+  "@viewGrid": {},
+  "viewList": "列表",
+  "@viewList": {},
+  "linesCount": "{count} 行",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

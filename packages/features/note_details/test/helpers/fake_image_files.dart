@@ -19,6 +19,19 @@ class FakeImageFiles implements ImageFiles {
     deletedPaths.add(imagePath);
   }
 
+  /// Paths passed to the last [deleteUnreferenced] call, for assertions.
+  Set<String>? lastReferencedPaths;
+
+  @override
+  Future<List<String>> listImages() async => const [];
+
+  @override
+  Future<int> deleteUnreferenced(Set<String> referencedPaths) async {
+    if (shouldThrow) throw ImageFilesException('deleteUnreferenced failed');
+    lastReferencedPaths = referencedPaths;
+    return 0;
+  }
+
   @override
   Future<void> deleteImagesFromContent(String content) async {
     if (shouldThrow) {

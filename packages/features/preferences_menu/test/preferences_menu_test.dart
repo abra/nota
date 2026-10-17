@@ -84,7 +84,7 @@ void main() {
       final service = await _createService();
       await tester.pumpWidget(_buildMenu(service));
 
-      await tester.tap(find.byIcon(Icons.dark_mode));
+      await tester.tap(find.byIcon(Icons.dark_mode_outlined));
       await tester.pump();
 
       expect(service.current.themeMode, ThemeMode.dark);
@@ -94,7 +94,7 @@ void main() {
       final service = await _createService();
       await tester.pumpWidget(_buildMenu(service));
 
-      await tester.tap(find.byIcon(Icons.list));
+      await tester.tap(find.byIcon(Icons.view_agenda_outlined));
       await tester.pump();
 
       expect(service.current.noteViewMode, NoteViewMode.list);

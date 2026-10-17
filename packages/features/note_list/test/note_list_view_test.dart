@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -126,7 +127,7 @@ void main() {
 
     // --- Grid / list views ---
 
-    testWidgets('shows GridView with note content when viewMode is grid', (
+    testWidgets('shows masonry grid with note content when viewMode is grid', (
       tester,
     ) async {
       final notes = [
@@ -145,12 +146,12 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(GridView), findsOneWidget);
+      expect(find.byType(SliverMasonryGrid), findsOneWidget);
       expect(find.text('note one'), findsOneWidget);
       expect(find.text('note two'), findsOneWidget);
     });
 
-    testWidgets('shows ListView with note content when viewMode is list', (
+    testWidgets('shows list with note content when viewMode is list', (
       tester,
     ) async {
       final notes = [_note('1', content: 'list note')];
@@ -166,7 +167,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(SliverList), findsOneWidget);
       expect(find.text('list note'), findsOneWidget);
     });
 
@@ -303,7 +304,7 @@ void main() {
           selectedIds: const {'1'},
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.add), findsNothing);
       expect(find.byIcon(Icons.menu), findsNothing);
@@ -343,12 +344,13 @@ void main() {
           selectedIds: const {'1'},
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.close));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.text('Nota'), findsOneWidget);
+      // SliverAppBar.medium keeps a collapsed and an expanded title widget.
+      expect(find.text('Nota'), findsWidgets);
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
@@ -367,12 +369,12 @@ void main() {
       await tester.pumpWidget(buildView(bloc: bloc));
       await tester.pumpAndSettle();
 
-      expect(find.byType(GridView), findsOneWidget);
+      expect(find.byType(SliverMasonryGrid), findsOneWidget);
 
       prefsController.add(const Preferences(noteViewMode: NoteViewMode.list));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(SliverList), findsOneWidget);
     });
   });
 }

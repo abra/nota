@@ -8,5 +8,33 @@
   "noteLoadFailed": "加载笔记失败",
   "noteSaveFailed": "保存笔记失败",
   "noteColor": "笔记颜色",
-  "imageInsertFailed": "插入图片失败"
+  "imageInsertFailed": "插入图片失败",
+  "deleteNote": "删除笔记",
+  "@deleteNote": {},
+  "pinNote": "置顶",
+  "@pinNote": {},
+  "unpinNote": "取消置顶",
+  "@unpinNote": {},
+  "editedAt": "编辑于 {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "返回",
+  "@back": {},
+  "moreActions": "更多",
+  "@moreActions": {},
+  "formatting": "格式",
+  "@formatting": {},
+  "insertImage": "插入图片",
+  "@insertImage": {},
+  "undo": "撤销",
+  "@undo": {},
+  "redo": "重做",
+  "@redo": {},
+  "newLine": "换行",
+  "@newLine": {}
 }

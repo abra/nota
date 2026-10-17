@@ -11,5 +11,31 @@
   "language": "Language",
   "@language": {},
   "searchHint": "Search",
-  "@searchHint": {}
+  "@searchHint": {},
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "System",
+  "@themeSystem": {},
+  "themeLight": "Light",
+  "@themeLight": {},
+  "themeDark": "Dark",
+  "@themeDark": {},
+  "viewGrid": "Grid",
+  "@viewGrid": {},
+  "viewList": "List",
+  "@viewList": {},
+  "linesCount": "{count} lines",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

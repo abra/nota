@@ -34,7 +34,10 @@ void main() {
     late _MockPreferencesService mockPrefs;
     late StreamController<Preferences> prefsController;
 
+    late FakeImageFiles imageFiles;
+
     setUp(() {
+      imageFiles = FakeImageFiles();
       repo = FakeNoteRepository();
       mockPrefs = _MockPreferencesService();
       prefsController = StreamController<Preferences>.broadcast();
@@ -121,6 +124,7 @@ void main() {
           NoteListState(
             status: NoteListStatus.success,
             notes: [_note('1'), _note('3')],
+            lastDeleted: [_note('2')],
           ),
         ],
       );
@@ -502,6 +506,110 @@ void main() {
         );
         expect(state.filteredNotes, isEmpty);
       });
+    });
+
+    group('NoteListUndoDeleteRequested', () {
+      final notes = [_note('1'), _note('2'), _note('3')];
+
+      blocTest<NoteListBloc, NoteListState>(
+        'restores last deleted notes in sorted position and clears lastDeleted',
+        build: () => NoteListBloc(
+          noteRepository: FakeNoteRepository(notes: [_note('1'), _note('3')]),
+          preferencesService: mockPrefs,
+          imageFiles: FakeImageFiles(),
+        ),
+        seed: () => NoteListState(
+          status: NoteListStatus.success,
+          notes: [_note('1'), _note('3')],
+          lastDeleted: [_note('2', updatedAt: DateTime(2025))],
+        ),
+        act: (bloc) => bloc.add(NoteListUndoDeleteRequested()),
+        verify: (bloc) {
+          expect(bloc.state.notes.map((n) => n.id), ['2', '1', '3']);
+          expect(bloc.state.lastDeleted, isNull);
+          expect(bloc.state.operationFailure, isNull);
+        },
+      );
+
+      blocTest<NoteListBloc, NoteListState>(
+        'does nothing when there is nothing to restore',
+        build: () => NoteListBloc(
+          noteRepository: FakeNoteRepository(notes: List.of(notes)),
+          preferencesService: mockPrefs,
+          imageFiles: FakeImageFiles(),
+        ),
+        seed: () => NoteListState(
+          status: NoteListStatus.success,
+          notes: List.of(notes),
+        ),
+        act: (bloc) => bloc.add(NoteListUndoDeleteRequested()),
+        expect: () => <NoteListState>[],
+      );
+
+      blocTest<NoteListBloc, NoteListState>(
+        'emits restore failure when repository throws',
+        build: () => NoteListBloc(
+          noteRepository: FakeNoteRepository(notes: [])..shouldThrow = true,
+          preferencesService: mockPrefs,
+          imageFiles: FakeImageFiles(),
+        ),
+        seed: () => NoteListState(
+          status: NoteListStatus.success,
+          lastDeleted: [_note('2')],
+        ),
+        act: (bloc) => bloc.add(NoteListUndoDeleteRequested()),
+        verify: (bloc) {
+          expect(
+            bloc.state.operationFailure?.operation,
+            NoteListFailedOperation.restore,
+          );
+          expect(bloc.state.lastDeleted, isNotNull);
+        },
+      );
+    });
+
+    group('orphan image sweep', () {
+      blocTest<NoteListBloc, NoteListState>(
+        'passes every referenced image path to deleteUnreferenced on start',
+        build: () => NoteListBloc(
+          noteRepository: FakeNoteRepository(
+            notes: [
+              _note(
+                '1',
+                content:
+                    '{"ops":[{"insert":{"image":"/img/a.jpg"}},{"insert":"\\n"}]}',
+              ),
+              _note(
+                '2',
+                content:
+                    '{"ops":[{"insert":{"image":"/img/b.jpg"}},{"insert":"\\n"}]}',
+              ),
+            ],
+          ),
+          preferencesService: mockPrefs,
+          imageFiles: imageFiles,
+        ),
+        act: (bloc) => bloc.add(NoteListStarted()),
+        wait: const Duration(milliseconds: 10),
+        verify: (_) {
+          expect(imageFiles.lastReferencedPaths, {'/img/a.jpg', '/img/b.jpg'});
+        },
+      );
+
+      blocTest<NoteListBloc, NoteListState>(
+        'load still succeeds when the sweep throws',
+        build: () => NoteListBloc(
+          noteRepository: FakeNoteRepository(notes: [_note('1')]),
+          preferencesService: mockPrefs,
+          imageFiles: FakeImageFiles()..shouldThrow = true,
+        ),
+        act: (bloc) => bloc.add(NoteListStarted()),
+        wait: const Duration(milliseconds: 10),
+        verify: (bloc) {
+          expect(bloc.state.status, NoteListStatus.success);
+          expect(bloc.state.notes, hasLength(1));
+        },
+      );
     });
 
     group('image reference safety', () {

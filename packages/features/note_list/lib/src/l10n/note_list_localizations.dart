@@ -164,6 +164,84 @@ abstract class NoteListLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// No description provided for @pinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get pinned;
+
+  /// No description provided for @others.
+  ///
+  /// In en, this message translates to:
+  /// **'Others'**
+  String get others;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get noResults;
+
+  /// No description provided for @noResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get noResultsHint;
+
+  /// No description provided for @emptyStateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to create your first note'**
+  String get emptyStateHint;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @addNote.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get addNote;
+
+  /// No description provided for @menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menu;
+
+  /// No description provided for @pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get pin;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @noteRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore note'**
+  String get noteRestoreFailed;
 }
 
 class _NoteListLocalizationsDelegate

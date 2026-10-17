@@ -5,12 +5,14 @@ import 'dart:io';
 import 'package:component_library/component_library.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:image_files/image_files.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:note_repository/note_repository.dart';
 import 'package:shared/shared.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:smart_keyboard_insets/smart_keyboard_insets.dart';
 import 'package:toast_service/toast_service.dart';
 
@@ -19,6 +21,18 @@ import 'note_details_bloc.dart';
 import 'quill_content.dart';
 
 part 'note_color_picker.dart';
+
+// ─── Layout constants ─────────────────────────────────────────────────────────
+
+// The toolbar shares the FloatingBar grid with the note list's bottom bar so
+// both screens feel like one app.
+const double _kBarMargin = FloatingBar.margin;
+
+// Secondary panel (formatting or colours) matches the primary toolbar height.
+const double _kSecondaryPanelHeight = FloatingBar.height;
+
+// Space reserved under the editor for the primary toolbar.
+const double _kToolbarClearance = FloatingBar.clearance;
 
 // Converts KeyboardMetrics into a logical-pixel inset for positioning UI above
 // the keyboard. On Android the plugin measures from the physical screen bottom
@@ -32,6 +46,8 @@ double _keyboardInsetFor(KeyboardMetrics metrics) {
 }
 
 enum _SecondaryPanelMode { formatting, colors }
+
+enum _MenuAction { delete }
 
 class NoteDetailsScreen extends StatelessWidget {
   const NoteDetailsScreen({
@@ -97,12 +113,12 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     _quillScrollController = ScrollController();
     _toolbarAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 220),
     );
     _toolbarAnimation = CurvedAnimation(
       parent: _toolbarAnimController,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     );
     _subscribeToChanges();
   }
@@ -142,6 +158,15 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     final bloc = context.read<NoteDetailsBloc>();
     final state = bloc.state;
 
+    // Ignore repeated back presses while a save or delete is in flight.
+    if (state.isSaveInProgress) return;
+
+    // The note never loaded (missing or storage error): nothing to save.
+    if (!state.isNew && state.note == null) {
+      Navigator.of(context).pop<Note?>(null);
+      return;
+    }
+
     if (state.isContentEmpty && state.title.trim().isEmpty) {
       if (!state.isNew) {
         bloc.add(NoteDetailsDeleteRequested());
@@ -165,6 +190,20 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
       }
     }
     bloc.add(NoteDetailsSaved());
+  }
+
+  void _onMenuAction(BuildContext context, _MenuAction action) {
+    switch (action) {
+      case _MenuAction.delete:
+        HapticFeedback.mediumImpact();
+        final bloc = context.read<NoteDetailsBloc>();
+        if (bloc.state.isNew) {
+          // Nothing persisted yet: discard the draft.
+          Navigator.of(context).pop<Note?>(null);
+        } else {
+          bloc.add(NoteDetailsDeleteRequested());
+        }
+    }
   }
 
   DefaultStyles _buildEditorStyles(BuildContext context) {
@@ -200,12 +239,12 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
       lists: DefaultListBlockStyle(
         body,
         noH,
-        VerticalSpacing.zero,
+        const VerticalSpacing(2, 0),
         VerticalSpacing.zero,
         null,
         null,
       ),
-      bold: bodyLarge.copyWith(fontWeight: FontWeight.bold),
+      bold: bodyLarge.copyWith(fontWeight: FontWeight.w600),
       italic: bodyLarge.copyWith(fontStyle: FontStyle.italic),
       underline: bodyLarge.copyWith(decoration: TextDecoration.underline),
       strikeThrough: bodyLarge.copyWith(
@@ -215,6 +254,7 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
   }
 
   void _togglePanel(_SecondaryPanelMode mode) {
+    HapticFeedback.selectionClick();
     setState(() {
       if (_isPanelOpen && _activePanel == mode) {
         // Tapping the active button closes the panel.
@@ -231,18 +271,46 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     });
   }
 
+  Future<void> _pickImage(BuildContext context) async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null || !context.mounted) return;
+    context.read<NoteDetailsBloc>().add(NoteDetailsImageInserted(picked.path));
+  }
+
+  void _insertNewLine() {
+    final offset = _quillController.selection.extentOffset;
+    _quillController.replaceText(
+      offset,
+      0,
+      '\n',
+      TextSelection.collapsed(offset: offset + 1),
+    );
+  }
+
+  String _formatEdited(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    try {
+      return DateFormat.yMMMd(locale).add_Hm().format(date);
+    } catch (_) {
+      return DateFormat.yMMMd('en').add_Hm().format(date);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NoteDetailsBloc, NoteDetailsState>(
       listenWhen: (prev, curr) =>
           prev.status != curr.status ||
           prev.insertedImagePath != curr.insertedImagePath ||
-          prev.imageInsertError != curr.imageInsertError,
+          prev.imageInsertError != curr.imageInsertError ||
+          prev.loadError != curr.loadError ||
+          prev.saveError != curr.saveError,
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||
           prev.color != curr.color ||
           prev.isPinned != curr.isPinned ||
-          prev.isNew != curr.isNew,
+          prev.isNew != curr.isNew ||
+          prev.note != curr.note,
       listener: (context, state) {
         final l10n = NoteDetailsLocalizations.of(context)!;
 
@@ -294,7 +362,10 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
           );
         }
 
-        if (state.status == NoteDetailsStatus.failure) {
+        // Only react to a failure that carries a fresh error; the status stays
+        // `failure` on later emits, but the error fields are one-shot.
+        if (state.status == NoteDetailsStatus.failure &&
+            (state.loadError != null || state.saveError != null)) {
           final isNotFound = state.loadError is NoteNotFoundException;
           showToast(
             context,
@@ -309,195 +380,222 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
       },
       builder: (context, state) {
         final l10n = NoteDetailsLocalizations.of(context)!;
-        final brightness = Theme.of(context).brightness;
+        final theme = Theme.of(context);
+        final brightness = theme.brightness;
         final hasColor = state.color != NoteColor.none;
-        final appBarColor = hasColor
+        final pageColor = hasColor
             ? state.color.forBrightness(brightness)
-            : null;
-        final appBarForeground = hasColor
-            ? state.color.onColor
-            : Theme.of(context).colorScheme.onSurface;
-        final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+            : theme.scaffoldBackgroundColor;
+        final foreground = hasColor
+            ? state.color.onColorFor(brightness)
+            : theme.colorScheme.onSurface;
+        final editedAt = state.note?.updatedAt;
 
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _saveAndPop(context);
           },
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: _NoteDetailsAppBar(
-              color: appBarColor,
-              foregroundColor: appBarForeground,
-              isNew: state.isNew,
-              isPinned: state.isPinned,
-              onBack: () => _saveAndPop(context),
-            ),
-            body: SafeArea(
-              top: false,
-              child: StreamBuilder<KeyboardMetrics>(
-                stream: SmartKeyboardInsets.instance.metricsStream,
-                initialData: KeyboardMetrics.hidden,
-                builder: (context, snapshot) {
-                  final keyboardInset = _keyboardInsetFor(
-                    snapshot.data ?? KeyboardMetrics.hidden,
-                  );
-                  return Stack(
-                    children: [
-                      CustomScrollView(
-                        slivers: [
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(
-                              Spacing.mediumLarge,
-                              Spacing.medium,
-                              Spacing.mediumLarge,
-                              0,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: TextField(
-                                controller: _titleController,
-                                onChanged: (v) => context
-                                    .read<NoteDetailsBloc>()
-                                    .add(NoteDetailsTitleChanged(v)),
-                                style:
-                                    Theme.of(
-                                      context,
-                                    ).textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
+          // The page tint lives behind a transparent Scaffold so colour changes
+          // can animate; the app bar is transparent for the same reason.
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOut,
+            color: pageColor,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              resizeToAvoidBottomInset: false,
+              appBar: _NoteDetailsAppBar(
+                foregroundColor: foreground,
+                isPinned: state.isPinned,
+                onBack: () => _saveAndPop(context),
+                onPinToggled: () {
+                  HapticFeedback.selectionClick();
+                  context.read<NoteDetailsBloc>().add(NoteDetailsPinToggled());
+                },
+                onMenuAction: (action) => _onMenuAction(context, action),
+              ),
+              body: SafeArea(
+                top: false,
+                child: StreamBuilder<KeyboardMetrics>(
+                  stream: SmartKeyboardInsets.instance.metricsStream,
+                  initialData: KeyboardMetrics.hidden,
+                  builder: (context, snapshot) {
+                    final keyboardInset = _keyboardInsetFor(
+                      snapshot.data ?? KeyboardMetrics.hidden,
+                    );
+                    return Stack(
+                      children: [
+                        CustomScrollView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.fromLTRB(
+                                Spacing.large,
+                                Spacing.small,
+                                Spacing.large,
+                                0,
+                              ),
+                              sliver: SliverToBoxAdapter(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextField(
+                                      controller: _titleController,
+                                      onChanged: (v) => context
+                                          .read<NoteDetailsBloc>()
+                                          .add(NoteDetailsTitleChanged(v)),
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(color: foreground),
+                                      cursorColor: theme.colorScheme.primary,
+                                      decoration: InputDecoration(
+                                        hintText: l10n.titleHint,
+                                        hintStyle: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              color: foreground.withValues(
+                                                alpha: 0.38,
+                                              ),
+                                            ),
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: Spacing.xSmall,
+                                            ),
+                                      ),
+                                      maxLines: null,
+                                      keyboardType: TextInputType.text,
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      textInputAction: TextInputAction.next,
                                     ),
-                                decoration: InputDecoration(
-                                  hintText: l10n.titleHint,
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: Spacing.xSmall,
+                                    if (editedAt != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: Spacing.xSmall,
+                                          bottom: Spacing.small,
+                                        ),
+                                        child: Text(
+                                          l10n.editedAt(
+                                            _formatEdited(context, editedAt),
+                                          ),
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w400,
+                                                color: foreground.withValues(
+                                                  alpha: 0.55,
+                                                ),
+                                              ),
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox(height: Spacing.small),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SliverFillRemaining(
+                              hasScrollBody: false,
+                              // Bottom padding grows as the secondary panel
+                              // slides in, keeping the last line of text above
+                              // the toolbar stack.
+                              child: AnimatedBuilder(
+                                animation: _toolbarAnimation,
+                                builder: (context, child) => Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    Spacing.large,
+                                    0,
+                                    Spacing.large,
+                                    _kToolbarClearance +
+                                        _toolbarAnimation.value *
+                                            (_kSecondaryPanelHeight +
+                                                Spacing.small) +
+                                        keyboardInset,
+                                  ),
+                                  child: child,
+                                ),
+                                child: QuillEditor(
+                                  controller: _quillController,
+                                  focusNode: _quillFocusNode,
+                                  scrollController: _quillScrollController,
+                                  config: QuillEditorConfig(
+                                    placeholder: l10n.contentHint,
+                                    scrollable: false,
+                                    expands: false,
+                                    padding: EdgeInsets.zero,
+                                    autoFocus: false,
+                                    customStyles: _buildEditorStyles(context),
+                                    embedBuilders: const [
+                                      _LocalImageEmbedBuilder(),
+                                    ],
                                   ),
                                 ),
-                                maxLines: null,
-                                keyboardType: TextInputType.text,
-                                textInputAction: TextInputAction.next,
                               ),
                             ),
-                          ),
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            // Bottom padding grows as the secondary panel slides
-                            // in, keeping the last line of text above the
-                            // toolbar stack.
+                          ],
+                        ),
+                        // Gradient fade behind the toolbar so content scrolls
+                        // under smoothly.
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: IgnorePointer(
                             child: AnimatedBuilder(
                               animation: _toolbarAnimation,
-                              builder: (context, child) => Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                  Spacing.mediumLarge,
-                                  Spacing.small,
-                                  Spacing.mediumLarge,
-                                  _toolbarClearance +
-                                      _toolbarAnimation.value *
-                                          (_secondaryPanelHeight +
-                                              Spacing.small) +
-                                      keyboardInset,
-                                ),
-                                child: child,
-                              ),
-                              child: QuillEditor(
-                                controller: _quillController,
-                                focusNode: _quillFocusNode,
-                                scrollController: _quillScrollController,
-                                config: QuillEditorConfig(
-                                  placeholder: l10n.contentHint,
-                                  scrollable: false,
-                                  expands: false,
-                                  padding: EdgeInsets.zero,
-                                  autoFocus: false,
-                                  customStyles: _buildEditorStyles(context),
-                                  embedBuilders: const [
-                                    _LocalImageEmbedBuilder(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Gradient fade behind the toolbar so content scrolls
-                      // under smoothly.
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: IgnorePointer(
-                          child: AnimatedBuilder(
-                            animation: _toolbarAnimation,
-                            builder: (context, _) => Container(
-                              height:
-                                  _toolbarClearance +
-                                  _toolbarAnimation.value *
-                                      (_secondaryPanelHeight + Spacing.small) +
-                                  keyboardInset,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    scaffoldBg.withValues(alpha: 0),
-                                    scaffoldBg,
-                                  ],
+                              builder: (context, _) => Container(
+                                height:
+                                    _kToolbarClearance +
+                                    _toolbarAnimation.value *
+                                        (_kSecondaryPanelHeight +
+                                            Spacing.small) +
+                                    keyboardInset,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      pageColor.withValues(alpha: 0),
+                                      pageColor,
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        left: Spacing.mediumLarge,
-                        right: Spacing.mediumLarge,
-                        bottom: Spacing.mediumLarge + keyboardInset,
-                        child: _NoteToolbar(
-                          // Key forces a full rebuild when the controller is
-                          // replaced (happens once, on first note load).
-                          key: ObjectKey(_quillController),
-                          controller: _quillController,
-                          animation: _toolbarAnimation,
-                          activePanel: _activePanel,
-                          isSecondaryOpen: _isPanelOpen,
-                          isPinned: state.isPinned,
-                          noteColor: state.color,
-                          onToggleFormatting: () =>
-                              _togglePanel(_SecondaryPanelMode.formatting),
-                          onToggleColors: () =>
-                              _togglePanel(_SecondaryPanelMode.colors),
-                          onImagePressed: () async {
-                            final picked = await ImagePicker().pickImage(
-                              source: ImageSource.gallery,
-                            );
-                            if (picked == null || !context.mounted) return;
-                            context.read<NoteDetailsBloc>().add(
-                              NoteDetailsImageInserted(picked.path),
-                            );
-                          },
-                          onPinToggled: () =>
-                              context.read<NoteDetailsBloc>().add(
-                                NoteDetailsPinToggled(),
-                              ),
-                          onColorSelected: (color) =>
+                        Positioned(
+                          left: _kBarMargin,
+                          right: _kBarMargin,
+                          bottom: _kBarMargin + keyboardInset,
+                          child: _NoteToolbar(
+                            // Key forces a full rebuild when the controller is
+                            // replaced (happens once, on first note load).
+                            key: ObjectKey(_quillController),
+                            controller: _quillController,
+                            animation: _toolbarAnimation,
+                            activePanel: _activePanel,
+                            isSecondaryOpen: _isPanelOpen,
+                            noteColor: state.color,
+                            onToggleFormatting: () =>
+                                _togglePanel(_SecondaryPanelMode.formatting),
+                            onToggleColors: () =>
+                                _togglePanel(_SecondaryPanelMode.colors),
+                            onImagePressed: () => _pickImage(context),
+                            onColorSelected: (color) {
+                              HapticFeedback.selectionClick();
                               context.read<NoteDetailsBloc>().add(
                                 NoteDetailsColorChanged(color),
-                              ),
-                          onNewLine: () {
-                            final offset =
-                                _quillController.selection.extentOffset;
-                            _quillController.replaceText(
-                              offset,
-                              0,
-                              '\n',
-                              TextSelection.collapsed(offset: offset + 1),
-                            );
-                          },
+                              );
+                            },
+                            onNewLine: _insertNewLine,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -509,22 +607,22 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
 
 // ─── App bar ──────────────────────────────────────────────────────────────────
 
-// Tinted when the note has a color; otherwise uses the default surface color.
+// Transparent so the animated page tint behind the Scaffold shows through.
 class _NoteDetailsAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _NoteDetailsAppBar({
-    required this.color,
     required this.foregroundColor,
-    required this.isNew,
     required this.isPinned,
     required this.onBack,
+    required this.onPinToggled,
+    required this.onMenuAction,
   });
 
-  final Color? color;
   final Color foregroundColor;
-  final bool isNew;
   final bool isPinned;
   final VoidCallback onBack;
+  final VoidCallback onPinToggled;
+  final ValueChanged<_MenuAction> onMenuAction;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -532,60 +630,63 @@ class _NoteDetailsAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final l10n = NoteDetailsLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return AppBar(
-      backgroundColor: color,
+      backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      scrolledUnderElevation: 8,
-      shadowColor: Colors.black.withValues(alpha: 0.3),
+      scrolledUnderElevation: 0,
+      // A transparent bar cannot infer status-bar icon colour from its
+      // background, so follow the theme brightness explicitly.
+      systemOverlayStyle: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       leading: IconButton(
+        tooltip: l10n.back,
         icon: const Icon(Icons.arrow_back),
         onPressed: onBack,
       ),
-      centerTitle: true,
-      title: Text(
-        isNew ? l10n.newNote : l10n.editNote,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(color: foregroundColor),
-      ),
       actions: [
-        if (isPinned)
-          Padding(
-            padding: const EdgeInsets.only(right: Spacing.mediumLarge),
-            child: Icon(
-              Icons.push_pin,
-              color: foregroundColor.withValues(alpha: 0.6),
-            ),
+        IconButton(
+          tooltip: isPinned ? l10n.unpinNote : l10n.pinNote,
+          icon: Icon(
+            isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+            color: isPinned ? colorScheme.primary : foregroundColor,
           ),
+          onPressed: onPinToggled,
+        ),
+        PopupMenuButton<_MenuAction>(
+          tooltip: l10n.moreActions,
+          icon: Icon(Icons.more_horiz, color: foregroundColor),
+          position: PopupMenuPosition.under,
+          onSelected: onMenuAction,
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: _MenuAction.delete,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.delete_outline,
+                    size: IconSize.medium,
+                    color: colorScheme.error,
+                  ),
+                  const SizedBox(width: Spacing.medium),
+                  Text(
+                    l10n.deleteNote,
+                    style: TextStyle(color: colorScheme.error),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: Spacing.xSmall),
       ],
     );
   }
 }
-
-// ─── Toolbar constants ────────────────────────────────────────────────────────
-
-const _toolbarRadius = BorderRadius.all(Radius.circular(AppRadius.large));
-
-const _toolbarShadows = [
-  BoxShadow(color: Color(0x26000000), blurRadius: 8),
-  BoxShadow(color: Color(0x0D000000), blurRadius: 2),
-];
-
-const _toolbarButtonStyle = ButtonStyle(
-  fixedSize: WidgetStatePropertyAll(Size(32, 32)),
-  padding: WidgetStatePropertyAll(EdgeInsets.zero),
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-);
-
-// Space reserved at the bottom of the scroll area for the primary toolbar
-// (56 px panel + 8 px bottom margin = 64 px, with a small built-in buffer).
-const double _toolbarClearance = 64;
-
-// Secondary panel height: 32 px buttons + 12 px vertical padding × 2 = 56 px.
-// Matches the primary toolbar height so both panels look uniform.
-const double _secondaryPanelHeight = 56;
 
 // ─── Toolbar ──────────────────────────────────────────────────────────────────
 
@@ -596,12 +697,10 @@ class _NoteToolbar extends StatelessWidget {
     required this.animation,
     required this.activePanel,
     required this.isSecondaryOpen,
-    required this.isPinned,
     required this.noteColor,
     required this.onToggleFormatting,
     required this.onToggleColors,
     required this.onImagePressed,
-    required this.onPinToggled,
     required this.onColorSelected,
     required this.onNewLine,
   });
@@ -610,18 +709,16 @@ class _NoteToolbar extends StatelessWidget {
   final Animation<double> animation;
   final _SecondaryPanelMode activePanel;
   final bool isSecondaryOpen;
-  final bool isPinned;
   final NoteColor noteColor;
   final VoidCallback onToggleFormatting;
   final VoidCallback onToggleColors;
   final VoidCallback onImagePressed;
-  final VoidCallback onPinToggled;
   final ValueChanged<NoteColor> onColorSelected;
   final VoidCallback onNewLine;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = NoteDetailsLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -647,96 +744,57 @@ class _NoteToolbar extends StatelessWidget {
           ),
         ),
         // Primary toolbar.
-        _PanelBox(
-          child: Padding(
-            padding: const EdgeInsets.all(Spacing.small),
-            child: Row(
-              children: [
-                // Undo / redo rebuild on every controller history change.
-                ListenableBuilder(
-                  listenable: controller,
-                  builder: (context, _) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.undo,
-                          color: controller.hasUndo
-                              ? colorScheme.onSurfaceVariant
-                              : colorScheme.onSurfaceVariant.withValues(
-                                  alpha: 0.3,
-                                ),
-                        ),
-                        style: _toolbarButtonStyle,
-                        onPressed: controller.hasUndo ? controller.undo : null,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.redo,
-                          color: controller.hasRedo
-                              ? colorScheme.onSurfaceVariant
-                              : colorScheme.onSurfaceVariant.withValues(
-                                  alpha: 0.3,
-                                ),
-                        ),
-                        style: _toolbarButtonStyle,
-                        onPressed: controller.hasRedo ? controller.redo : null,
-                      ),
-                    ],
-                  ),
+        FloatingPanel(
+          child: Row(
+            children: [
+              // Undo / redo rebuild on every controller history change.
+              ListenableBuilder(
+                listenable: controller,
+                builder: (context, _) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FloatingBarButton(
+                      tooltip: l10n.undo,
+                      icon: Icons.undo_rounded,
+                      onPressed: controller.hasUndo ? controller.undo : null,
+                    ),
+                    FloatingBarButton(
+                      tooltip: l10n.redo,
+                      icon: Icons.redo_rounded,
+                      onPressed: controller.hasRedo ? controller.redo : null,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: Spacing.xSmall),
-                IconButton(
-                  icon: Icon(
-                    Icons.text_format,
-                    color:
-                        isSecondaryOpen &&
-                            activePanel == _SecondaryPanelMode.formatting
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  style: _toolbarButtonStyle,
-                  onPressed: onToggleFormatting,
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.image_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  style: _toolbarButtonStyle,
-                  onPressed: onImagePressed,
-                ),
-                IconButton(
-                  style: _toolbarButtonStyle,
-                  icon: _ColorCircleIcon(
-                    noteColor: noteColor,
-                    isActive:
-                        isSecondaryOpen &&
-                        activePanel == _SecondaryPanelMode.colors,
-                  ),
-                  onPressed: onToggleColors,
-                ),
-                IconButton(
-                  icon: Icon(
-                    isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                    color: isPinned
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  style: _toolbarButtonStyle,
-                  onPressed: onPinToggled,
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    Icons.keyboard_return,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  style: _toolbarButtonStyle,
-                  onPressed: onNewLine,
-                ),
-              ],
-            ),
+              ),
+              const FloatingBarDivider(),
+              FloatingBarButton(
+                tooltip: l10n.formatting,
+                icon: Icons.text_format_rounded,
+                active:
+                    isSecondaryOpen &&
+                    activePanel == _SecondaryPanelMode.formatting,
+                onPressed: onToggleFormatting,
+              ),
+              FloatingBarButton(
+                tooltip: l10n.insertImage,
+                icon: Icons.image_outlined,
+                onPressed: onImagePressed,
+              ),
+              FloatingBarButton(
+                tooltip: l10n.noteColor,
+                active:
+                    isSecondaryOpen &&
+                    activePanel == _SecondaryPanelMode.colors,
+                onPressed: onToggleColors,
+                child: _ColorCircleIcon(noteColor: noteColor),
+              ),
+              const Spacer(),
+              FloatingBarButton(
+                tooltip: l10n.newLine,
+                icon: Icons.keyboard_return_rounded,
+                onPressed: onNewLine,
+              ),
+            ],
           ),
         ),
       ],
@@ -754,73 +812,71 @@ class _FormattingPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return _PanelBox(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.small,
-          vertical: Spacing.medium,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 32,
-                child: QuillSimpleToolbar(
-                  controller: controller,
-                  config: QuillSimpleToolbarConfig(
-                    multiRowsDisplay: false,
-                    toolbarSize: 32,
-                    toolbarSectionSpacing: 0,
-                    color: Colors.transparent,
-                    buttonOptions: QuillSimpleToolbarButtonOptions(
-                      base: QuillToolbarBaseButtonOptions(
-                        iconTheme: QuillIconTheme(
-                          iconButtonUnselectedData: IconButtonData(
-                            style: _toolbarButtonStyle,
-                            color: colorScheme.onSurface,
-                          ),
-                          iconButtonSelectedData: IconButtonData(
-                            style: _toolbarButtonStyle.copyWith(
-                              backgroundColor: const WidgetStatePropertyAll(
-                                Colors.transparent,
-                              ),
-                            ),
-                            color: colorScheme.primary,
-                          ),
-                        ),
+    return FloatingPanel(
+      child: SizedBox(
+        height: FloatingBar.controlSize,
+        child: QuillSimpleToolbar(
+          controller: controller,
+          config: QuillSimpleToolbarConfig(
+            multiRowsDisplay: false,
+            toolbarSize: FloatingBar.controlSize,
+            toolbarSectionSpacing: 0,
+            toolbarIconAlignment: WrapAlignment.spaceBetween,
+            color: Colors.transparent,
+            buttonOptions: QuillSimpleToolbarButtonOptions(
+              base: QuillToolbarBaseButtonOptions(
+                iconSize: IconSize.medium,
+                iconButtonFactor: FloatingBar.controlSize / IconSize.medium,
+                iconTheme: QuillIconTheme(
+                  iconButtonUnselectedData: IconButtonData(
+                    style: FloatingBar.buttonStyle.copyWith(
+                      iconSize: const WidgetStatePropertyAll(IconSize.medium),
+                      foregroundColor: WidgetStatePropertyAll(
+                        colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    // Only the buttons we need; QuillSimpleToolbar shows
-                    // everything by default so the rest must be hidden explicitly.
-                    showBoldButton: true,
-                    showItalicButton: true,
-                    showUnderLineButton: true,
-                    showListNumbers: true,
-                    showListBullets: true,
-                    showListCheck: true,
-                    showClearFormat: true,
-                    showUndo: false,
-                    showRedo: false,
-                    showDividers: false,
-                    showFontFamily: false,
-                    showFontSize: false,
-                    showStrikeThrough: true,
-                    showInlineCode: false,
-                    showHeaderStyle: false,
-                    showCodeBlock: false,
-                    showQuote: false,
-                    showIndent: false,
-                    showLink: false,
-                    showSearchButton: false,
-                    showColorButton: false,
-                    showBackgroundColorButton: false,
-                    showSuperscript: false,
-                    showSubscript: false,
+                  ),
+                  iconButtonSelectedData: IconButtonData(
+                    style: FloatingBar.buttonStyle.copyWith(
+                      iconSize: const WidgetStatePropertyAll(IconSize.medium),
+                      backgroundColor: WidgetStatePropertyAll(
+                        colorScheme.primaryContainer,
+                      ),
+                      foregroundColor: WidgetStatePropertyAll(
+                        colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
+            // Only the buttons we need; QuillSimpleToolbar shows
+            // everything by default so the rest must be hidden explicitly.
+            showBoldButton: true,
+            showItalicButton: true,
+            showUnderLineButton: true,
+            showStrikeThrough: true,
+            showListNumbers: true,
+            showListBullets: true,
+            showListCheck: true,
+            showClearFormat: true,
+            showUndo: false,
+            showRedo: false,
+            showDividers: false,
+            showFontFamily: false,
+            showFontSize: false,
+            showInlineCode: false,
+            showHeaderStyle: false,
+            showCodeBlock: false,
+            showQuote: false,
+            showIndent: false,
+            showLink: false,
+            showSearchButton: false,
+            showColorButton: false,
+            showBackgroundColorButton: false,
+            showSuperscript: false,
+            showSubscript: false,
+          ),
         ),
       ),
     );
@@ -829,73 +885,32 @@ class _FormattingPanel extends StatelessWidget {
 
 // ─── Shared panel widgets ─────────────────────────────────────────────────────
 
-// Shared rounded + shadow decoration used by every toolbar panel.
-// The outer DecoratedBox must have a transparent background so its box shadows
-// render outside the ClipRRect. The actual surface color sits inside the clip.
-class _PanelBox extends StatelessWidget {
-  const _PanelBox({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Color(0x00000000),
-        borderRadius: _toolbarRadius,
-        boxShadow: _toolbarShadows,
-      ),
-      child: ClipRRect(
-        borderRadius: _toolbarRadius,
-        child: ColoredBox(
-          color: Theme.of(context).colorScheme.surface,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// Color swatch circle used as the icon for the color-picker toolbar button.
-// Shows the current note color; falls back to a palette icon for NoteColor.none.
+// Colour swatch used as the icon for the colour-picker toolbar button.
+// Shows the current note colour; a palette glyph stands in for NoteColor.none.
 class _ColorCircleIcon extends StatelessWidget {
-  const _ColorCircleIcon({
-    required this.noteColor,
-    required this.isActive,
-  });
+  const _ColorCircleIcon({required this.noteColor});
 
   final NoteColor noteColor;
-  final bool isActive; // true when the color secondary panel is open
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final brightness = Theme.of(context).brightness;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isNone = noteColor == NoteColor.none;
+    if (isNone) {
+      return const Icon(Icons.palette_outlined);
+    }
     return Container(
       width: IconSize.medium,
       height: IconSize.medium,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isNone
-            ? colorScheme.surfaceContainerHighest
-            : noteColor.forBrightness(brightness),
-        border: isActive
-            ? Border.all(color: colorScheme.primary, width: 2.5)
-            : isNone
-            ? Border.all(
-                color: colorScheme.onSurface.withValues(alpha: 0.2),
-                width: 1.5,
-              )
-            : null,
+        color: noteColor.forBrightness(theme.brightness),
+        border: Border.all(
+          color: colorScheme.onSurface.withValues(alpha: 0.15),
+          width: 1,
+        ),
       ),
-      child: isNone
-          ? Icon(
-              Icons.palette_outlined,
-              size: IconSize.xSmall,
-              color: colorScheme.onSurfaceVariant,
-            )
-          : null,
     );
   }
 }
@@ -938,42 +953,48 @@ class _LocalImageEmbedBuilder extends EmbedBuilder {
   @override
   Widget build(BuildContext context, EmbedContext embedContext) {
     final path = embedContext.node.value.data as String;
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: Spacing.small,
-        horizontal: Spacing.xLarge,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: Spacing.small),
       child: Stack(
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.all(
-              Radius.circular(AppRadius.small),
+              Radius.circular(AppRadius.mediumLarge),
             ),
             child: Image.file(
               File(path),
               width: double.infinity,
               fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.broken_image_outlined,
-                size: IconSize.xLarge,
+              gaplessPlayback: true,
+              errorBuilder: (_, _, _) => Container(
+                height: 120,
+                color: colorScheme.surfaceContainerHigh,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  size: IconSize.xLarge,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
           Positioned(
-            top: Spacing.xSmall,
-            right: Spacing.xSmall,
-            child: GestureDetector(
-              onTap: () => _removeEmbed(embedContext.controller, path),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.55),
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(Spacing.xSmall),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: IconSize.xSmall,
+            top: Spacing.small,
+            right: Spacing.small,
+            child: Material(
+              color: Colors.black.withValues(alpha: 0.55),
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _removeEmbed(embedContext.controller, path),
+                child: const Padding(
+                  padding: EdgeInsets.all(Spacing.small - 2),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: IconSize.small,
+                  ),
                 ),
               ),
             ),

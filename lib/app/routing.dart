@@ -34,9 +34,11 @@ GoRouter buildRouter({required DependenciesContainer dependencies}) {
           onSettingsPressed: (ctx) => showModalBottomSheet<void>(
             context: ctx,
             isScrollControlled: true,
+            useSafeArea: true,
             builder: (_) => PreferencesMenu(
               service: dependencies.preferencesService,
               supportedLanguages: SupportedLocales.languages,
+              appVersion: dependencies.packageInfo.version,
             ),
           ),
         ),

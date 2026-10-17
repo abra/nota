@@ -17,5 +17,33 @@
   "noteColor": "Note color",
   "@noteColor": {},
   "imageInsertFailed": "Failed to insert image",
-  "@imageInsertFailed": {}
+  "@imageInsertFailed": {},
+  "deleteNote": "Delete note",
+  "@deleteNote": {},
+  "pinNote": "Pin",
+  "@pinNote": {},
+  "unpinNote": "Unpin",
+  "@unpinNote": {},
+  "editedAt": "Edited {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Back",
+  "@back": {},
+  "moreActions": "More",
+  "@moreActions": {},
+  "formatting": "Formatting",
+  "@formatting": {},
+  "insertImage": "Insert image",
+  "@insertImage": {},
+  "undo": "Undo",
+  "@undo": {},
+  "redo": "Redo",
+  "@redo": {},
+  "newLine": "New line",
+  "@newLine": {}
 }

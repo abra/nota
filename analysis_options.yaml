@@ -10,4 +10,7 @@ analyzer:
   exclude:
     - "**/*.*.dart"
     - "**/generated/**"
+    - build/**
+    - android/**
+    - ios/**
 

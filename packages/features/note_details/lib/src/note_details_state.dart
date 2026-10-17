@@ -39,11 +39,11 @@ class NoteDetailsState extends Equatable {
 
   final NoteColor color;
   final bool isPinned;
+
+  /// One-shot errors: set on the emit that reports them and dropped by the
+  /// next [copyWith], so listeners never see a stale error again.
   final Object? loadError;
   final Object? saveError;
-
-  /// Set to the caught exception when image copy fails in [NoteDetailsImageInserted].
-  /// Each new failure produces a distinct object so the listener always fires.
   final Object? imageInsertError;
 
   /// Permanent path of an image just saved by the BLoC, consumed once by the
@@ -53,6 +53,13 @@ class NoteDetailsState extends Equatable {
 
   /// Whether the current content is empty (Delta-aware).
   bool get isContentEmpty => DeltaUtils.isContentEmpty(content);
+
+  /// True while a save is in flight or has just completed; used to ignore
+  /// repeated back presses that would otherwise trigger a second save and pop.
+  bool get isSaveInProgress =>
+      status == NoteDetailsStatus.saving ||
+      status == NoteDetailsStatus.saved ||
+      status == NoteDetailsStatus.deleted;
 
   NoteDetailsState copyWith({
     NoteDetailsStatus? status,
@@ -78,7 +85,7 @@ class NoteDetailsState extends Equatable {
     isPinned: isPinned ?? this.isPinned,
     loadError: loadError,
     saveError: saveError,
-    imageInsertError: imageInsertError ?? this.imageInsertError,
+    imageInsertError: imageInsertError,
     insertedImagePath: identical(insertedImagePath, _kNoInsertedImage)
         ? this.insertedImagePath
         : insertedImagePath as String?,

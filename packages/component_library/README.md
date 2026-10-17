@@ -179,25 +179,51 @@ const CenteredCircularProgressIndicator()
 
 ### EmptyState
 
-Centered text message for empty lists.
+Centered placeholder with an icon badge, a message and an optional hint.
 
 ```dart
-EmptyState(message: l10n.emptyState)
+EmptyState(message: l10n.emptyState, hint: l10n.emptyStateHint)
+EmptyState(icon: Icons.search_off_rounded, message: l10n.noResults)
 ```
 
 ### ErrorState
-
-Centered error message with a retry button.
 
 ```dart
 ErrorState(
   message: l10n.loadFailed,
   retryLabel: l10n.retry,
-  onRetry: () => bloc.add(SomeEvent()),
+  onRetry: () => bloc.add(Started()),
 )
 ```
 
----
+### FloatingPanel
+
+Rounded floating surface with a soft layered shadow (hairline border in the
+dark theme). Every floating control in the app sits on one of these.
+
+```dart
+FloatingPanel(child: Row(children: [...]))
+```
+
+### FloatingBar, FloatingBarButton, FloatingBarDivider
+
+`FloatingBar` holds the shared metrics for floating bars: 40 px controls in an
+8 px panel padding (56 px tall), 24 px icons, 16 px screen margin and the scroll
+`clearance` to keep content visible above a bar. `FloatingBarButton` is the
+square icon button on that grid (`filled` for the primary action, `active` for
+an open toggle); `FloatingBarDivider` separates control groups.
+
+```dart
+FloatingPanel(
+  child: Row(
+    children: [
+      FloatingBarButton(icon: Icons.close, tooltip: l10n.cancel, onPressed: onCancel),
+      const FloatingBarDivider(),
+      FloatingBarButton(icon: Icons.add, tooltip: l10n.addNote, filled: true, onPressed: onAdd),
+    ],
+  ),
+)
+```
 
 ## Package structure
 
@@ -210,12 +236,13 @@ lib/
     empty_state.dart              ← EmptyState widget
     error_state.dart              ← ErrorState widget
     fade_gradient_overlay.dart    ← FadeGradientOverlay widget
+    floating_bar.dart             ← FloatingBar metrics, FloatingBarButton, FloatingBarDivider
+    floating_panel.dart           ← FloatingPanel widget
     nota_logo.dart                ← NotaLogo widget
     theme/
       app_radius.dart             ← AppRadius constants
       app_theme.dart              ← AppTheme (InheritedWidget)
       app_theme_data.dart         ← AppThemeData + LightAppThemeData + DarkAppThemeData
-      catppuccin.dart             ← Catppuccin Latte + Frappé color palettes
       font_size.dart              ← FontSize constants
       icon_size.dart              ← IconSize constants
       note_color_x.dart           ← NoteColor → Color extension

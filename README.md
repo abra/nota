@@ -12,23 +12,23 @@
     <td align="center"><b>Note list · Light</b></td>
     <td align="center"><b>Note list · Dark</b></td>
     <td align="center"><b>Rich text editor</b></td>
-    <td align="center"><b>Color picker</b></td>
+    <td align="center"><b>Formatting</b></td>
   </tr>
   <tr>
     <td><img src="screenshots/note_list_light.png" width="180"/></td>
     <td><img src="screenshots/note_list_dark.png" width="180"/></td>
     <td><img src="screenshots/editor_checklist.png" width="180"/></td>
-    <td><img src="screenshots/editor_colors.png" width="180"/></td>
+    <td><img src="screenshots/editor_formatting.png" width="180"/></td>
   </tr>
   <tr>
     <td align="center"><b>List view</b></td>
-    <td align="center"><b>Bullet lists</b></td>
+    <td align="center"><b>Color picker</b></td>
     <td align="center"><b>Preferences</b></td>
     <td align="center"><b>10 languages</b></td>
   </tr>
   <tr>
     <td><img src="screenshots/note_list_list_view.png" width="180"/></td>
-    <td><img src="screenshots/editor_bullets.png" width="180"/></td>
+    <td><img src="screenshots/editor_colors.png" width="180"/></td>
     <td><img src="screenshots/preferences.png" width="180"/></td>
     <td><img src="screenshots/language.png" width="180"/></td>
   </tr>
@@ -40,14 +40,15 @@
 - Rich text editor — bold, italic, underline, strikethrough
 - Ordered lists, bullet lists, checklists
 - Embed images from the gallery
-- 16 note colors
-- Pin important notes to the top
+- 16 note colors that tint the whole editor; muted variants in the dark theme
+- Pin important notes; pinned notes get their own section
 - Search across all notes
 
 **Note list**
-- Grid and list view modes
-- Adjustable list density (2 / 3 / 4 lines of preview)
-- Multi-select and batch delete
+- Masonry grid or list view, with adjustable list density (2 / 3 / 4 lines)
+- Relative timestamps on every card (time, yesterday, weekday, date)
+- Swipe to delete, multi-select with batch delete and pin, undo after delete
+- Collapsing large-title header, haptic feedback on selection
 
 **Customization**
 - Light, dark, and system theme (Nord palette)
@@ -78,6 +79,7 @@
 | [sqlite3_flutter_libs](https://pub.dev/packages/sqlite3_flutter_libs) | SQLite native binaries |
 | [shared_preferences](https://pub.dev/packages/shared_preferences) | Persistent key-value storage |
 | [toastification](https://pub.dev/packages/toastification) | In-app toast notifications |
+| [flutter_staggered_grid_view](https://pub.dev/packages/flutter_staggered_grid_view) | Masonry note grid |
 | [image_picker](https://pub.dev/packages/image_picker) | Pick images from gallery |
 | [smart_keyboard_insets](https://pub.dev/packages/smart_keyboard_insets) | Smooth keyboard inset handling |
 | [path_provider](https://pub.dev/packages/path_provider) | App document directory |
@@ -85,22 +87,42 @@
 | [equatable](https://pub.dev/packages/equatable) | Value equality |
 | [bloc_concurrency](https://pub.dev/packages/bloc_concurrency) | Event transformers |
 | [uuid](https://pub.dev/packages/uuid) | UUID generation |
-| [intl](https://pub.dev/packages/intl) | Localizations |
+| [intl](https://pub.dev/packages/intl) | Localizations and date formatting |
 
 ## Project structure
 
 ```
 lib/                        # App shell, routing, DI
 packages/
-  shared/                   # Domain models, repository interfaces
+  shared/                   # Domain models, Delta helpers
   note_repository/          # SQLite persistence (Drift)
   preferences_service/      # User preferences
   component_library/        # Theme, design tokens, shared widgets
   image_files/              # Note image file management
+  toast_service/            # Toasts with optional inline action
+  monitoring/               # Logger and error-reporting interfaces
   features/
     note_list/              # Note list screen
     note_details/           # Note editor screen
     preferences_menu/       # Settings bottom sheet
+integration_test/           # Screenshot tour (see below)
+tool/                       # Dev scripts
+```
+
+## Development
+
+Run every package's tests:
+
+```sh
+./test_all.sh
+```
+
+Regenerate screenshots on a simulator (seeds demo notes, walks through every
+screen). Start the watcher first, then the tour:
+
+```sh
+tool/screenshot_watcher.sh <simulator-udid> build/screenshots &
+flutter test integration_test/screenshot_tour_test.dart -d <simulator-udid>
 ```
 
 ## Requirements

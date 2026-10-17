@@ -25,6 +25,7 @@ class FakeNoteRepository implements NoteRepository {
     String? title,
     required String content,
     NoteColor color = NoteColor.none,
+    bool isPinned = false,
   }) async {
     if (shouldThrow) {
       throw const NoteStorageException(cause: 'createNote failed');
@@ -34,11 +35,28 @@ class FakeNoteRepository implements NoteRepository {
       title: title,
       content: content,
       color: color,
+      isPinned: isPinned,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
     _notes.add(note);
     return note;
+  }
+
+  @override
+  Future<void> restoreNote(Note note) async {
+    if (shouldThrow) {
+      throw const NoteStorageException(cause: 'restoreNote failed');
+    }
+    _notes.add(note);
+  }
+
+  @override
+  Future<void> restoreNotes(List<Note> notes) async {
+    if (shouldThrow) {
+      throw const NoteStorageException(cause: 'restoreNotes failed');
+    }
+    _notes.addAll(notes);
   }
 
   @override
