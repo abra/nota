@@ -47,11 +47,13 @@ Future<void> _snap(
     await _snap(binding, name);
     return;
   }
-  final dir = Directory('${Directory.systemTemp.path}/nota_shots')
-    ..createSync(recursive: true);
-  File('${dir.path}/$name.req').writeAsStringSync('');
+  final dir = _handshakeDir..createSync(recursive: true);
   final ack = File('${dir.path}/$name.ack');
-  final deadline = DateTime.now().add(const Duration(seconds: 20));
+  // A stale ack from an earlier run would let us continue before the watcher
+  // has captured the frame.
+  if (ack.existsSync()) ack.deleteSync();
+  File('${dir.path}/$name.req').writeAsStringSync('');
+  final deadline = DateTime.now().add(const Duration(seconds: 8));
   while (!ack.existsSync()) {
     if (DateTime.now().isAfter(deadline)) {
       debugPrint('screenshot "$name": no watcher answered, skipping');
@@ -68,10 +70,15 @@ const _driverAttached = bool.fromEnvironment(
   defaultValue: false,
 );
 
+final _handshakeDir = Directory('${Directory.systemTemp.path}/nota_shots');
+
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('screenshot tour', (tester) async {
+    // Drop requests/acks left behind by an interrupted run.
+    if (_handshakeDir.existsSync()) _handshakeDir.deleteSync(recursive: true);
+
     final logger = createAppLogger();
     final result = await composeDependencies(
       config: const ApplicationConfig(),

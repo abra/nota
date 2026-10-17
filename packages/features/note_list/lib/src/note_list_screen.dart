@@ -220,7 +220,11 @@ class _NoteListScaffold extends StatelessWidget {
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 slivers: [
-                  SliverAppBar.medium(
+                  // A single 56 px pinned row: a medium/large app bar would
+                  // reserve an empty toolbar row above the title because this
+                  // screen has no leading button or actions.
+                  SliverAppBar(
+                    pinned: true,
                     title: const _AppTitle(),
                     scrolledUnderElevation: 3,
                     shadowColor: Colors.black.withValues(alpha: 0.18),

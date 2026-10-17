@@ -349,8 +349,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 
-      // SliverAppBar.medium keeps a collapsed and an expanded title widget.
-      expect(find.text('Nota'), findsWidgets);
+      expect(find.text('Nota'), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
