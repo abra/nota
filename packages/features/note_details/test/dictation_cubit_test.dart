@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:note_details/src/dictation/dictation_commands.dart';
 import 'package:note_details/src/dictation/dictation_cubit.dart';
 import 'package:note_details/src/dictation/dictation_mode.dart';
+import 'package:shared/shared.dart' show DictationPause;
 import 'package:speech_service/speech_service.dart';
 import 'package:speech_service/testing.dart';
 
@@ -31,7 +32,11 @@ void main() {
       ],
     );
     sink = FakeDictationSink();
-    cubit = DictationCubit(service: service, sink: sink, timing: timing);
+    cubit = DictationCubit(
+      service: service,
+      sink: sink,
+      settings: const DictationSettings(timing: timing),
+    );
   });
 
   tearDown(() async {
@@ -312,7 +317,56 @@ void main() {
     expect(service.stopCalls, 1);
     expect(service.isListening, isFalse);
     // Replace so tearDown closes a fresh cubit.
-    cubit = DictationCubit(service: service, sink: sink, timing: timing);
+    cubit = DictationCubit(
+      service: service,
+      sink: sink,
+      settings: const DictationSettings(timing: timing),
+    );
+  });
+
+  group('settings', () {
+    test('voice commands can be switched off', () async {
+      cubit.updateSettings(
+        const DictationSettings(timing: timing, voiceCommands: false),
+      );
+      await cubit.start(en);
+      expect(cubit.state.newLinePhrase, isNull);
+      expect(service.lastConfig?.contextualPhrases, isEmpty);
+
+      service.finalText('Milk new line');
+      await settle();
+      expect(sink.inserted, [('Milk new line', DictationMode.text)]);
+      expect(sink.newLines, 0);
+    });
+
+    test('updating settings mid-session reconfigures and re-hints', () async {
+      await cubit.start(en);
+      cubit.updateSettings(
+        DictationSettings(
+          timing: DictationTiming.forPause(DictationPause.long),
+          voiceCommands: false,
+        ),
+      );
+      expect(
+        service.reconfigureCalls.single.segmentPause,
+        DictationTiming.forPause(DictationPause.long).textPause,
+      );
+      expect(cubit.state.newLinePhrase, isNull);
+
+      cubit.updateSettings(const DictationSettings(timing: timing));
+      expect(cubit.state.newLinePhrase, 'new line');
+    });
+
+    test('DictationTiming.forPause orders the pauses', () {
+      final short = DictationTiming.forPause(DictationPause.short);
+      final normal = DictationTiming.forPause(DictationPause.normal);
+      final long = DictationTiming.forPause(DictationPause.long);
+      expect(short.listPause < normal.listPause, isTrue);
+      expect(normal.listPause < long.listPause, isTrue);
+      expect(short.textPause < normal.textPause, isTrue);
+      expect(normal.textPause < long.textPause, isTrue);
+      expect(normal.listPause, const DictationTiming().listPause);
+    });
   });
 
   test('DictationCommands are reachable through the default resolver', () {

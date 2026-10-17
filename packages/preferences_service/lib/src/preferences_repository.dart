@@ -2,7 +2,8 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/material.dart' show ThemeMode;
-import 'package:shared/shared.dart' show NoteListDensity, NoteViewMode;
+import 'package:shared/shared.dart'
+    show DictationPause, NoteListDensity, NoteViewMode;
 
 import 'preferences.dart';
 import 'preferences_storage.dart';
@@ -33,6 +34,11 @@ class PreferencesRepository {
         noteListDensity: NoteListDensity.values.byName(
           map['noteListDensity'] as String? ?? 'threeLines',
         ),
+        // Added later; older installs have no such keys.
+        dictationPause: DictationPause.values.byName(
+          map['dictationPause'] as String? ?? 'normal',
+        ),
+        voiceCommands: map['voiceCommands'] as bool? ?? true,
       );
     } catch (_) {
       return const Preferences();
@@ -45,6 +51,8 @@ class PreferencesRepository {
       'locale': prefs.locale.languageCode,
       'noteViewMode': prefs.noteViewMode.name,
       'noteListDensity': prefs.noteListDensity.name,
+      'dictationPause': prefs.dictationPause.name,
+      'voiceCommands': prefs.voiceCommands,
     };
     await _storage.setString(_key, jsonEncode(map));
   }

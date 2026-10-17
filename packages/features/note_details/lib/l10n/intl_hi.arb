@@ -52,5 +52,7 @@
   "dictationUnavailable": "इस डिवाइस पर वाक् पहचान उपलब्ध नहीं है",
   "dictationLanguageUnsupported": "इस भाषा के लिए वाक् पहचान उपलब्ध नहीं है",
   "dictationNetworkError": "वाक् पहचान के लिए नेटवर्क कनेक्शन आवश्यक है",
-  "dictationFailed": "त्रुटि के कारण डिक्टेशन रुक गया"
+  "dictationFailed": "त्रुटि के कारण डिक्टेशन रुक गया",
+  "openSettings": "सेटिंग्स",
+  "dictateNote": "बोलकर नोट लिखें"
 }

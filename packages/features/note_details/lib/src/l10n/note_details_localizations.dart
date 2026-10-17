@@ -332,6 +332,18 @@ abstract class NoteDetailsLocalizations {
   /// In en, this message translates to:
   /// **'Dictation stopped because of an error'**
   String get dictationFailed;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get openSettings;
+
+  /// No description provided for @dictateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate a note'**
+  String get dictateNote;
 }
 
 class _NoteDetailsLocalizationsDelegate

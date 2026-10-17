@@ -7,16 +7,22 @@ import 'package:note_details/src/dictation/dictation_cubit.dart';
 import 'package:note_details/src/l10n/note_details_localizations.dart';
 import 'package:note_details/src/note_details_bloc.dart';
 import 'package:note_details/src/note_details_screen.dart';
+import 'package:preferences_service/preferences_service.dart';
+import 'package:shared/shared.dart' show DictationPause;
 import 'package:speech_service/speech_service.dart';
 import 'package:speech_service/testing.dart';
 
 import 'helpers/fake_image_files.dart';
 import 'helpers/fake_note_repository.dart';
+import 'helpers/fake_preferences_service.dart';
 
 Widget _buildView(
   NoteDetailsBloc bloc,
   ScriptedSpeechService speech, {
   KeepScreenAwake? keepScreenAwake,
+  OpenAppSettings? openAppSettings,
+  Preferences preferences = const Preferences(),
+  bool startDictation = false,
 }) {
   return MaterialApp(
     localizationsDelegates: const [
@@ -30,7 +36,10 @@ Widget _buildView(
       value: bloc,
       child: NoteDetailsView(
         speechService: speech,
+        preferencesService: FakePreferencesService(preferences),
         keepScreenAwake: keepScreenAwake,
+        openAppSettings: openAppSettings,
+        startDictation: startDictation,
       ),
     ),
   );
@@ -214,7 +223,20 @@ void main() {
       expect(bloc.state.content, contains('Bread'));
     });
 
-    testWidgets('a paused session does not resume when its panel reappears', (
+    testWidgets('opening the panel from another panel starts a session', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildView(bloc, speech));
+      await tester.tap(find.byTooltip('Formatting'));
+      await _settle(tester);
+
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+      expect(speech.startCalls, hasLength(1));
+      expect(find.byTooltip('Pause dictation'), findsOneWidget);
+    });
+
+    testWidgets('a paused session resumes when its panel is shown again', (
       tester,
     ) async {
       await tester.pumpWidget(_buildView(bloc, speech));
@@ -226,12 +248,13 @@ void main() {
       await _settle(tester);
       await tester.tap(find.byTooltip('Dictate'));
       await _settle(tester);
-      expect(speech.startCalls, hasLength(1));
-      expect(find.byTooltip('Resume dictation'), findsOneWidget);
+      expect(speech.startCalls, hasLength(2));
+      expect(find.byTooltip('Pause dictation'), findsOneWidget);
 
       // Closing the panel with the mic button is still the way to end it.
       await tester.tap(find.byTooltip('Dictate'));
       await _settle(tester);
+      expect(speech.stopCalls, 2);
       expect(find.byTooltip('Checklist').hitTestable(), findsNothing);
     });
 
@@ -301,6 +324,91 @@ void main() {
       speech.finalText('last words');
       await _settle(tester);
       expect(bloc.state.content, contains('last words'));
+    });
+  });
+
+  group('Entry points and preferences', () {
+    late NoteDetailsBloc bloc;
+    late ScriptedSpeechService speech;
+
+    setUp(() {
+      bloc = _newNoteBloc();
+      speech = ScriptedSpeechService();
+    });
+
+    tearDown(() async {
+      await bloc.close();
+      await speech.dispose();
+    });
+
+    testWidgets('startDictation opens the panel and listens right away', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildView(bloc, speech, startDictation: true),
+      );
+      await _settle(tester);
+
+      expect(speech.startCalls, hasLength(1));
+      expect(find.byTooltip('Pause dictation'), findsOneWidget);
+    });
+
+    testWidgets('the pause preference shapes the session', (tester) async {
+      await tester.pumpWidget(
+        _buildView(
+          bloc,
+          speech,
+          preferences: const Preferences(dictationPause: DictationPause.long),
+        ),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      expect(
+        speech.lastConfig?.segmentPause,
+        DictationTiming.forPause(DictationPause.long).textPause,
+      );
+    });
+
+    testWidgets('voice commands off: no hint, no command', (tester) async {
+      await tester.pumpWidget(
+        _buildView(
+          bloc,
+          speech,
+          preferences: const Preferences(voiceCommands: false),
+        ),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+      expect(find.text('Listening…'), findsOneWidget);
+
+      speech.finalText('Milk new line');
+      await _settle(tester);
+      expect(bloc.state.content, contains('Milk new line'));
+    });
+
+    testWidgets('offers to open the settings when permission was denied', (
+      tester,
+    ) async {
+      var opened = 0;
+      speech.availability = SpeechAvailability.permissionDenied;
+      await tester.pumpWidget(
+        _buildView(bloc, speech, openAppSettings: () async => opened++),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      await tester.tap(find.text('Settings'));
+      await _settle(tester);
+      expect(opened, 1);
+    });
+
+    testWidgets('has no settings action without a handler', (tester) async {
+      speech.availability = SpeechAvailability.permissionDenied;
+      await tester.pumpWidget(_buildView(bloc, speech));
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+      expect(find.text('Settings'), findsNothing);
     });
   });
 

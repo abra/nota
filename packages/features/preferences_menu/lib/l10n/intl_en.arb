@@ -37,5 +37,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "Pause between phrases",
+  "@dictationPause": {},
+  "pauseShort": "Short",
+  "@pauseShort": {},
+  "pauseNormal": "Normal",
+  "@pauseNormal": {},
+  "pauseLong": "Long",
+  "@pauseLong": {},
+  "voiceCommands": "Voice commands",
+  "@voiceCommands": {}
 }

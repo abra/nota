@@ -11,6 +11,7 @@ import 'package:speech_service/testing.dart';
 
 import 'helpers/fake_image_files.dart';
 import 'helpers/fake_note_repository.dart';
+import 'helpers/fake_preferences_service.dart';
 
 Widget _buildView(NoteDetailsBloc bloc) {
   return MaterialApp(
@@ -23,7 +24,10 @@ Widget _buildView(NoteDetailsBloc bloc) {
     supportedLocales: const [Locale('en')],
     home: BlocProvider<NoteDetailsBloc>.value(
       value: bloc,
-      child: NoteDetailsView(speechService: ScriptedSpeechService()),
+      child: NoteDetailsView(
+        speechService: ScriptedSpeechService(),
+        preferencesService: FakePreferencesService(),
+      ),
     ),
   );
 }
@@ -53,6 +57,7 @@ Widget _buildNavigationView(
                   value: bloc,
                   child: NoteDetailsView(
                     speechService: ScriptedSpeechService(),
+                    preferencesService: FakePreferencesService(),
                   ),
                 ),
               ),

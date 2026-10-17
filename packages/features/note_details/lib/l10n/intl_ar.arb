@@ -52,5 +52,7 @@
   "dictationUnavailable": "التعرف على الكلام غير متاح على هذا الجهاز",
   "dictationLanguageUnsupported": "التعرف على الكلام غير متاح لهذه اللغة",
   "dictationNetworkError": "يحتاج التعرف على الكلام إلى اتصال بالشبكة",
-  "dictationFailed": "توقف الإملاء بسبب خطأ"
+  "dictationFailed": "توقف الإملاء بسبب خطأ",
+  "openSettings": "الإعدادات",
+  "dictateNote": "إملاء ملاحظة"
 }

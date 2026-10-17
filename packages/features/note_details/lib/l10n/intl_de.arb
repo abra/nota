@@ -52,5 +52,7 @@
   "dictationUnavailable": "Spracherkennung ist auf diesem Gerät nicht verfügbar",
   "dictationLanguageUnsupported": "Spracherkennung ist für diese Sprache nicht verfügbar",
   "dictationNetworkError": "Die Spracherkennung benötigt eine Netzwerkverbindung",
-  "dictationFailed": "Das Diktat wurde wegen eines Fehlers beendet"
+  "dictationFailed": "Das Diktat wurde wegen eines Fehlers beendet",
+  "openSettings": "Einstellungen",
+  "dictateNote": "Notiz diktieren"
 }

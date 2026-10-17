@@ -1,15 +1,19 @@
 import 'dart:ui' show Locale;
 
 import 'package:flutter/material.dart' show ThemeMode;
-import 'package:shared/shared.dart' show NoteListDensity, NoteViewMode;
+import 'package:shared/shared.dart'
+    show DictationPause, NoteListDensity, NoteViewMode;
 
-/// Stores user preferences: theme mode, locale and note view mode.
+/// Stores user preferences: theme mode, locale, note view mode and
+/// dictation settings.
 final class Preferences {
   const Preferences({
     this.themeMode = ThemeMode.system,
     this.locale = const Locale('en'),
     this.noteViewMode = NoteViewMode.grid,
     this.noteListDensity = NoteListDensity.threeLines,
+    this.dictationPause = DictationPause.normal,
+    this.voiceCommands = true,
   });
 
   final ThemeMode themeMode;
@@ -17,16 +21,26 @@ final class Preferences {
   final NoteViewMode noteViewMode;
   final NoteListDensity noteListDensity;
 
+  /// Silence that ends a dictated phrase.
+  final DictationPause dictationPause;
+
+  /// Whether spoken commands ("new line", "undo", …) are recognised.
+  final bool voiceCommands;
+
   Preferences copyWith({
     ThemeMode? themeMode,
     Locale? locale,
     NoteViewMode? noteViewMode,
     NoteListDensity? noteListDensity,
+    DictationPause? dictationPause,
+    bool? voiceCommands,
   }) => Preferences(
     themeMode: themeMode ?? this.themeMode,
     locale: locale ?? this.locale,
     noteViewMode: noteViewMode ?? this.noteViewMode,
     noteListDensity: noteListDensity ?? this.noteListDensity,
+    dictationPause: dictationPause ?? this.dictationPause,
+    voiceCommands: voiceCommands ?? this.voiceCommands,
   );
 
   @override
@@ -36,9 +50,17 @@ final class Preferences {
           themeMode == other.themeMode &&
           locale == other.locale &&
           noteViewMode == other.noteViewMode &&
-          noteListDensity == other.noteListDensity;
+          noteListDensity == other.noteListDensity &&
+          dictationPause == other.dictationPause &&
+          voiceCommands == other.voiceCommands;
 
   @override
-  int get hashCode =>
-      Object.hash(themeMode, locale, noteViewMode, noteListDensity);
+  int get hashCode => Object.hash(
+    themeMode,
+    locale,
+    noteViewMode,
+    noteListDensity,
+    dictationPause,
+    voiceCommands,
+  );
 }

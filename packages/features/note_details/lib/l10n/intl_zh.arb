@@ -52,5 +52,7 @@
   "dictationUnavailable": "此设备不支持语音识别",
   "dictationLanguageUnsupported": "此语言不支持语音识别",
   "dictationNetworkError": "语音识别需要网络连接",
-  "dictationFailed": "语音输入因错误而停止"
+  "dictationFailed": "语音输入因错误而停止",
+  "openSettings": "设置",
+  "dictateNote": "语音记笔记"
 }

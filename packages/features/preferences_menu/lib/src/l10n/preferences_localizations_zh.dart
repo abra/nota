@@ -50,4 +50,19 @@ class PreferencesLocalizationsZh extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count 行';
   }
+
+  @override
+  String get dictationPause => '短语之间的停顿';
+
+  @override
+  String get pauseShort => '短';
+
+  @override
+  String get pauseNormal => '标准';
+
+  @override
+  String get pauseLong => '长';
+
+  @override
+  String get voiceCommands => '语音命令';
 }

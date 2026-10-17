@@ -51,6 +51,7 @@ dependencies:
   package_info_plus: ^9.0.0
   go_router: ^17.1.0
   wakelock_plus: ^1.2.0
+  quick_actions: ^1.1.0
 
 dev_dependencies:
   flutter_test:

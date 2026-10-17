@@ -52,5 +52,7 @@
   "dictationUnavailable": "La reconnaissance vocale n’est pas disponible sur cet appareil",
   "dictationLanguageUnsupported": "La reconnaissance vocale n’est pas disponible pour cette langue",
   "dictationNetworkError": "La reconnaissance vocale nécessite une connexion réseau",
-  "dictationFailed": "La dictée s’est arrêtée à cause d’une erreur"
+  "dictationFailed": "La dictée s’est arrêtée à cause d’une erreur",
+  "openSettings": "Réglages",
+  "dictateNote": "Dicter une note"
 }

@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "वाक्यांशों के बीच विराम",
+  "pauseShort": "छोटा",
+  "pauseNormal": "सामान्य",
+  "pauseLong": "लंबा",
+  "voiceCommands": "वॉइस कमांड"
 }

@@ -50,4 +50,19 @@ class PreferencesLocalizationsRu extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count строки';
   }
+
+  @override
+  String get dictationPause => 'Пауза между фразами';
+
+  @override
+  String get pauseShort => 'Короткая';
+
+  @override
+  String get pauseNormal => 'Обычная';
+
+  @override
+  String get pauseLong => 'Длинная';
+
+  @override
+  String get voiceCommands => 'Голосовые команды';
 }

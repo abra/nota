@@ -4,6 +4,7 @@ import 'dart:ui' show Locale;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/shared.dart' show DictationPause;
 import 'package:speech_service/speech_service.dart';
 
 import 'dictation_commands.dart';
@@ -24,6 +25,19 @@ final class DictationTiming {
     this.initialPause = const Duration(seconds: 20),
   });
 
+  /// The timing behind a [DictationPause] preference.
+  factory DictationTiming.forPause(DictationPause pause) => switch (pause) {
+    DictationPause.short => const DictationTiming(
+      listPause: Duration(milliseconds: 1000),
+      textPause: Duration(milliseconds: 2000),
+    ),
+    DictationPause.normal => const DictationTiming(),
+    DictationPause.long => const DictationTiming(
+      listPause: Duration(milliseconds: 2000),
+      textPause: Duration(milliseconds: 3500),
+    ),
+  };
+
   final Duration listPause;
   final Duration textPause;
 
@@ -32,6 +46,19 @@ final class DictationTiming {
   final Duration initialPause;
 
   Duration pauseFor(DictationMode mode) => mode.isList ? listPause : textPause;
+}
+
+/// User-adjustable dictation behaviour, derived from the preferences.
+final class DictationSettings {
+  const DictationSettings({
+    this.timing = const DictationTiming(),
+    this.voiceCommands = true,
+  });
+
+  final DictationTiming timing;
+
+  /// Whether spoken commands are recognised and hinted at.
+  final bool voiceCommands;
 }
 
 /// Drives one dictation session.
@@ -46,16 +73,20 @@ class DictationCubit extends Cubit<DictationState> {
     required DictationSink sink,
     DictationCommandSet? Function(String languageCode) commandsFor =
         DictationCommands.forLanguage,
-    this.timing = const DictationTiming(),
+    DictationSettings settings = const DictationSettings(),
   }) : _service = service,
        _sink = sink,
        _commandsFor = commandsFor,
+       _settings = settings,
        super(const DictationState());
 
   final SpeechService _service;
   final DictationSink _sink;
   final DictationCommandSet? Function(String languageCode) _commandsFor;
-  final DictationTiming timing;
+  DictationSettings _settings;
+  String? _languageCode;
+
+  DictationSettings get settings => _settings;
 
   /// Microphone level, `0..1`. Kept out of [state] because it changes many
   /// times per second and only the level meter needs it.
@@ -112,7 +143,8 @@ class DictationCubit extends Cubit<DictationState> {
     // An empty list means the platform could not enumerate its locales;
     // the device default is the best remaining guess.
     _localeId = localeId;
-    _commands = _commandsFor(locale.languageCode);
+    _languageCode = locale.languageCode;
+    _commands = _resolveCommands();
     _subscription ??= _service.events.listen(_onEvent);
 
     try {
@@ -151,6 +183,20 @@ class DictationCubit extends Cubit<DictationState> {
     if (state.isListening) _service.reconfigure(_configFor(mode));
   }
 
+  /// Applies new preferences, to the running session as well.
+  void updateSettings(DictationSettings settings) {
+    _settings = settings;
+    _commands = _resolveCommands();
+    if (state.isListening) {
+      _service.reconfigure(_configFor(state.mode));
+      emit(
+        state.copyWith(
+          newLinePhrase: _commands?.primaryPhrase(DictationCommand.newLine),
+        ),
+      );
+    }
+  }
+
   void newLine() => _sink.newLine();
 
   void undo() => _sink.undo();
@@ -167,10 +213,16 @@ class DictationCubit extends Cubit<DictationState> {
   bool _isSuperseded(int token) =>
       isClosed || token != _startToken || !state.isStarting;
 
+  DictationCommandSet? _resolveCommands() {
+    final language = _languageCode;
+    if (language == null || !_settings.voiceCommands) return null;
+    return _commandsFor(language);
+  }
+
   SpeechSessionConfig _configFor(DictationMode mode) => SpeechSessionConfig(
     localeId: _localeId,
-    segmentPause: timing.pauseFor(mode),
-    initialPause: timing.initialPause,
+    segmentPause: _settings.timing.pauseFor(mode),
+    initialPause: _settings.timing.initialPause,
     contextualPhrases: _commands?.allPhrases ?? const [],
   );
 

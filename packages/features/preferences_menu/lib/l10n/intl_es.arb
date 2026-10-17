@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "Pausa entre frases",
+  "pauseShort": "Corta",
+  "pauseNormal": "Normal",
+  "pauseLong": "Larga",
+  "voiceCommands": "Comandos de voz"
 }

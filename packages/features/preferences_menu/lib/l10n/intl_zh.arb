@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "短语之间的停顿",
+  "pauseShort": "短",
+  "pauseNormal": "标准",
+  "pauseLong": "长",
+  "voiceCommands": "语音命令"
 }

@@ -119,4 +119,10 @@ class NoteDetailsLocalizationsJa extends NoteDetailsLocalizations {
 
   @override
   String get dictationFailed => 'エラーのため音声入力を停止しました';
+
+  @override
+  String get openSettings => '設定';
+
+  @override
+  String get dictateNote => '音声でメモ';
 }

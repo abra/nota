@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "التوقف بين العبارات",
+  "pauseShort": "قصير",
+  "pauseNormal": "عادي",
+  "pauseLong": "طويل",
+  "voiceCommands": "الأوامر الصوتية"
 }

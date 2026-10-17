@@ -50,4 +50,19 @@ class PreferencesLocalizationsHi extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count पंक्तियाँ';
   }
+
+  @override
+  String get dictationPause => 'वाक्यांशों के बीच विराम';
+
+  @override
+  String get pauseShort => 'छोटा';
+
+  @override
+  String get pauseNormal => 'सामान्य';
+
+  @override
+  String get pauseLong => 'लंबा';
+
+  @override
+  String get voiceCommands => 'वॉइस कमांड';
 }

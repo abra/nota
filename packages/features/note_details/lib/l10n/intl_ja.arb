@@ -52,5 +52,7 @@
   "dictationUnavailable": "このデバイスでは音声認識を利用できません",
   "dictationLanguageUnsupported": "この言語では音声認識を利用できません",
   "dictationNetworkError": "音声認識にはネットワーク接続が必要です",
-  "dictationFailed": "エラーのため音声入力を停止しました"
+  "dictationFailed": "エラーのため音声入力を停止しました",
+  "openSettings": "設定",
+  "dictateNote": "音声でメモ"
 }

@@ -280,6 +280,47 @@ class _MainPage extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: Spacing.medium),
+            _PreferenceGroup(
+              children: [
+                _PreferenceRow(
+                  icon: Icons.mic_none_rounded,
+                  label: l10n.dictationPause,
+                  stacked: true,
+                  control: SegmentedButton<DictationPause>(
+                    showSelectedIcon: false,
+                    expandedInsets: EdgeInsets.zero,
+                    segments: [
+                      ButtonSegment(
+                        value: DictationPause.short,
+                        label: Text(l10n.pauseShort),
+                      ),
+                      ButtonSegment(
+                        value: DictationPause.normal,
+                        label: Text(l10n.pauseNormal),
+                      ),
+                      ButtonSegment(
+                        value: DictationPause.long,
+                        label: Text(l10n.pauseLong),
+                      ),
+                    ],
+                    selected: {prefs.dictationPause},
+                    onSelectionChanged: (value) =>
+                        update((p) => p.copyWith(dictationPause: value.first)),
+                  ),
+                ),
+                _PreferenceRow(
+                  icon: Icons.record_voice_over_outlined,
+                  label: l10n.voiceCommands,
+                  control: Switch(
+                    value: prefs.voiceCommands,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: (value) =>
+                        update((p) => p.copyWith(voiceCommands: value)),
+                  ),
+                ),
+              ],
+            ),
             if (appVersion != null) ...[
               const SizedBox(height: Spacing.mediumLarge),
               Center(
@@ -440,48 +481,61 @@ class _PreferenceGroup extends StatelessWidget {
 }
 
 /// A single row: leading icon, label, and a control at the trailing edge.
+///
+/// With [stacked] the control takes a full-width line under the label, for
+/// controls with text segments that would not fit beside long labels.
 class _PreferenceRow extends StatelessWidget {
   const _PreferenceRow({
     required this.icon,
     required this.label,
     required this.control,
     this.onTap,
+    this.stacked = false,
   });
 
   final IconData icon;
   final String label;
   final Widget control;
   final VoidCallback? onTap;
+  final bool stacked;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final header = [
+      Icon(icon, size: IconSize.medium, color: colorScheme.onSurfaceVariant),
+      const SizedBox(width: Spacing.medium),
+      Expanded(
+        child: Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface,
+          ),
+        ),
+      ),
+    ];
     final row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: Spacing.mediumLarge,
         vertical: Spacing.medium,
       ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: IconSize.medium,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: Spacing.medium),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+      child: stacked
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(children: header),
+                const SizedBox(height: Spacing.medium),
+                control,
+              ],
+            )
+          : Row(
+              children: [
+                ...header,
+                const SizedBox(width: Spacing.small),
+                control,
+              ],
             ),
-          ),
-          const SizedBox(width: Spacing.small),
-          control,
-        ],
-      ),
     );
     if (onTap == null) return row;
     return InkWell(onTap: onTap, child: row);

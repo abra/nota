@@ -83,5 +83,9 @@
   "dictationNetworkError": "Speech recognition needs a network connection",
   "@dictationNetworkError": {},
   "dictationFailed": "Dictation stopped because of an error",
-  "@dictationFailed": {}
+  "@dictationFailed": {},
+  "openSettings": "Settings",
+  "@openSettings": {},
+  "dictateNote": "Dictate a note",
+  "@dictateNote": {}
 }

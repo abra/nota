@@ -194,6 +194,36 @@ abstract class PreferencesLocalizations {
   /// In en, this message translates to:
   /// **'{count} lines'**
   String linesCount(int count);
+
+  /// No description provided for @dictationPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause between phrases'**
+  String get dictationPause;
+
+  /// No description provided for @pauseShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get pauseShort;
+
+  /// No description provided for @pauseNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get pauseNormal;
+
+  /// No description provided for @pauseLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Long'**
+  String get pauseLong;
+
+  /// No description provided for @voiceCommands.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice commands'**
+  String get voiceCommands;
 }
 
 class _PreferencesLocalizationsDelegate

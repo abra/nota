@@ -61,17 +61,51 @@ void main() {
     });
 
     testWidgets(
-      'shows three SegmentedButtons (Theme, Notes view, List density)',
+      'shows four SegmentedButtons (Theme, Notes view, List density, Pause)',
       (tester) async {
         final service = await _createService();
         await tester.pumpWidget(_buildMenu(service));
 
         expect(
           find.byWidgetPredicate((w) => w is SegmentedButton),
-          findsNWidgets(3),
+          findsNWidgets(4),
         );
       },
     );
+
+    testWidgets('shows the dictation rows', (tester) async {
+      final service = await _createService();
+      await tester.pumpWidget(_buildMenu(service));
+
+      expect(find.text('Pause between phrases'), findsOneWidget);
+      expect(find.text('Voice commands'), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
+    });
+
+    testWidgets('selecting a pause length updates the preferences', (
+      tester,
+    ) async {
+      final service = await _createService();
+      await tester.pumpWidget(_buildMenu(service));
+
+      await tester.tap(find.text('Long'));
+      await tester.pumpAndSettle();
+
+      expect(service.current.dictationPause, DictationPause.long);
+    });
+
+    testWidgets('the voice commands switch updates the preferences', (
+      tester,
+    ) async {
+      final service = await _createService();
+      await tester.pumpWidget(_buildMenu(service));
+      expect(service.current.voiceCommands, isTrue);
+
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(service.current.voiceCommands, isFalse);
+    });
 
     testWidgets('shows close button on main page', (tester) async {
       final service = await _createService();

@@ -119,4 +119,10 @@ class NoteDetailsLocalizationsZh extends NoteDetailsLocalizations {
 
   @override
   String get dictationFailed => '语音输入因错误而停止';
+
+  @override
+  String get openSettings => '设置';
+
+  @override
+  String get dictateNote => '语音记笔记';
 }

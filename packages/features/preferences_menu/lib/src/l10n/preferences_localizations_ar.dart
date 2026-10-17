@@ -50,4 +50,19 @@ class PreferencesLocalizationsAr extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count أسطر';
   }
+
+  @override
+  String get dictationPause => 'التوقف بين العبارات';
+
+  @override
+  String get pauseShort => 'قصير';
+
+  @override
+  String get pauseNormal => 'عادي';
+
+  @override
+  String get pauseLong => 'طويل';
+
+  @override
+  String get voiceCommands => 'الأوامر الصوتية';
 }

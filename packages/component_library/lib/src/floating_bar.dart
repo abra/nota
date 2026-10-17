@@ -35,11 +35,14 @@ abstract final class FloatingBar {
 /// Square icon button on the [FloatingBar] grid.
 ///
 /// [filled] renders the primary call to action; [active] highlights a toggle
-/// whose panel is open. Pass either [icon] or a custom [child].
+/// whose panel is open. Pass either [icon] or a custom [child]. An optional
+/// [onLongPress] adds a secondary action; it replaces the tooltip's
+/// long-press trigger, so keep the tooltip meaningful for assistive tech.
 class FloatingBarButton extends StatelessWidget {
   const FloatingBarButton({
     required this.tooltip,
     required this.onPressed,
+    this.onLongPress,
     this.icon,
     this.child,
     this.filled = false,
@@ -49,6 +52,7 @@ class FloatingBarButton extends StatelessWidget {
 
   final String tooltip;
   final VoidCallback? onPressed;
+  final VoidCallback? onLongPress;
   final IconData? icon;
   final Widget? child;
   final bool filled;
@@ -68,6 +72,7 @@ class FloatingBarButton extends StatelessWidget {
         ),
         icon: glyph,
         onPressed: onPressed,
+        onLongPress: onLongPress,
       );
     }
 
@@ -88,6 +93,7 @@ class FloatingBarButton extends StatelessWidget {
       ),
       icon: glyph,
       onPressed: onPressed,
+      onLongPress: onLongPress,
     );
   }
 }

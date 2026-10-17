@@ -13,6 +13,7 @@ import 'package:image_files/image_files.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:note_repository/note_repository.dart';
+import 'package:preferences_service/preferences_service.dart';
 import 'package:shared/shared.dart';
 import 'package:smart_keyboard_insets/smart_keyboard_insets.dart';
 import 'package:speech_service/speech_service.dart';
@@ -72,20 +73,35 @@ enum _MenuAction { delete }
 /// and the screen lock would otherwise end the session mid-list.
 typedef KeepScreenAwake = Future<void> Function(bool enabled);
 
+/// Opens the system settings page of the app, where a denied microphone or
+/// speech permission can be granted.
+typedef OpenAppSettings = Future<void> Function();
+
 class NoteDetailsScreen extends StatelessWidget {
   const NoteDetailsScreen({
     super.key,
     required this.noteRepository,
     required this.imageFiles,
     required this.speechService,
+    required this.preferencesService,
     this.keepScreenAwake,
+    this.openAppSettings,
+    this.startDictation = false,
     this.noteId,
   });
 
   final NoteRepository noteRepository;
   final ImageFiles imageFiles;
   final SpeechService speechService;
+
+  /// Source of the dictation pause and voice-command preferences.
+  final PreferencesService preferencesService;
   final KeepScreenAwake? keepScreenAwake;
+  final OpenAppSettings? openAppSettings;
+
+  /// Opens the dictation panel as soon as the editor appears, for the
+  /// "new voice note" entry points.
+  final bool startDictation;
   final String? noteId;
 
   @override
@@ -98,7 +114,10 @@ class NoteDetailsScreen extends StatelessWidget {
       )..add(NoteDetailsStarted(noteId: noteId)),
       child: NoteDetailsView(
         speechService: speechService,
+        preferencesService: preferencesService,
         keepScreenAwake: keepScreenAwake,
+        openAppSettings: openAppSettings,
+        startDictation: startDictation,
       ),
     );
   }
@@ -109,11 +128,17 @@ class NoteDetailsView extends StatefulWidget {
   const NoteDetailsView({
     super.key,
     required this.speechService,
+    required this.preferencesService,
     this.keepScreenAwake,
+    this.openAppSettings,
+    this.startDictation = false,
   });
 
   final SpeechService speechService;
+  final PreferencesService preferencesService;
   final KeepScreenAwake? keepScreenAwake;
+  final OpenAppSettings? openAppSettings;
+  final bool startDictation;
 
   @override
   State<NoteDetailsView> createState() => _NoteDetailsViewState();
@@ -169,6 +194,13 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     // The recogniser cannot run in the background; stop cleanly instead of
     // leaving a half-finished session behind.
     _lifecycleListener = AppLifecycleListener(onHide: _dictation.stop);
+    if (widget.startDictation) {
+      // After the first frame: the panel animation and the locale lookup
+      // both need a built tree.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _togglePanel(_SecondaryPanelMode.dictation);
+      });
+    }
   }
 
   @override
@@ -320,7 +352,6 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
 
   void _togglePanel(_SecondaryPanelMode mode) {
     HapticFeedback.selectionClick();
-    final wasClosed = !_isPanelOpen;
     final closing = _isPanelOpen && _activePanel == mode;
     setState(() {
       if (closing) {
@@ -336,14 +367,14 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
         }
       }
     });
-    // The mic button starts a session when it opens the panel and ends one
-    // when it closes it. Switching to formatting or colours leaves the
-    // session running so styles can change between utterances, and coming
-    // back to a paused session does not resume it unasked.
+    // Showing the dictation panel means "dictate": a session starts unless
+    // one is already running. Closing the panel with the mic button ends it.
+    // Switching to formatting or colours leaves the session alone so styles
+    // can change between utterances.
     if (mode != _SecondaryPanelMode.dictation) return;
     if (closing) {
       _dictation.stop();
-    } else if (wasClosed && !_dictation.state.isActive) {
+    } else if (!_dictation.state.isActive) {
       _startDictation();
     }
   }
@@ -354,6 +385,13 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     if (!_quillFocusNode.hasFocus) _quillController.moveCursorToEnd();
     // Dictation is hands-free: hide the keyboard and give the note the room.
     _quillFocusNode.unfocus();
+    final prefs = widget.preferencesService.current;
+    _dictation.updateSettings(
+      DictationSettings(
+        timing: DictationTiming.forPause(prefs.dictationPause),
+        voiceCommands: prefs.voiceCommands,
+      ),
+    );
     _dictation.start(Localizations.localeOf(context), detectMode: true);
   }
 
@@ -697,6 +735,7 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
                                     _togglePanel(_SecondaryPanelMode.colors),
                                 onToggleDictation: () =>
                                     _togglePanel(_SecondaryPanelMode.dictation),
+                                onOpenSettings: widget.openAppSettings,
                                 onImagePressed: () => _pickImage(context),
                                 onColorSelected: (color) {
                                   HapticFeedback.selectionClick();
@@ -866,6 +905,7 @@ class _NoteToolbar extends StatelessWidget {
     required this.onImagePressed,
     required this.onColorSelected,
     required this.onNewLine,
+    this.onOpenSettings,
   });
 
   final QuillController controller;
@@ -877,6 +917,7 @@ class _NoteToolbar extends StatelessWidget {
   final VoidCallback onToggleColors;
   final VoidCallback onToggleDictation;
   final VoidCallback onImagePressed;
+  final OpenAppSettings? onOpenSettings;
   final ValueChanged<NoteColor> onColorSelected;
   final VoidCallback onNewLine;
 
@@ -905,6 +946,7 @@ class _NoteToolbar extends StatelessWidget {
                 controller: controller,
                 noteColor: noteColor,
                 onColorSelected: onColorSelected,
+                onOpenSettings: onOpenSettings,
               ),
             ),
           ),
@@ -1120,12 +1162,14 @@ class _SecondaryPanel extends StatelessWidget {
     required this.controller,
     required this.noteColor,
     required this.onColorSelected,
+    this.onOpenSettings,
   });
 
   final _SecondaryPanelMode mode;
   final QuillController controller;
   final NoteColor noteColor;
   final ValueChanged<NoteColor> onColorSelected;
+  final OpenAppSettings? onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -1137,7 +1181,9 @@ class _SecondaryPanel extends StatelessWidget {
         selected: noteColor,
         onSelected: onColorSelected,
       ),
-      _SecondaryPanelMode.dictation => const _DictationPanel(),
+      _SecondaryPanelMode.dictation => _DictationPanel(
+        onOpenSettings: onOpenSettings,
+      ),
     };
     // Panels differ in height (dictation has two rows): grow from the
     // toolbar upwards instead of jumping.

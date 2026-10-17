@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "フレーズ間の間",
+  "pauseShort": "短い",
+  "pauseNormal": "標準",
+  "pauseLong": "長い",
+  "voiceCommands": "音声コマンド"
 }

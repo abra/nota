@@ -50,4 +50,19 @@ class PreferencesLocalizationsDe extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count Zeilen';
   }
+
+  @override
+  String get dictationPause => 'Pause zwischen Sätzen';
+
+  @override
+  String get pauseShort => 'Kurz';
+
+  @override
+  String get pauseNormal => 'Normal';
+
+  @override
+  String get pauseLong => 'Lang';
+
+  @override
+  String get voiceCommands => 'Sprachbefehle';
 }

@@ -31,5 +31,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "dictationPause": "Пауза между фразами",
+  "pauseShort": "Короткая",
+  "pauseNormal": "Обычная",
+  "pauseLong": "Длинная",
+  "voiceCommands": "Голосовые команды"
 }

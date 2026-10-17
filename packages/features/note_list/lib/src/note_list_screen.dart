@@ -25,6 +25,7 @@ class NoteListScreen extends StatelessWidget {
     required this.imageFiles,
     this.onNotePressed,
     this.onAddPressed,
+    this.onAddLongPressed,
     this.onSettingsPressed,
   });
 
@@ -33,6 +34,10 @@ class NoteListScreen extends StatelessWidget {
   final ImageFiles imageFiles;
   final Future<Note?> Function(Note)? onNotePressed;
   final Future<Note?> Function()? onAddPressed;
+
+  /// Secondary way to create a note, e.g. one that opens ready for
+  /// dictation. Returns the created note like [onAddPressed].
+  final Future<Note?> Function()? onAddLongPressed;
   final void Function(BuildContext)? onSettingsPressed;
 
   @override
@@ -46,6 +51,7 @@ class NoteListScreen extends StatelessWidget {
       child: NoteListView(
         onNotePressed: onNotePressed,
         onAddPressed: onAddPressed,
+        onAddLongPressed: onAddLongPressed,
         onSettingsPressed: onSettingsPressed,
       ),
     );
@@ -58,11 +64,13 @@ class NoteListView extends StatelessWidget {
     super.key,
     this.onNotePressed,
     this.onAddPressed,
+    this.onAddLongPressed,
     this.onSettingsPressed,
   });
 
   final Future<Note?> Function(Note)? onNotePressed;
   final Future<Note?> Function()? onAddPressed;
+  final Future<Note?> Function()? onAddLongPressed;
   final void Function(BuildContext)? onSettingsPressed;
 
   @override
@@ -115,6 +123,7 @@ class NoteListView extends StatelessWidget {
           state: state,
           onNotePressed: onNotePressed,
           onAddPressed: onAddPressed,
+          onAddLongPressed: onAddLongPressed,
           onSettingsPressed: onSettingsPressed,
         ),
       ),
@@ -149,12 +158,14 @@ class _NoteListScaffold extends StatelessWidget {
     required this.state,
     this.onNotePressed,
     this.onAddPressed,
+    this.onAddLongPressed,
     this.onSettingsPressed,
   });
 
   final NoteListState state;
   final Future<Note?> Function(Note)? onNotePressed;
   final Future<Note?> Function()? onAddPressed;
+  final Future<Note?> Function()? onAddLongPressed;
   final void Function(BuildContext)? onSettingsPressed;
 
   Future<void> _openNote(BuildContext context, Note note) async {
@@ -167,8 +178,11 @@ class _NoteListScaffold extends StatelessWidget {
     }
   }
 
-  Future<void> _addNote(BuildContext context) async {
-    final created = await onAddPressed!();
+  Future<void> _addNote(
+    BuildContext context,
+    Future<Note?> Function() create,
+  ) async {
+    final created = await create();
     if (!context.mounted) return;
     if (created != null) {
       context.read<NoteListBloc>().add(NoteListNoteAdded(created));
@@ -280,7 +294,10 @@ class _NoteListScaffold extends StatelessWidget {
                           initialQuery: state.query,
                           onAddPressed: onAddPressed == null
                               ? null
-                              : () => _addNote(context),
+                              : () => _addNote(context, onAddPressed!),
+                          onAddLongPressed: onAddLongPressed == null
+                              ? null
+                              : () => _addNote(context, onAddLongPressed!),
                           onQueryChanged: (q) =>
                               bloc.add(NoteListQueryChanged(q)),
                           onSettingsPressed: onSettingsPressed,
@@ -479,12 +496,14 @@ class _BottomBar extends StatefulWidget {
     super.key,
     required this.initialQuery,
     this.onAddPressed,
+    this.onAddLongPressed,
     this.onQueryChanged,
     this.onSettingsPressed,
   });
 
   final String initialQuery;
   final Future<void> Function()? onAddPressed;
+  final Future<void> Function()? onAddLongPressed;
   final ValueChanged<String>? onQueryChanged;
   final void Function(BuildContext)? onSettingsPressed;
 
@@ -610,6 +629,13 @@ class _BottomBarState extends State<_BottomBar> {
             tooltip: l10n.addNote,
             filled: true,
             onPressed: widget.onAddPressed,
+            // Hold to start the new note in dictation.
+            onLongPress: widget.onAddLongPressed == null
+                ? null
+                : () {
+                    HapticFeedback.mediumImpact();
+                    widget.onAddLongPressed!();
+                  },
           ),
         ],
       ),

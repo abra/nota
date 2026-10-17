@@ -52,5 +52,7 @@
   "dictationUnavailable": "Распознавание речи недоступно на этом устройстве",
   "dictationLanguageUnsupported": "Распознавание речи недоступно для этого языка",
   "dictationNetworkError": "Для распознавания речи нужно подключение к сети",
-  "dictationFailed": "Диктовка остановлена из-за ошибки"
+  "dictationFailed": "Диктовка остановлена из-за ошибки",
+  "openSettings": "Настройки",
+  "dictateNote": "Надиктовать заметку"
 }

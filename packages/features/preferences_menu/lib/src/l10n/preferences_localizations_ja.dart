@@ -50,4 +50,19 @@ class PreferencesLocalizationsJa extends PreferencesLocalizations {
   String linesCount(int count) {
     return '$count 行';
   }
+
+  @override
+  String get dictationPause => 'フレーズ間の間';
+
+  @override
+  String get pauseShort => '短い';
+
+  @override
+  String get pauseNormal => '標準';
+
+  @override
+  String get pauseLong => '長い';
+
+  @override
+  String get voiceCommands => '音声コマンド';
 }

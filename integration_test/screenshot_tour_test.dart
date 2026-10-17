@@ -325,13 +325,21 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
 
+    // Holding "+" opens a new note already listening.
+    await tester.longPress(find.byIcon(Icons.add));
+    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pumpAndSettle();
+    await _snap(binding, '11_editor_new_dictation');
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
     // Preferences sheet.
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
-    await _snap(binding, '11_preferences');
+    await _snap(binding, '12_preferences');
     await tester.tap(find.text('English'));
     await tester.pumpAndSettle();
-    await _snap(binding, '12_preferences_language');
+    await _snap(binding, '13_preferences_language');
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.close));
@@ -340,7 +348,7 @@ void main() {
     // Search with no results.
     await tester.enterText(find.byType(TextField), 'zebra');
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
-    await _snap(binding, '13_search_empty');
+    await _snap(binding, '14_search_empty');
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
@@ -362,9 +370,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump(const Duration(milliseconds: 600));
-    await _snap(binding, '14_deleted_undo');
+    await _snap(binding, '15_deleted_undo');
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
-    await _snap(binding, '15_restored');
+    await _snap(binding, '16_restored');
   });
 }

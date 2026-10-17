@@ -10,6 +10,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nota/app/config/supported_locales.dart';
 import 'package:nota/app/dependency_scope.dart';
+import 'package:nota/app/quick_actions.dart';
 import 'package:nota/app/routing.dart';
 import 'package:note_details/note_details.dart';
 import 'package:note_list/note_list.dart';
@@ -30,11 +31,25 @@ class _MaterialContextState extends State<MaterialContext> {
   static final _globalKey = GlobalKey(debugLabel: 'MaterialContext');
 
   late final GoRouter _router;
+  late final AppQuickActions _quickActions;
+  Locale? _quickActionLocale;
 
   @override
   void initState() {
     super.initState();
     _router = buildRouter(dependencies: DependenciesScope.of(context));
+    _quickActions = AppQuickActions(router: _router)..install();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Shortcut titles follow the in-app language.
+    final locale = PreferencesScope.of(context).locale;
+    if (locale != _quickActionLocale) {
+      _quickActionLocale = locale;
+      _quickActions.updateTitles(locale);
+    }
   }
 
   @override

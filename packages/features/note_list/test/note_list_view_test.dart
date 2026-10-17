@@ -51,6 +51,7 @@ void main() {
     required NoteListBloc bloc,
     Future<Note?> Function(Note)? onNotePressed,
     Future<Note?> Function()? onAddPressed,
+    Future<Note?> Function()? onAddLongPressed,
     void Function(BuildContext)? onSettingsPressed,
   }) {
     return MaterialApp(
@@ -65,6 +66,7 @@ void main() {
         child: NoteListView(
           onNotePressed: onNotePressed,
           onAddPressed: onAddPressed,
+          onAddLongPressed: onAddLongPressed,
           onSettingsPressed: onSettingsPressed,
         ),
       ),
@@ -183,6 +185,35 @@ void main() {
       expect(find.byIcon(Icons.search), findsOneWidget);
       expect(find.byIcon(Icons.menu), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
+    });
+
+    testWidgets('holding the add button invokes onAddLongPressed', (
+      tester,
+    ) async {
+      final bloc = makeBloc();
+      var taps = 0;
+      var holds = 0;
+      await tester.pumpWidget(
+        buildView(
+          bloc: bloc,
+          onAddPressed: () async {
+            taps++;
+            return null;
+          },
+          onAddLongPressed: () async {
+            holds++;
+            return null;
+          },
+        ),
+      );
+      bloc.emit(const NoteListState(status: NoteListStatus.success));
+      await tester.pumpAndSettle();
+
+      await tester.longPress(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+
+      expect(holds, 1);
+      expect(taps, 0, reason: 'a hold is not a tap');
     });
 
     testWidgets('onAddPressed is invoked when add button is tapped', (

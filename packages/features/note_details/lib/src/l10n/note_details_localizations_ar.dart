@@ -123,4 +123,10 @@ class NoteDetailsLocalizationsAr extends NoteDetailsLocalizations {
 
   @override
   String get dictationFailed => 'توقف الإملاء بسبب خطأ';
+
+  @override
+  String get openSettings => 'الإعدادات';
+
+  @override
+  String get dictateNote => 'إملاء ملاحظة';
 }

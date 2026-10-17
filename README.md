@@ -50,10 +50,12 @@
 - Pin important notes; pinned notes get their own section
 - Search across all notes
 - Voice dictation: speak list items one after another and a pause starts the
-  next one; say "new line", "undo" or "stop dictation" (English and Russian)
-  instead of touching the screen. Formatting stays available while you
-  dictate: toggle bold or switch the line to a checklist and the next words
-  follow
+  next one; say "new line", "undo" or "stop dictation" in any of the ten
+  languages instead of touching the screen. Formatting stays available while
+  you dictate: toggle bold or switch the line to a checklist and the next
+  words follow
+- Hands-free entry points: hold the "+" button, or use the "Dictate a note"
+  home-screen quick action, to open a new note that is already listening
 
 **Note list**
 - Masonry grid or list view, with adjustable list density (2 / 3 / 4 lines)
@@ -64,6 +66,7 @@
 **Customization**
 - Light, dark, and system theme (Nord palette)
 - 10 interface languages: English, Russian, Spanish, French, German, Portuguese, Japanese, Chinese, Hindi, Arabic
+- Dictation settings: pause length between phrases, voice commands on or off
 
 **Privacy**
 - Fully local — no account, no cloud, no analytics
@@ -95,6 +98,7 @@
 | [image_picker](https://pub.dev/packages/image_picker) | Pick images from gallery |
 | [speech_to_text](https://pub.dev/packages/speech_to_text) | System speech recognition for dictation |
 | [wakelock_plus](https://pub.dev/packages/wakelock_plus) | Keep the screen on while dictating |
+| [quick_actions](https://pub.dev/packages/quick_actions) | Home-screen shortcut into dictation |
 | [smart_keyboard_insets](https://pub.dev/packages/smart_keyboard_insets) | Smooth keyboard inset handling |
 | [path_provider](https://pub.dev/packages/path_provider) | App document directory |
 | [package_info_plus](https://pub.dev/packages/package_info_plus) | App version info |

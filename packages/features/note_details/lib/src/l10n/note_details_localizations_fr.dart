@@ -124,4 +124,10 @@ class NoteDetailsLocalizationsFr extends NoteDetailsLocalizations {
 
   @override
   String get dictationFailed => 'La dictée s’est arrêtée à cause d’une erreur';
+
+  @override
+  String get openSettings => 'Réglages';
+
+  @override
+  String get dictateNote => 'Dicter une note';
 }

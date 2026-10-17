@@ -6,7 +6,10 @@ part of 'note_details_screen.dart';
 /// (or a status line) on top; mode toggles, return and microphone below.
 /// Reads its [DictationCubit] from the widget tree.
 class _DictationPanel extends StatelessWidget {
-  const _DictationPanel();
+  const _DictationPanel({this.onOpenSettings});
+
+  /// Shown as a "Settings" action when the permission was denied.
+  final OpenAppSettings? onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,16 @@ class _DictationPanel extends StatelessWidget {
                     ),
                   ),
                   Expanded(child: _DictationTranscript(state: state)),
-                  const SizedBox(width: Spacing.small),
+                  if (onOpenSettings != null &&
+                      state.problem == DictationProblem.permissionDenied)
+                    TextButton(
+                      onPressed: onOpenSettings,
+                      child: Text(
+                        NoteDetailsLocalizations.of(context)!.openSettings,
+                      ),
+                    )
+                  else
+                    const SizedBox(width: Spacing.small),
                 ],
               ),
             ),

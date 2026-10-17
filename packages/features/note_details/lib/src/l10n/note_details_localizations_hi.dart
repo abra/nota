@@ -123,4 +123,10 @@ class NoteDetailsLocalizationsHi extends NoteDetailsLocalizations {
 
   @override
   String get dictationFailed => 'त्रुटि के कारण डिक्टेशन रुक गया';
+
+  @override
+  String get openSettings => 'सेटिंग्स';
+
+  @override
+  String get dictateNote => 'बोलकर नोट लिखें';
 }
