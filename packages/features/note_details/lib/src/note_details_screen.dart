@@ -825,12 +825,14 @@ class _FormattingPanel extends StatelessWidget {
             color: Colors.transparent,
             buttonOptions: QuillSimpleToolbarButtonOptions(
               base: QuillToolbarBaseButtonOptions(
-                iconSize: IconSize.medium,
-                iconButtonFactor: FloatingBar.controlSize / IconSize.medium,
+                // flutter_quill draws each glyph at iconSize * iconButtonFactor,
+                // so keep the factor at 1 to match FloatingBar icons; the
+                // 40 px tap target comes from buttonStyle.fixedSize.
+                iconSize: FloatingBar.iconSize,
+                iconButtonFactor: 1,
                 iconTheme: QuillIconTheme(
                   iconButtonUnselectedData: IconButtonData(
                     style: FloatingBar.buttonStyle.copyWith(
-                      iconSize: const WidgetStatePropertyAll(IconSize.medium),
                       foregroundColor: WidgetStatePropertyAll(
                         colorScheme.onSurfaceVariant,
                       ),
@@ -838,7 +840,6 @@ class _FormattingPanel extends StatelessWidget {
                   ),
                   iconButtonSelectedData: IconButtonData(
                     style: FloatingBar.buttonStyle.copyWith(
-                      iconSize: const WidgetStatePropertyAll(IconSize.medium),
                       backgroundColor: WidgetStatePropertyAll(
                         colorScheme.primaryContainer,
                       ),
