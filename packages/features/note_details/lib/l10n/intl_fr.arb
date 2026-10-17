@@ -8,5 +8,33 @@
   "noteLoadFailed": "Échec du chargement de la note",
   "noteSaveFailed": "Échec de la sauvegarde de la note",
   "noteColor": "Couleur de la note",
-  "imageInsertFailed": "Échec de l'insertion de l'image"
+  "imageInsertFailed": "Échec de l'insertion de l'image",
+  "deleteNote": "Supprimer la note",
+  "@deleteNote": {},
+  "pinNote": "Épingler",
+  "@pinNote": {},
+  "unpinNote": "Désépingler",
+  "@unpinNote": {},
+  "editedAt": "Modifié {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Retour",
+  "@back": {},
+  "moreActions": "Plus",
+  "@moreActions": {},
+  "formatting": "Mise en forme",
+  "@formatting": {},
+  "insertImage": "Insérer une image",
+  "@insertImage": {},
+  "undo": "Annuler",
+  "@undo": {},
+  "redo": "Rétablir",
+  "@redo": {},
+  "newLine": "Nouvelle ligne",
+  "@newLine": {}
 }

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'note_details_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -35,4 +34,39 @@ class NoteDetailsLocalizationsHi extends NoteDetailsLocalizations {
 
   @override
   String get imageInsertFailed => 'छवि सम्मिलित नहीं हो सकी';
+
+  @override
+  String get deleteNote => 'नोट हटाएँ';
+
+  @override
+  String get pinNote => 'पिन करें';
+
+  @override
+  String get unpinNote => 'अनपिन करें';
+
+  @override
+  String editedAt(String date) {
+    return '$date को संपादित';
+  }
+
+  @override
+  String get back => 'वापस';
+
+  @override
+  String get moreActions => 'अधिक';
+
+  @override
+  String get formatting => 'फ़ॉर्मैटिंग';
+
+  @override
+  String get insertImage => 'छवि डालें';
+
+  @override
+  String get undo => 'पूर्ववत करें';
+
+  @override
+  String get redo => 'फिर से करें';
+
+  @override
+  String get newLine => 'नई पंक्ति';
 }

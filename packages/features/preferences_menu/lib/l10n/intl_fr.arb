@@ -5,5 +5,31 @@
   "notesView": "Vue des notes",
   "listDensity": "Densité de liste",
   "language": "Langue",
-  "searchHint": "Rechercher"
+  "searchHint": "Rechercher",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "Système",
+  "@themeSystem": {},
+  "themeLight": "Clair",
+  "@themeLight": {},
+  "themeDark": "Sombre",
+  "@themeDark": {},
+  "viewGrid": "Grille",
+  "@viewGrid": {},
+  "viewList": "Liste",
+  "@viewList": {},
+  "linesCount": "{count} lignes",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -8,5 +8,33 @@
   "noteLoadFailed": "فشل تحميل الملاحظة",
   "noteSaveFailed": "فشل حفظ الملاحظة",
   "noteColor": "لون الملاحظة",
-  "imageInsertFailed": "فشل إدراج الصورة"
+  "imageInsertFailed": "فشل إدراج الصورة",
+  "deleteNote": "حذف الملاحظة",
+  "@deleteNote": {},
+  "pinNote": "تثبيت",
+  "@pinNote": {},
+  "unpinNote": "إزالة التثبيت",
+  "@unpinNote": {},
+  "editedAt": "تم التعديل {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "رجوع",
+  "@back": {},
+  "moreActions": "المزيد",
+  "@moreActions": {},
+  "formatting": "التنسيق",
+  "@formatting": {},
+  "insertImage": "إدراج صورة",
+  "@insertImage": {},
+  "undo": "تراجع",
+  "@undo": {},
+  "redo": "إعادة",
+  "@redo": {},
+  "newLine": "سطر جديد",
+  "@newLine": {}
 }

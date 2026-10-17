@@ -41,4 +41,43 @@ class NoteListLocalizationsJa extends NoteListLocalizations {
 
   @override
   String get retry => '再試行';
+
+  @override
+  String get pinned => 'ピン留め';
+
+  @override
+  String get others => 'その他';
+
+  @override
+  String get yesterday => '昨日';
+
+  @override
+  String get noResults => '見つかりませんでした';
+
+  @override
+  String get noResultsHint => '別のキーワードで検索してください';
+
+  @override
+  String get emptyStateHint => '+ をタップして最初のメモを作成';
+
+  @override
+  String get undo => '元に戻す';
+
+  @override
+  String get addNote => '新しいメモ';
+
+  @override
+  String get menu => 'メニュー';
+
+  @override
+  String get pin => 'ピン留め';
+
+  @override
+  String get delete => '削除';
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get noteRestoreFailed => 'メモを復元できませんでした';
 }

@@ -8,5 +8,33 @@
   "noteLoadFailed": "नोट लोड नहीं हो सका",
   "noteSaveFailed": "नोट सहेजा नहीं जा सका",
   "noteColor": "नोट का रंग",
-  "imageInsertFailed": "छवि सम्मिलित नहीं हो सकी"
+  "imageInsertFailed": "छवि सम्मिलित नहीं हो सकी",
+  "deleteNote": "नोट हटाएँ",
+  "@deleteNote": {},
+  "pinNote": "पिन करें",
+  "@pinNote": {},
+  "unpinNote": "अनपिन करें",
+  "@unpinNote": {},
+  "editedAt": "{date} को संपादित",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "वापस",
+  "@back": {},
+  "moreActions": "अधिक",
+  "@moreActions": {},
+  "formatting": "फ़ॉर्मैटिंग",
+  "@formatting": {},
+  "insertImage": "छवि डालें",
+  "@insertImage": {},
+  "undo": "पूर्ववत करें",
+  "@undo": {},
+  "redo": "फिर से करें",
+  "@redo": {},
+  "newLine": "नई पंक्ति",
+  "@newLine": {}
 }

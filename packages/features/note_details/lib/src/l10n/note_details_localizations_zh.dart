@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'note_details_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -35,4 +34,39 @@ class NoteDetailsLocalizationsZh extends NoteDetailsLocalizations {
 
   @override
   String get imageInsertFailed => '插入图片失败';
+
+  @override
+  String get deleteNote => '删除笔记';
+
+  @override
+  String get pinNote => '置顶';
+
+  @override
+  String get unpinNote => '取消置顶';
+
+  @override
+  String editedAt(String date) {
+    return '编辑于 $date';
+  }
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get moreActions => '更多';
+
+  @override
+  String get formatting => '格式';
+
+  @override
+  String get insertImage => '插入图片';
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String get redo => '重做';
+
+  @override
+  String get newLine => '换行';
 }

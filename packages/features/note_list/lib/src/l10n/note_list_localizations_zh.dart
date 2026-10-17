@@ -41,4 +41,43 @@ class NoteListLocalizationsZh extends NoteListLocalizations {
 
   @override
   String get retry => '重试';
+
+  @override
+  String get pinned => '已置顶';
+
+  @override
+  String get others => '其他';
+
+  @override
+  String get yesterday => '昨天';
+
+  @override
+  String get noResults => '未找到任何内容';
+
+  @override
+  String get noResultsHint => '请尝试其他搜索词';
+
+  @override
+  String get emptyStateHint => '点按 + 创建第一条笔记';
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String get addNote => '新建笔记';
+
+  @override
+  String get menu => '菜单';
+
+  @override
+  String get pin => '置顶';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get noteRestoreFailed => '无法恢复笔记';
 }

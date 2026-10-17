@@ -8,5 +8,33 @@
   "noteLoadFailed": "Error al cargar la nota",
   "noteSaveFailed": "Error al guardar la nota",
   "noteColor": "Color de nota",
-  "imageInsertFailed": "Error al insertar la imagen"
+  "imageInsertFailed": "Error al insertar la imagen",
+  "deleteNote": "Eliminar nota",
+  "@deleteNote": {},
+  "pinNote": "Fijar",
+  "@pinNote": {},
+  "unpinNote": "Desfijar",
+  "@unpinNote": {},
+  "editedAt": "Editado {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Atrás",
+  "@back": {},
+  "moreActions": "Más",
+  "@moreActions": {},
+  "formatting": "Formato",
+  "@formatting": {},
+  "insertImage": "Insertar imagen",
+  "@insertImage": {},
+  "undo": "Deshacer",
+  "@undo": {},
+  "redo": "Rehacer",
+  "@redo": {},
+  "newLine": "Nueva línea",
+  "@newLine": {}
 }

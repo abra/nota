@@ -8,5 +8,33 @@
   "noteLoadFailed": "Не удалось загрузить заметку",
   "noteSaveFailed": "Не удалось сохранить заметку",
   "noteColor": "Цвет заметки",
-  "imageInsertFailed": "Не удалось вставить изображение"
+  "imageInsertFailed": "Не удалось вставить изображение",
+  "deleteNote": "Удалить заметку",
+  "@deleteNote": {},
+  "pinNote": "Закрепить",
+  "@pinNote": {},
+  "unpinNote": "Открепить",
+  "@unpinNote": {},
+  "editedAt": "Изменено {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Назад",
+  "@back": {},
+  "moreActions": "Ещё",
+  "@moreActions": {},
+  "formatting": "Форматирование",
+  "@formatting": {},
+  "insertImage": "Вставить изображение",
+  "@insertImage": {},
+  "undo": "Отменить",
+  "@undo": {},
+  "redo": "Повторить",
+  "@redo": {},
+  "newLine": "Новая строка",
+  "@newLine": {}
 }

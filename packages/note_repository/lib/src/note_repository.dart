@@ -34,6 +34,7 @@ class NoteRepository {
     String? title,
     required String content,
     NoteColor color = NoteColor.none,
+    bool isPinned = false,
   }) async {
     final now = DateTime.now();
     final note = Note(
@@ -42,6 +43,7 @@ class NoteRepository {
       content: content,
       createdAt: now,
       updatedAt: now,
+      isPinned: isPinned,
       color: color,
     );
     try {
@@ -50,6 +52,25 @@ class NoteRepository {
       throw NoteStorageException(cause: e.cause);
     }
     return note;
+  }
+
+  /// Re-inserts a previously deleted [note] with its original id and
+  /// timestamps. Used by "undo" after a delete.
+  Future<void> restoreNote(Note note) async {
+    try {
+      await _storage.insertNote(note);
+    } on NoteLocalStorageException catch (e) {
+      throw NoteStorageException(cause: e.cause);
+    }
+  }
+
+  /// Re-inserts several previously deleted [notes] in one transaction.
+  Future<void> restoreNotes(List<Note> notes) async {
+    try {
+      await _storage.insertNotes(notes);
+    } on NoteLocalStorageException catch (e) {
+      throw NoteStorageException(cause: e.cause);
+    }
   }
 
   Future<Note> updateNote(Note note) async {
@@ -79,9 +100,8 @@ class NoteRepository {
   }
 
   Future<List<Note>> updateNotes(List<Note> notes) async {
-    final updated = notes
-        .map((n) => n.copyWith(updatedAt: DateTime.now()))
-        .toList();
+    final now = DateTime.now();
+    final updated = notes.map((n) => n.copyWith(updatedAt: now)).toList();
     try {
       await _storage.updateNotes(updated);
     } on NoteLocalStorageException catch (e) {

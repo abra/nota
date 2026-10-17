@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'preferences_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -26,4 +25,29 @@ class PreferencesLocalizationsHi extends PreferencesLocalizations {
 
   @override
   String get searchHint => 'खोजें';
+
+  @override
+  String version(String version) {
+    return 'संस्करण $version';
+  }
+
+  @override
+  String get themeSystem => 'सिस्टम';
+
+  @override
+  String get themeLight => 'हल्का';
+
+  @override
+  String get themeDark => 'गहरा';
+
+  @override
+  String get viewGrid => 'ग्रिड';
+
+  @override
+  String get viewList => 'सूची';
+
+  @override
+  String linesCount(int count) {
+    return '$count पंक्तियाँ';
+  }
 }

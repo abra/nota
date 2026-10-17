@@ -5,13 +5,16 @@ import 'dart:convert';
 /// [Note.content] can be either:
 /// - Legacy plain text (old notes)
 /// - Quill Delta JSON: `{"ops": [{"insert": "..."}, ...]}`
+///
+/// The `*Of(ops)` variants work on an already decoded ops list so callers that
+/// need several facts about one note decode its JSON only once.
 abstract final class DeltaUtils {
-  /// Extracts the ops list from [content], handling both formats:
+  /// Decodes [content] into a Quill ops list, handling both formats:
   /// - Canonical: `{"ops": [...]}`
   /// - Legacy bare array: `[...]`
   ///
   /// Returns null if [content] is not a recognized Delta format.
-  static List<dynamic>? _extractOps(String content) {
+  static List<dynamic>? extractOps(String content) {
     try {
       final decoded = jsonDecode(content);
       if (decoded is Map) {
@@ -27,15 +30,19 @@ abstract final class DeltaUtils {
   /// Returns true if [content] is a valid Quill Delta JSON string.
   ///
   /// Accepts both canonical `{"ops":[...]}` and legacy bare `[...]` formats.
-  static bool isDelta(String content) => _extractOps(content) != null;
+  static bool isDelta(String content) => extractOps(content) != null;
 
   /// Extracts plain text from [content].
   ///
   /// If [content] is a Delta JSON, concatenates all text inserts.
   /// If [content] is plain text, returns it as-is.
   static String toPlainText(String content) {
-    final ops = _extractOps(content);
-    if (ops == null) return content;
+    final ops = extractOps(content);
+    return ops == null ? content : plainTextOf(ops);
+  }
+
+  /// Concatenates every text insert in [ops], trimming trailing whitespace.
+  static String plainTextOf(List<dynamic> ops) {
     final buffer = StringBuffer();
     for (final op in ops) {
       if (op is Map) {
@@ -48,39 +55,40 @@ abstract final class DeltaUtils {
 
   /// Returns true if [content] has no meaningful text or embeds.
   static bool isContentEmpty(String content) {
-    final ops = _extractOps(content);
+    final ops = extractOps(content);
     if (ops == null) return content.trim().isEmpty;
-    final plain = toPlainText(content).trim();
-    if (plain.isNotEmpty) return false;
+    if (plainTextOf(ops).trim().isNotEmpty) return false;
     return !ops.any((op) => op is Map && op['insert'] is Map);
   }
 
   /// Returns the file path of the first image embed in [content], or null.
   static String? firstImagePath(String content) {
-    final ops = _extractOps(content);
-    if (ops == null) return null;
+    final ops = extractOps(content);
+    return ops == null ? null : firstImagePathOf(ops);
+  }
+
+  /// Returns the file path of the first image embed in [ops], or null.
+  static String? firstImagePathOf(List<dynamic> ops) {
     for (final op in ops) {
-      if (op is Map) {
-        final insert = op['insert'];
-        if (insert is Map && insert.containsKey('image')) {
-          final path = insert['image'];
-          if (path is String) return path;
-        }
-      }
+      final path = _imagePathOf(op);
+      if (path != null) return path;
     }
     return null;
   }
 
   /// Returns all image paths embedded in [content].
   static List<String> allImagePaths(String content) {
-    final ops = _extractOps(content);
-    if (ops == null) return [];
-    return [
-      for (final op in ops)
-        if (op is Map)
-          if (op['insert'] is Map && (op['insert'] as Map).containsKey('image'))
-            (op['insert'] as Map)['image'] as String,
-    ];
+    final ops = extractOps(content);
+    if (ops == null) return const [];
+    return [for (final op in ops) ?_imagePathOf(op)];
+  }
+
+  static String? _imagePathOf(Object? op) {
+    if (op is! Map) return null;
+    final insert = op['insert'];
+    if (insert is! Map) return null;
+    final path = insert['image'];
+    return path is String ? path : null;
   }
 
   /// Wraps [plainText] into a minimal Quill Delta JSON string.

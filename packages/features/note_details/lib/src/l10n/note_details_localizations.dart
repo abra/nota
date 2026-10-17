@@ -170,6 +170,72 @@ abstract class NoteDetailsLocalizations {
   /// In en, this message translates to:
   /// **'Failed to insert image'**
   String get imageInsertFailed;
+
+  /// No description provided for @deleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete note'**
+  String get deleteNote;
+
+  /// No description provided for @pinNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get pinNote;
+
+  /// No description provided for @unpinNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get unpinNote;
+
+  /// No description provided for @editedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited {date}'**
+  String editedAt(String date);
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @moreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreActions;
+
+  /// No description provided for @formatting.
+  ///
+  /// In en, this message translates to:
+  /// **'Formatting'**
+  String get formatting;
+
+  /// No description provided for @insertImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert image'**
+  String get insertImage;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @redo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get redo;
+
+  /// No description provided for @newLine.
+  ///
+  /// In en, this message translates to:
+  /// **'New line'**
+  String get newLine;
 }
 
 class _NoteDetailsLocalizationsDelegate

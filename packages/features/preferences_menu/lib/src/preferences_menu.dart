@@ -1,5 +1,6 @@
 import 'package:component_library/component_library.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:preferences_service/preferences_service.dart';
 import 'package:shared/shared.dart';
@@ -11,29 +12,43 @@ enum _Page { main, language }
 
 /// App preferences menu. Creates [PreferencesCubit] and manages navigation
 /// between the main settings page and the language selection page.
+///
+/// Designed to be shown with `showModalBottomSheet`; the sheet theme provides
+/// the drag handle and rounded corners.
 class PreferencesMenu extends StatelessWidget {
   const PreferencesMenu({
     super.key,
     required this.service,
     required this.supportedLanguages,
+    this.appVersion,
   });
 
   final PreferencesService service;
   final List<SupportedLanguage> supportedLanguages;
 
+  /// Shown in the footer as "Version x.y.z" when provided.
+  final String? appVersion;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => PreferencesCubit(service: service),
-      child: _PreferencesMenuView(supportedLanguages: supportedLanguages),
+      child: _PreferencesMenuView(
+        supportedLanguages: supportedLanguages,
+        appVersion: appVersion,
+      ),
     );
   }
 }
 
 class _PreferencesMenuView extends StatefulWidget {
-  const _PreferencesMenuView({required this.supportedLanguages});
+  const _PreferencesMenuView({
+    required this.supportedLanguages,
+    required this.appVersion,
+  });
 
   final List<SupportedLanguage> supportedLanguages;
+  final String? appVersion;
 
   @override
   State<_PreferencesMenuView> createState() => _PreferencesMenuViewState();
@@ -50,15 +65,18 @@ class _PreferencesMenuViewState extends State<_PreferencesMenuView> {
   Widget build(BuildContext context) {
     return ClipRect(
       child: AnimatedSize(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOutCubic,
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 280),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
           transitionBuilder: _slideTransition,
           child: _page == _Page.main
               ? _MainPage(
                   key: const ValueKey(_Page.main),
                   supportedLanguages: widget.supportedLanguages,
+                  appVersion: widget.appVersion,
                   onLanguageTap: _goToLanguage,
                 )
               : _LanguagePage(
@@ -70,6 +88,7 @@ class _PreferencesMenuViewState extends State<_PreferencesMenuView> {
                       .languageCode,
                   supportedLanguages: widget.supportedLanguages,
                   onSelected: (code) {
+                    HapticFeedback.selectionClick();
                     context.read<PreferencesCubit>().update(
                       (p) => p.copyWith(locale: Locale(code)),
                     );
@@ -91,15 +110,26 @@ class _PreferencesMenuViewState extends State<_PreferencesMenuView> {
     final beginOffset = isLanguagePage
         ? const Offset(1, 0)
         : const Offset(-1, 0);
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: beginOffset,
-        end: Offset.zero,
-      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
-      child: child,
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: beginOffset * 0.25,
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      ),
     );
   }
 }
+
+// Sheet content inset. The drag handle above comes from the sheet theme.
+const _kSheetPadding = EdgeInsets.fromLTRB(
+  Spacing.large,
+  Spacing.small,
+  Spacing.large,
+  Spacing.large,
+);
 
 /// Reads current [Preferences] from [PreferencesCubit] and renders
 /// theme, notes view, list density and language controls.
@@ -107,16 +137,20 @@ class _MainPage extends StatelessWidget {
   const _MainPage({
     super.key,
     required this.supportedLanguages,
+    required this.appVersion,
     required this.onLanguageTap,
   });
 
   final List<SupportedLanguage> supportedLanguages;
+  final String? appVersion;
   final VoidCallback onLanguageTap;
 
   @override
   Widget build(BuildContext context) {
     final prefs = context.watch<PreferencesCubit>().state;
+    final cubit = context.read<PreferencesCubit>();
     final l10n = PreferencesLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final selectedLanguage = supportedLanguages.firstWhere(
       (l) => l.code == prefs.locale.languageCode,
       orElse: () => (
@@ -125,14 +159,15 @@ class _MainPage extends StatelessWidget {
       ),
     );
 
+    void update(Preferences Function(Preferences) transform) {
+      HapticFeedback.selectionClick();
+      cubit.update(transform);
+    }
+
     return SafeArea(
+      top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Spacing.large,
-          Spacing.mediumLarge,
-          Spacing.large,
-          Spacing.mediumLarge,
-        ),
+        padding: _kSheetPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,102 +177,123 @@ class _MainPage extends StatelessWidget {
               onClose: () => Navigator.of(context).pop(),
             ),
             const SizedBox(height: Spacing.mediumLarge),
-            _PreferenceRow(
-              label: l10n.theme,
-              control: SegmentedButton<ThemeMode>(
-                showSelectedIcon: false,
-                style: _segmentedButtonStyle,
-                segments: const [
-                  ButtonSegment(
-                    value: ThemeMode.system,
-                    icon: Icon(Icons.brightness_auto),
-                    tooltip: 'System',
+            _PreferenceGroup(
+              children: [
+                _PreferenceRow(
+                  icon: Icons.brightness_6_outlined,
+                  label: l10n.theme,
+                  control: SegmentedButton<ThemeMode>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        icon: const Icon(Icons.brightness_auto_outlined),
+                        tooltip: l10n.themeSystem,
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: const Icon(Icons.light_mode_outlined),
+                        tooltip: l10n.themeLight,
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: const Icon(Icons.dark_mode_outlined),
+                        tooltip: l10n.themeDark,
+                      ),
+                    ],
+                    selected: {prefs.themeMode},
+                    onSelectionChanged: (value) =>
+                        update((p) => p.copyWith(themeMode: value.first)),
                   ),
-                  ButtonSegment(
-                    value: ThemeMode.light,
-                    icon: Icon(Icons.light_mode),
-                    tooltip: 'Light',
+                ),
+                _PreferenceRow(
+                  icon: Icons.dashboard_outlined,
+                  label: l10n.notesView,
+                  control: SegmentedButton<NoteViewMode>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: NoteViewMode.grid,
+                        icon: const Icon(Icons.grid_view_rounded),
+                        tooltip: l10n.viewGrid,
+                      ),
+                      ButtonSegment(
+                        value: NoteViewMode.list,
+                        icon: const Icon(Icons.view_agenda_outlined),
+                        tooltip: l10n.viewList,
+                      ),
+                    ],
+                    selected: {prefs.noteViewMode},
+                    onSelectionChanged: (value) =>
+                        update((p) => p.copyWith(noteViewMode: value.first)),
                   ),
-                  ButtonSegment(
-                    value: ThemeMode.dark,
-                    icon: Icon(Icons.dark_mode),
-                    tooltip: 'Dark',
+                ),
+                _PreferenceRow(
+                  icon: Icons.density_medium_rounded,
+                  label: l10n.listDensity,
+                  control: SegmentedButton<NoteListDensity>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: NoteListDensity.twoLines,
+                        label: const Text('2'),
+                        tooltip: l10n.linesCount(2),
+                      ),
+                      ButtonSegment(
+                        value: NoteListDensity.threeLines,
+                        label: const Text('3'),
+                        tooltip: l10n.linesCount(3),
+                      ),
+                      ButtonSegment(
+                        value: NoteListDensity.fourLines,
+                        label: const Text('4'),
+                        tooltip: l10n.linesCount(4),
+                      ),
+                    ],
+                    selected: {prefs.noteListDensity},
+                    onSelectionChanged: (value) => update(
+                      (p) => p.copyWith(noteListDensity: value.first),
+                    ),
                   ),
-                ],
-                selected: {prefs.themeMode},
-                onSelectionChanged: (value) => context
-                    .read<PreferencesCubit>()
-                    .update((p) => p.copyWith(themeMode: value.first)),
-              ),
+                ),
+                _PreferenceRow(
+                  icon: Icons.language_rounded,
+                  label: l10n.language,
+                  onTap: onLanguageTap,
+                  control: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        selectedLanguage.name,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: Spacing.xSmall),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: IconSize.medium,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: Spacing.medium),
-            _PreferenceRow(
-              label: l10n.notesView,
-              control: SegmentedButton<NoteViewMode>(
-                showSelectedIcon: false,
-                style: _segmentedButtonStyle,
-                segments: const [
-                  ButtonSegment(
-                    value: NoteViewMode.grid,
-                    icon: Icon(Icons.grid_view),
-                    tooltip: 'Grid',
+            if (appVersion != null) ...[
+              const SizedBox(height: Spacing.mediumLarge),
+              Center(
+                child: Text(
+                  l10n.version(appVersion!),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.7,
+                    ),
                   ),
-                  ButtonSegment(
-                    value: NoteViewMode.list,
-                    icon: Icon(Icons.list),
-                    tooltip: 'List',
-                  ),
-                ],
-                selected: {prefs.noteViewMode},
-                onSelectionChanged: (value) => context
-                    .read<PreferencesCubit>()
-                    .update((p) => p.copyWith(noteViewMode: value.first)),
-              ),
-            ),
-            const SizedBox(height: Spacing.medium),
-            _PreferenceRow(
-              label: l10n.listDensity,
-              control: SegmentedButton<NoteListDensity>(
-                showSelectedIcon: false,
-                style: _segmentedButtonStyle,
-                segments: const [
-                  ButtonSegment(
-                    value: NoteListDensity.twoLines,
-                    label: Text('2'),
-                    tooltip: '2 lines',
-                  ),
-                  ButtonSegment(
-                    value: NoteListDensity.threeLines,
-                    label: Text('3'),
-                    tooltip: '3 lines',
-                  ),
-                  ButtonSegment(
-                    value: NoteListDensity.fourLines,
-                    label: Text('4'),
-                    tooltip: '4 lines',
-                  ),
-                ],
-                selected: {prefs.noteListDensity},
-                onSelectionChanged: (value) => context
-                    .read<PreferencesCubit>()
-                    .update((p) => p.copyWith(noteListDensity: value.first)),
-              ),
-            ),
-            const SizedBox(height: Spacing.medium),
-            _PreferenceRow(
-              label: l10n.language,
-              control: TextButton(
-                onPressed: onLanguageTap,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(selectedLanguage.name),
-                    const SizedBox(width: Spacing.xSmall),
-                    const Icon(Icons.chevron_right, size: IconSize.small),
-                  ],
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -264,55 +320,67 @@ class _LanguagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = PreferencesLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SafeArea(
+      top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Spacing.large,
-          Spacing.mediumLarge,
-          Spacing.large,
-          Spacing.mediumLarge,
-        ),
+        padding: _kSheetPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: onBack,
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
+                // Shift the 40 px button so its glyph aligns with the sheet
+                // edge like the title text on the main page.
+                Transform.translate(
+                  offset: const Offset(-Spacing.small, 0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: onBack,
+                  ),
                 ),
-                const SizedBox(width: Spacing.small),
-                Text(
-                  l10n.language,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text(l10n.language, style: theme.textTheme.titleLarge),
               ],
             ),
             const SizedBox(height: Spacing.mediumLarge),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300),
-              child: Scrollbar(
-                thickness: 4,
-                radius: const Radius.circular(AppRadius.xSmall),
-                child: ListView.builder(
+            _PreferenceGroup(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: Spacing.xSmall),
                   itemCount: supportedLanguages.length,
+                  separatorBuilder: (_, _) => Divider(
+                    indent: Spacing.mediumLarge,
+                    endIndent: Spacing.mediumLarge,
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  ),
                   itemBuilder: (context, index) {
                     final lang = supportedLanguages[index];
                     final isSelected = lang.code == selectedCode;
                     return ListTile(
                       dense: true,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.mediumLarge,
+                      ),
                       title: Text(
                         lang.name,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
                       ),
                       trailing: isSelected
                           ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
+                              Icons.check_rounded,
+                              size: IconSize.medium,
+                              color: colorScheme.primary,
                             )
                           : null,
                       onTap: () => onSelected(lang.code),
@@ -328,28 +396,94 @@ class _LanguagePage extends StatelessWidget {
   }
 }
 
-const _segmentedButtonStyle = ButtonStyle(
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  visualDensity: VisualDensity.compact,
-);
+/// Rounded container that groups related rows, separated by hairlines.
+class _PreferenceGroup extends StatelessWidget {
+  const _PreferenceGroup({this.children, this.child})
+    : assert(children != null || child != null);
 
-/// A single row with a label on the left and a control widget on the right.
-class _PreferenceRow extends StatelessWidget {
-  const _PreferenceRow({required this.label, required this.control});
-
-  final String label;
-  final Widget control;
+  final List<Widget>? children;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
-        ),
-        const SizedBox(width: Spacing.small),
-        control,
-      ],
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
+    final rows = children;
+    // Material (not DecoratedBox) so ListTile and InkWell splashes stay visible.
+    return Material(
+      color: isDark
+          ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)
+          : colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(AppRadius.mediumLarge)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child:
+          child ??
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < rows!.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                    indent: Spacing.mediumLarge,
+                    endIndent: Spacing.mediumLarge,
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  ),
+                rows[i],
+              ],
+            ],
+          ),
     );
+  }
+}
+
+/// A single row: leading icon, label, and a control at the trailing edge.
+class _PreferenceRow extends StatelessWidget {
+  const _PreferenceRow({
+    required this.icon,
+    required this.label,
+    required this.control,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Widget control;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.mediumLarge,
+        vertical: Spacing.medium,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: IconSize.medium,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: Spacing.medium),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(width: Spacing.small),
+          control,
+        ],
+      ),
+    );
+    if (onTap == null) return row;
+    return InkWell(onTap: onTap, child: row);
   }
 }

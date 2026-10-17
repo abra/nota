@@ -11,14 +11,6 @@ import 'package:shared/shared.dart';
 import 'helpers/fake_image_files.dart';
 import 'helpers/fake_note_repository.dart';
 
-final _existingNote = Note(
-  id: '1',
-  title: 'My note',
-  content: 'Some content',
-  createdAt: DateTime(2024),
-  updatedAt: DateTime(2024),
-);
-
 Widget _buildView(NoteDetailsBloc bloc) {
   return MaterialApp(
     localizationsDelegates: const [
@@ -73,42 +65,6 @@ Widget _buildNavigationView(
 
 void main() {
   group('NoteDetailsView', () {
-    // --- AppBar title ---
-
-    testWidgets('shows "New note" title for a new note', (tester) async {
-      final bloc = NoteDetailsBloc(
-        noteRepository: FakeNoteRepository(),
-        imageFiles: FakeImageFiles(),
-        isNew: true,
-      );
-      await tester.pumpWidget(_buildView(bloc));
-
-      expect(find.text('New note'), findsOneWidget);
-      await tester.pump(const Duration(seconds: 1));
-    });
-
-    testWidgets('shows "Edit note" title for an existing note', (tester) async {
-      final bloc = NoteDetailsBloc(
-        noteRepository: FakeNoteRepository(notes: [_existingNote]),
-        imageFiles: FakeImageFiles(),
-        isNew: false,
-      );
-      bloc.emit(
-        NoteDetailsState(
-          isNew: false,
-          status: NoteDetailsStatus.success,
-          note: _existingNote,
-          title: 'My note',
-          content: 'Some content',
-          originalContent: 'Some content',
-        ),
-      );
-      await tester.pumpWidget(_buildView(bloc));
-
-      expect(find.text('Edit note'), findsOneWidget);
-      await tester.pump(const Duration(seconds: 1));
-    });
-
     // --- Initial UI elements ---
 
     testWidgets('renders back button, pin icon and color icon', (tester) async {

@@ -96,6 +96,20 @@ class NoteLocalStorage extends _$NoteLocalStorage {
     }
   }
 
+  /// Inserts [notes], replacing any row that already has the same id, so a
+  /// repeated restore of the same notes is harmless.
+  Future<void> insertNotes(List<Note> notes) async {
+    try {
+      await transaction(() async {
+        for (final note in notes) {
+          await into(notesTable).insertOnConflictUpdate(note.toStorageModel());
+        }
+      });
+    } catch (e) {
+      throw NoteLocalStorageException(cause: e);
+    }
+  }
+
   Future<void> updateNote(Note note) async {
     try {
       await (update(

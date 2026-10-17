@@ -49,6 +49,12 @@ class NoteListSelectedPinToggled extends NoteListEvent {
   String toString() => 'NoteListSelectedPinToggled()';
 }
 
+/// Restores the notes removed by the most recent delete operation.
+class NoteListUndoDeleteRequested extends NoteListEvent {
+  @override
+  String toString() => 'NoteListUndoDeleteRequested()';
+}
+
 class NoteListNoteUpdated extends NoteListEvent {
   NoteListNoteUpdated(this.note);
 

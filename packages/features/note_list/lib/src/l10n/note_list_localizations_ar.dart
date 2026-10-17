@@ -41,4 +41,43 @@ class NoteListLocalizationsAr extends NoteListLocalizations {
 
   @override
   String get retry => 'إعادة المحاولة';
+
+  @override
+  String get pinned => 'مثبتة';
+
+  @override
+  String get others => 'أخرى';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String get noResults => 'لم يتم العثور على شيء';
+
+  @override
+  String get noResultsHint => 'جرّب كلمة بحث أخرى';
+
+  @override
+  String get emptyStateHint => 'اضغط + لإنشاء أول ملاحظة';
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get addNote => 'ملاحظة جديدة';
+
+  @override
+  String get menu => 'القائمة';
+
+  @override
+  String get pin => 'تثبيت';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get noteRestoreFailed => 'تعذّر استعادة الملاحظة';
 }

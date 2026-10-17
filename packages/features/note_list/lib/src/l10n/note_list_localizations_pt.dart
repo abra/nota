@@ -41,4 +41,43 @@ class NoteListLocalizationsPt extends NoteListLocalizations {
 
   @override
   String get retry => 'Tentar novamente';
+
+  @override
+  String get pinned => 'Fixadas';
+
+  @override
+  String get others => 'Outras';
+
+  @override
+  String get yesterday => 'Ontem';
+
+  @override
+  String get noResults => 'Nada encontrado';
+
+  @override
+  String get noResultsHint => 'Tente outro termo de busca';
+
+  @override
+  String get emptyStateHint => 'Toque em + para criar sua primeira nota';
+
+  @override
+  String get undo => 'Desfazer';
+
+  @override
+  String get addNote => 'Nova nota';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String get pin => 'Fixar';
+
+  @override
+  String get delete => 'Excluir';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get noteRestoreFailed => 'Falha ao restaurar a nota';
 }

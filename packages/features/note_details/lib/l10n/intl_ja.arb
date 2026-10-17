@@ -8,5 +8,33 @@
   "noteLoadFailed": "メモの読み込みに失敗しました",
   "noteSaveFailed": "メモの保存に失敗しました",
   "noteColor": "ノートの色",
-  "imageInsertFailed": "画像の挿入に失敗しました"
+  "imageInsertFailed": "画像の挿入に失敗しました",
+  "deleteNote": "メモを削除",
+  "@deleteNote": {},
+  "pinNote": "ピン留め",
+  "@pinNote": {},
+  "unpinNote": "ピン留めを解除",
+  "@unpinNote": {},
+  "editedAt": "{date} に編集",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "戻る",
+  "@back": {},
+  "moreActions": "その他",
+  "@moreActions": {},
+  "formatting": "書式",
+  "@formatting": {},
+  "insertImage": "画像を挿入",
+  "@insertImage": {},
+  "undo": "元に戻す",
+  "@undo": {},
+  "redo": "やり直す",
+  "@redo": {},
+  "newLine": "改行",
+  "@newLine": {}
 }

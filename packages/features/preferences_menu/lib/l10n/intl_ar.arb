@@ -5,5 +5,31 @@
   "notesView": "عرض الملاحظات",
   "listDensity": "كثافة القائمة",
   "language": "اللغة",
-  "searchHint": "بحث"
+  "searchHint": "بحث",
+  "version": "الإصدار {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "النظام",
+  "@themeSystem": {},
+  "themeLight": "فاتح",
+  "@themeLight": {},
+  "themeDark": "داكن",
+  "@themeDark": {},
+  "viewGrid": "شبكة",
+  "@viewGrid": {},
+  "viewList": "قائمة",
+  "@viewList": {},
+  "linesCount": "{count} أسطر",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

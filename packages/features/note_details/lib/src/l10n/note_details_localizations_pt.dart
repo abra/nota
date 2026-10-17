@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'note_details_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -35,4 +34,39 @@ class NoteDetailsLocalizationsPt extends NoteDetailsLocalizations {
 
   @override
   String get imageInsertFailed => 'Falha ao inserir imagem';
+
+  @override
+  String get deleteNote => 'Excluir nota';
+
+  @override
+  String get pinNote => 'Fixar';
+
+  @override
+  String get unpinNote => 'Desafixar';
+
+  @override
+  String editedAt(String date) {
+    return 'Editado $date';
+  }
+
+  @override
+  String get back => 'Voltar';
+
+  @override
+  String get moreActions => 'Mais';
+
+  @override
+  String get formatting => 'Formatação';
+
+  @override
+  String get insertImage => 'Inserir imagem';
+
+  @override
+  String get undo => 'Desfazer';
+
+  @override
+  String get redo => 'Refazer';
+
+  @override
+  String get newLine => 'Nova linha';
 }

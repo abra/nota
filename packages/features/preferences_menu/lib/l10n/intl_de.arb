@@ -5,5 +5,31 @@
   "notesView": "Notizenansicht",
   "listDensity": "Listendichte",
   "language": "Sprache",
-  "searchHint": "Suchen"
+  "searchHint": "Suchen",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "System",
+  "@themeSystem": {},
+  "themeLight": "Hell",
+  "@themeLight": {},
+  "themeDark": "Dunkel",
+  "@themeDark": {},
+  "viewGrid": "Raster",
+  "@viewGrid": {},
+  "viewList": "Liste",
+  "@viewList": {},
+  "linesCount": "{count} Zeilen",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

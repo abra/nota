@@ -8,5 +8,33 @@
   "noteLoadFailed": "Notiz konnte nicht geladen werden",
   "noteSaveFailed": "Notiz konnte nicht gespeichert werden",
   "noteColor": "Notizenfarbe",
-  "imageInsertFailed": "Bild konnte nicht eingefügt werden"
+  "imageInsertFailed": "Bild konnte nicht eingefügt werden",
+  "deleteNote": "Notiz löschen",
+  "@deleteNote": {},
+  "pinNote": "Anheften",
+  "@pinNote": {},
+  "unpinNote": "Lösen",
+  "@unpinNote": {},
+  "editedAt": "Bearbeitet {date}",
+  "@editedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Zurück",
+  "@back": {},
+  "moreActions": "Mehr",
+  "@moreActions": {},
+  "formatting": "Formatierung",
+  "@formatting": {},
+  "insertImage": "Bild einfügen",
+  "@insertImage": {},
+  "undo": "Rückgängig",
+  "@undo": {},
+  "redo": "Wiederholen",
+  "@redo": {},
+  "newLine": "Neue Zeile",
+  "@newLine": {}
 }

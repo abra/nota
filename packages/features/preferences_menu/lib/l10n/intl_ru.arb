@@ -5,5 +5,31 @@
   "notesView": "Вид заметок",
   "listDensity": "Плотность списка",
   "language": "Язык",
-  "searchHint": "Поиск"
+  "searchHint": "Поиск",
+  "version": "Версия {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSystem": "Системная",
+  "@themeSystem": {},
+  "themeLight": "Светлая",
+  "@themeLight": {},
+  "themeDark": "Тёмная",
+  "@themeDark": {},
+  "viewGrid": "Сетка",
+  "@viewGrid": {},
+  "viewList": "Список",
+  "@viewList": {},
+  "linesCount": "{count} строки",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
