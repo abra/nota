@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.0
+  # 2.5.0 crashes release builds at start: R8 renames the Kotlin classes its
+  # JNI bindings look up by name (flutter/flutter#194649). Lift the cap once
+  # a fixed version ships.
+  shared_preferences_android: ">=2.4.28 <2.5.0"
   shared:
     path: ../shared
 
