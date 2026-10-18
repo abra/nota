@@ -63,6 +63,23 @@ void main() {
     expect(ids, ['en-US', 'hi_IN']);
   });
 
+  test('names the primary locales that came without a name', () async {
+    primary.locales = const [
+      SpeechLocale(id: 'en_US', name: 'en_US'),
+      SpeechLocale(id: 'ja_JP', name: 'ja_JP'),
+      SpeechLocale(id: 'hi-IN', name: 'हिन्दी'),
+    ];
+    await service.initialize();
+    final locales = await service.supportedLocales();
+
+    expect(locales.map((l) => l.id), ['en_US', 'ja_JP', 'hi-IN']);
+    expect(locales.map((l) => l.displayName), [
+      'English (US)',
+      'ja-JP',
+      'हिन्दी',
+    ], reason: 'a real primary name is kept; a missing one stays the tag');
+  });
+
   test('only lists the fallback locales when it is the active one', () async {
     primary.availability = SpeechAvailability.unavailable;
     await service.initialize();

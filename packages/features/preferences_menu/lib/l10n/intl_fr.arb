@@ -36,5 +36,10 @@
   "pauseShort": "Courte",
   "pauseNormal": "Normale",
   "pauseLong": "Longue",
-  "voiceCommands": "Commandes vocales"
+  "voiceCommands": "Commandes vocales",
+  "dictationLanguage": "Langue de dictée",
+  "dictationLanguageApp": "Comme l’app",
+  "dictationLanguagesRecent": "Récentes",
+  "dictationLanguagesAll": "Toutes les langues",
+  "dictationLanguagesUnavailable": "La reconnaissance vocale n’a indiqué aucune langue. Vérifiez l’accès au micro et à la reconnaissance vocale."
 }

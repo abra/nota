@@ -78,6 +78,71 @@ void main() {
     });
   });
 
+  group('resolveSpeechLocaleIdForTag', () {
+    const android = [
+      SpeechLocale(id: 'en-US', name: 'English (United States)'),
+      SpeechLocale(id: 'cmn-Hans-CN', name: 'Chinese, Mandarin (China)'),
+      SpeechLocale(id: 'cmn-Hant-TW', name: 'Chinese, Mandarin (Taiwan)'),
+      SpeechLocale(id: 'ru-RU', name: 'Russian (Russia)'),
+    ];
+
+    test('returns the same locale in the platform spelling', () {
+      expect(
+        resolveSpeechLocaleIdForTag(available: locales, tag: 'ru-RU'),
+        'ru_RU',
+      );
+      expect(
+        resolveSpeechLocaleIdForTag(available: android, tag: 'cmn-Hant-TW'),
+        'cmn-Hant-TW',
+      );
+    });
+
+    test('falls back to the region, then to the language', () {
+      expect(
+        resolveSpeechLocaleIdForTag(available: locales, tag: 'pt-Latn-PT'),
+        'pt_PT',
+      );
+      expect(
+        resolveSpeechLocaleIdForTag(available: locales, tag: 'en-AU'),
+        'en_US',
+      );
+      expect(
+        resolveSpeechLocaleIdForTag(available: android, tag: 'ru'),
+        'ru-RU',
+      );
+    });
+
+    test('returns null when the language is missing', () {
+      expect(
+        resolveSpeechLocaleIdForTag(available: locales, tag: 'ja-JP'),
+        isNull,
+      );
+    });
+  });
+
+  group('speechLocaleTag', () {
+    test('spells every platform variant the same way', () {
+      expect(speechLocaleTag('en_US'), 'en-US');
+      expect(speechLocaleTag('EN-us'), 'en-US');
+      expect(speechLocaleTag('zh_hant_tw'), 'zh-Hant-TW');
+      expect(speechLocaleTag('cmn-Hans-CN'), 'cmn-Hans-CN');
+      expect(speechLocaleTag('es_419'), 'es-419');
+      expect(speechLocaleTag('ca-ES-valencia'), 'ca-ES-valencia');
+      expect(speechLocaleTag('fr'), 'fr');
+      expect(speechLocaleTag(''), '');
+    });
+
+    test('backs SpeechLocale.tag and displayName', () {
+      const named = SpeechLocale(id: 'ru_RU', name: 'Русский');
+      const bare = SpeechLocale(id: 'ru_RU', name: 'ru_RU');
+      const blank = SpeechLocale(id: 'ru_RU', name: '');
+      expect(named.tag, 'ru-RU');
+      expect(named.displayName, 'Русский');
+      expect(bare.displayName, 'ru-RU');
+      expect(blank.displayName, 'ru-RU');
+    });
+  });
+
   group('SoundLevelScale', () {
     test('maps the platform range onto 0..1 and clamps outside it', () {
       const scale = SoundLevelScale(silence: -50, loud: -10);

@@ -56,6 +56,10 @@
   words follow
 - Hands-free entry points: hold the "+" button, or use the "Dictate a note"
   home-screen quick action, to open a new note that is already listening
+- Dictate in any language the recogniser offers, independent of the
+  interface language: the language badge in the dictation panel switches it
+  mid-session, recently used languages come first, and voice commands follow
+  the dictation language
 - On iOS 26 dictation runs on Apple's on-device SpeechAnalyzer with no time
   limit; older systems and Android use the classic recognisers
 - "Paragraph to checklist" in the editor menu splits a dictated or typed
@@ -70,7 +74,8 @@
 **Customization**
 - Light, dark, and system theme (Nord palette)
 - 10 interface languages: English, Russian, Spanish, French, German, Portuguese, Japanese, Chinese, Hindi, Arabic
-- Dictation settings: pause length between phrases, voice commands on or off
+- Dictation settings: dictation language (or the app language), pause length
+  between phrases, voice commands on or off
 
 **Privacy**
 - Fully local — no account, no cloud, no analytics

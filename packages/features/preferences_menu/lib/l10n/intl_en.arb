@@ -47,5 +47,25 @@
   "pauseLong": "Long",
   "@pauseLong": {},
   "voiceCommands": "Voice commands",
-  "@voiceCommands": {}
+  "@voiceCommands": {},
+  "dictationLanguage": "Dictation language",
+  "@dictationLanguage": {
+    "description": "Title of the dictation language picker and tooltip of its button"
+  },
+  "dictationLanguageApp": "Same as app",
+  "@dictationLanguageApp": {
+    "description": "Choice that makes dictation follow the app language"
+  },
+  "dictationLanguagesRecent": "Recent",
+  "@dictationLanguagesRecent": {
+    "description": "Heading of the recently used dictation languages"
+  },
+  "dictationLanguagesAll": "All languages",
+  "@dictationLanguagesAll": {
+    "description": "Heading of every other dictation language"
+  },
+  "dictationLanguagesUnavailable": "Speech recognition did not list its languages. Check microphone and speech recognition access.",
+  "@dictationLanguagesUnavailable": {
+    "description": "Shown when the recogniser returned no languages"
+  }
 }

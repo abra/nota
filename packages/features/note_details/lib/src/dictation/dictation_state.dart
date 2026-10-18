@@ -33,6 +33,7 @@ final class DictationState extends Equatable {
     this.problem,
     this.committedCount = 0,
     this.newLinePhrase,
+    this.language,
   });
 
   final DictationStatus status;
@@ -52,6 +53,11 @@ final class DictationState extends Equatable {
   /// when the language has no voice commands.
   final String? newLinePhrase;
 
+  /// BCP 47 tag of the language the session listens in, once a start has
+  /// begun: the recogniser's locale when it has been resolved, the requested
+  /// language before that.
+  final String? language;
+
   bool get isListening => status == DictationStatus.listening;
   bool get isStarting => status == DictationStatus.starting;
 
@@ -65,6 +71,7 @@ final class DictationState extends Equatable {
     Object? problem = _kKeep,
     int? committedCount,
     Object? newLinePhrase = _kKeep,
+    String? language,
   }) => DictationState(
     status: status ?? this.status,
     mode: mode ?? this.mode,
@@ -76,6 +83,7 @@ final class DictationState extends Equatable {
     newLinePhrase: identical(newLinePhrase, _kKeep)
         ? this.newLinePhrase
         : newLinePhrase as String?,
+    language: language ?? this.language,
   );
 
   @override
@@ -86,11 +94,12 @@ final class DictationState extends Equatable {
     problem,
     committedCount,
     newLinePhrase,
+    language,
   ];
 
   @override
   String toString() =>
       'DictationState(status: $status, mode: $mode, '
       'partial: "$partialText", problem: $problem, '
-      'committed: $committedCount)';
+      'committed: $committedCount, language: $language)';
 }

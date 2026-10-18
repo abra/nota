@@ -52,6 +52,8 @@ GoRouter buildRouter({required DependenciesContainer dependencies}) {
               service: dependencies.preferencesService,
               supportedLanguages: SupportedLocales.languages,
               appVersion: dependencies.packageInfo.version,
+              loadDictationLanguages: () =>
+                  loadDictationLanguages(dependencies.speechService),
             ),
           ),
         ),

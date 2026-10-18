@@ -8,7 +8,7 @@ import 'package:shared/shared.dart';
 import 'l10n/preferences_localizations.dart';
 import 'preferences_cubit.dart';
 
-enum _Page { main, language }
+enum _Page { main, language, dictationLanguage }
 
 /// App preferences menu. Creates [PreferencesCubit] and manages navigation
 /// between the main settings page and the language selection page.
@@ -21,6 +21,7 @@ class PreferencesMenu extends StatelessWidget {
     required this.service,
     required this.supportedLanguages,
     this.appVersion,
+    this.loadDictationLanguages,
   });
 
   final PreferencesService service;
@@ -29,6 +30,10 @@ class PreferencesMenu extends StatelessWidget {
   /// Shown in the footer as "Version x.y.z" when provided.
   final String? appVersion;
 
+  /// Lists the languages the speech recogniser offers; the dictation
+  /// language row is hidden without it.
+  final Future<List<DictationLanguage>> Function()? loadDictationLanguages;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -36,6 +41,7 @@ class PreferencesMenu extends StatelessWidget {
       child: _PreferencesMenuView(
         supportedLanguages: supportedLanguages,
         appVersion: appVersion,
+        loadDictationLanguages: loadDictationLanguages,
       ),
     );
   }
@@ -45,10 +51,12 @@ class _PreferencesMenuView extends StatefulWidget {
   const _PreferencesMenuView({
     required this.supportedLanguages,
     required this.appVersion,
+    required this.loadDictationLanguages,
   });
 
   final List<SupportedLanguage> supportedLanguages;
   final String? appVersion;
+  final Future<List<DictationLanguage>> Function()? loadDictationLanguages;
 
   @override
   State<_PreferencesMenuView> createState() => _PreferencesMenuViewState();
@@ -57,12 +65,14 @@ class _PreferencesMenuView extends StatefulWidget {
 class _PreferencesMenuViewState extends State<_PreferencesMenuView> {
   _Page _page = _Page.main;
 
-  void _goToLanguage() => setState(() => _page = _Page.language);
+  void _goTo(_Page page) => setState(() => _page = page);
 
-  void _goToMain() => setState(() => _page = _Page.main);
+  void _goToMain() => _goTo(_Page.main);
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<PreferencesCubit>();
+    final loadDictationLanguages = widget.loadDictationLanguages;
     return ClipRect(
       child: AnimatedSize(
         duration: const Duration(milliseconds: 280),
@@ -72,44 +82,52 @@ class _PreferencesMenuViewState extends State<_PreferencesMenuView> {
           switchInCurve: Curves.easeOutCubic,
           switchOutCurve: Curves.easeInCubic,
           transitionBuilder: _slideTransition,
-          child: _page == _Page.main
-              ? _MainPage(
-                  key: const ValueKey(_Page.main),
-                  supportedLanguages: widget.supportedLanguages,
-                  appVersion: widget.appVersion,
-                  onLanguageTap: _goToLanguage,
-                )
-              : _LanguagePage(
-                  key: const ValueKey(_Page.language),
-                  selectedCode: context
-                      .read<PreferencesCubit>()
-                      .state
-                      .locale
-                      .languageCode,
-                  supportedLanguages: widget.supportedLanguages,
-                  onSelected: (code) {
-                    HapticFeedback.selectionClick();
-                    context.read<PreferencesCubit>().update(
-                      (p) => p.copyWith(locale: Locale(code)),
-                    );
-                    _goToMain();
-                  },
-                  onBack: _goToMain,
-                ),
+          child: switch (_page) {
+            _Page.main => _MainPage(
+              key: const ValueKey(_Page.main),
+              supportedLanguages: widget.supportedLanguages,
+              appVersion: widget.appVersion,
+              onLanguageTap: () => _goTo(_Page.language),
+              onDictationLanguageTap: loadDictationLanguages == null
+                  ? null
+                  : () => _goTo(_Page.dictationLanguage),
+            ),
+            _Page.language => _LanguagePage(
+              key: const ValueKey(_Page.language),
+              selectedCode: cubit.state.locale.languageCode,
+              supportedLanguages: widget.supportedLanguages,
+              onSelected: (code) {
+                HapticFeedback.selectionClick();
+                cubit.update((p) => p.copyWith(locale: Locale(code)));
+                _goToMain();
+              },
+              onBack: _goToMain,
+            ),
+            _Page.dictationLanguage => _DictationLanguagePage(
+              key: const ValueKey(_Page.dictationLanguage),
+              load: loadDictationLanguages!,
+              selectedTag: cubit.state.dictationLanguage?.tag,
+              recentTags: cubit.state.recentDictationLanguages,
+              onSelected: (language) {
+                HapticFeedback.selectionClick();
+                cubit.update((p) => p.withDictationLanguage(language));
+                _goToMain();
+              },
+              onBack: _goToMain,
+            ),
+          },
         ),
       ),
     );
   }
 
-  /// Language page always slides in from the right / out to the right.
+  /// Sub-pages always slide in from the right / out to the right.
   /// Main page always slides in from the left / out to the left.
   /// This naturally handles both forward and backward transitions
   /// without tracking direction explicitly.
   static Widget _slideTransition(Widget child, Animation<double> animation) {
-    final isLanguagePage = child.key == const ValueKey(_Page.language);
-    final beginOffset = isLanguagePage
-        ? const Offset(1, 0)
-        : const Offset(-1, 0);
+    final isSubPage = child.key != const ValueKey(_Page.main);
+    final beginOffset = isSubPage ? const Offset(1, 0) : const Offset(-1, 0);
     return FadeTransition(
       opacity: animation,
       child: SlideTransition(
@@ -139,11 +157,13 @@ class _MainPage extends StatelessWidget {
     required this.supportedLanguages,
     required this.appVersion,
     required this.onLanguageTap,
+    required this.onDictationLanguageTap,
   });
 
   final List<SupportedLanguage> supportedLanguages;
   final String? appVersion;
   final VoidCallback onLanguageTap;
+  final VoidCallback? onDictationLanguageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +197,7 @@ class _MainPage extends StatelessWidget {
               onClose: () => Navigator.of(context).pop(),
             ),
             const SizedBox(height: Spacing.mediumLarge),
-            _PreferenceGroup(
+            SettingsGroup(
               children: [
                 _PreferenceRow(
                   icon: Icons.brightness_6_outlined,
@@ -260,29 +280,23 @@ class _MainPage extends StatelessWidget {
                   icon: Icons.language_rounded,
                   label: l10n.language,
                   onTap: onLanguageTap,
-                  control: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        selectedLanguage.name,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(width: Spacing.xSmall),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: IconSize.medium,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  ),
+                  control: _ValueChevron(selectedLanguage.name),
                 ),
               ],
             ),
             const SizedBox(height: Spacing.medium),
-            _PreferenceGroup(
+            SettingsGroup(
               children: [
+                if (onDictationLanguageTap != null)
+                  _PreferenceRow(
+                    icon: Icons.translate_rounded,
+                    label: l10n.dictationLanguage,
+                    onTap: onDictationLanguageTap,
+                    control: _ValueChevron(
+                      prefs.dictationLanguage?.name ??
+                          l10n.dictationLanguageApp,
+                    ),
+                  ),
                 _PreferenceRow(
                   icon: Icons.mic_none_rounded,
                   label: l10n.dictationPause,
@@ -342,8 +356,7 @@ class _MainPage extends StatelessWidget {
   }
 }
 
-/// Scrollable list of supported languages with a checkmark
-/// on the currently selected one.
+/// Supported app languages with a checkmark on the selected one.
 class _LanguagePage extends StatelessWidget {
   const _LanguagePage({
     super.key,
@@ -360,10 +373,145 @@ class _LanguagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _SubPage(
+      title: PreferencesLocalizations.of(context)!.language,
+      onBack: onBack,
+      child: ChoiceList<String>(
+        sections: [
+          ChoiceSection(
+            choices: [
+              for (final language in supportedLanguages)
+                Choice(value: language.code, label: language.name),
+            ],
+          ),
+        ],
+        selected: selectedCode,
+        onSelected: onSelected,
+      ),
+    );
+  }
+}
+
+/// Languages the speech recogniser offers: "same as app" first, then the
+/// recently picked ones, then the rest by name.
+///
+/// The list comes from the recogniser, which may have to ask for microphone
+/// access first; it is loaded once when the page opens.
+class _DictationLanguagePage extends StatefulWidget {
+  const _DictationLanguagePage({
+    super.key,
+    required this.load,
+    required this.selectedTag,
+    required this.recentTags,
+    required this.onSelected,
+    required this.onBack,
+  });
+
+  final Future<List<DictationLanguage>> Function() load;
+
+  /// Tag of the chosen language; `null` follows the app language.
+  final String? selectedTag;
+  final List<String> recentTags;
+
+  /// Called with the picked language, or `null` for "same as app".
+  final ValueChanged<DictationLanguage?> onSelected;
+  final VoidCallback onBack;
+
+  @override
+  State<_DictationLanguagePage> createState() => _DictationLanguagePageState();
+}
+
+class _DictationLanguagePageState extends State<_DictationLanguagePage> {
+  late final Future<List<DictationLanguage>> _languages = widget.load();
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = PreferencesLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    return _SubPage(
+      title: l10n.dictationLanguage,
+      onBack: widget.onBack,
+      child: FutureBuilder<List<DictationLanguage>>(
+        future: _languages,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const SizedBox(
+              height: 120,
+              child: CenteredCircularProgressIndicator(),
+            );
+          }
+          final languages = snapshot.data ?? const [];
+          final byTag = {for (final l in languages) l.tag: l};
+          final arranged = arrangeDictationLanguages(
+            available: languages,
+            recentTags: widget.recentTags,
+          );
+          List<Choice<String?>> choicesOf(List<DictationLanguage> list) => [
+            for (final language in list)
+              Choice(value: language.tag, label: language.name),
+          ];
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ChoiceList<String?>(
+                maxHeight: 360,
+                sections: [
+                  ChoiceSection(
+                    choices: [
+                      Choice(value: null, label: l10n.dictationLanguageApp),
+                    ],
+                  ),
+                  ChoiceSection(
+                    title: l10n.dictationLanguagesRecent,
+                    choices: choicesOf(arranged.recent),
+                  ),
+                  ChoiceSection(
+                    title: l10n.dictationLanguagesAll,
+                    choices: choicesOf(arranged.others),
+                  ),
+                ],
+                selected: widget.selectedTag,
+                onSelected: (tag) =>
+                    widget.onSelected(tag == null ? null : byTag[tag]),
+              ),
+              if (languages.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.mediumLarge,
+                    Spacing.medium,
+                    Spacing.mediumLarge,
+                    0,
+                  ),
+                  child: Text(
+                    l10n.dictationLanguagesUnavailable,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
 
+/// Layout of a page reached from the main page: back button, title, content.
+class _SubPage extends StatelessWidget {
+  const _SubPage({
+    required this.title,
+    required this.onBack,
+    required this.child,
+  });
+
+  final String title;
+  final VoidCallback onBack;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       top: false,
       child: Padding(
@@ -383,53 +531,18 @@ class _LanguagePage extends StatelessWidget {
                     onPressed: onBack,
                   ),
                 ),
-                Text(l10n.language, style: theme.textTheme.titleLarge),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: Spacing.mediumLarge),
-            _PreferenceGroup(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 320),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: Spacing.xSmall),
-                  itemCount: supportedLanguages.length,
-                  separatorBuilder: (_, _) => Divider(
-                    indent: Spacing.mediumLarge,
-                    endIndent: Spacing.mediumLarge,
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-                  ),
-                  itemBuilder: (context, index) {
-                    final lang = supportedLanguages[index];
-                    final isSelected = lang.code == selectedCode;
-                    return ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.mediumLarge,
-                      ),
-                      title: Text(
-                        lang.name,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              Icons.check_rounded,
-                              size: IconSize.medium,
-                              color: colorScheme.primary,
-                            )
-                          : null,
-                      onTap: () => onSelected(lang.code),
-                    );
-                  },
-                ),
-              ),
-            ),
+            child,
           ],
         ),
       ),
@@ -437,45 +550,35 @@ class _LanguagePage extends StatelessWidget {
   }
 }
 
-/// Rounded container that groups related rows, separated by hairlines.
-class _PreferenceGroup extends StatelessWidget {
-  const _PreferenceGroup({this.children, this.child})
-    : assert(children != null || child != null);
+/// Current value of a row that opens a sub-page, followed by a chevron.
+class _ValueChevron extends StatelessWidget {
+  const _ValueChevron(this.value);
 
-  final List<Widget>? children;
-  final Widget? child;
+  final String value;
+
+  // Recogniser names such as "Chinese, Mandarin (Simplified, China)" would
+  // otherwise squeeze the row label.
+  static const _maxValueWidth = 168.0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final colorScheme = theme.colorScheme;
-    final rows = children;
-    // Material (not DecoratedBox) so ListTile and InkWell splashes stay visible.
-    return Material(
-      color: isDark
-          ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)
-          : colorScheme.surfaceContainerLow,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadius.mediumLarge)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child:
-          child ??
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < rows!.length; i++) ...[
-                if (i > 0)
-                  Divider(
-                    indent: Spacing.mediumLarge,
-                    endIndent: Spacing.mediumLarge,
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-                  ),
-                rows[i],
-              ],
-            ],
+    final color = theme.colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxValueWidth),
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(color: color),
           ),
+        ),
+        const SizedBox(width: Spacing.xSmall),
+        Icon(Icons.chevron_right_rounded, size: IconSize.medium, color: color),
+      ],
     );
   }
 }

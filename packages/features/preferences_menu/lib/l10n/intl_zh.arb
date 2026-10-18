@@ -36,5 +36,10 @@
   "pauseShort": "短",
   "pauseNormal": "标准",
   "pauseLong": "长",
-  "voiceCommands": "语音命令"
+  "voiceCommands": "语音命令",
+  "dictationLanguage": "语音输入语言",
+  "dictationLanguageApp": "与应用相同",
+  "dictationLanguagesRecent": "最近使用",
+  "dictationLanguagesAll": "所有语言",
+  "dictationLanguagesUnavailable": "语音识别未提供语言列表。请检查麦克风和语音识别权限。"
 }

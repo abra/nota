@@ -3,7 +3,7 @@ import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:shared/shared.dart'
-    show DictationPause, NoteListDensity, NoteViewMode;
+    show DictationLanguage, DictationPause, NoteListDensity, NoteViewMode;
 
 import 'preferences.dart';
 import 'preferences_storage.dart';
@@ -39,6 +39,10 @@ class PreferencesRepository {
           map['dictationPause'] as String? ?? 'normal',
         ),
         voiceCommands: map['voiceCommands'] as bool? ?? true,
+        dictationLanguage: _dictationLanguageFrom(map['dictationLanguage']),
+        recentDictationLanguages: List.unmodifiable([
+          ...?(map['recentDictationLanguages'] as List?)?.whereType<String>(),
+        ]),
       );
     } catch (_) {
       return const Preferences();
@@ -53,8 +57,20 @@ class PreferencesRepository {
       'noteListDensity': prefs.noteListDensity.name,
       'dictationPause': prefs.dictationPause.name,
       'voiceCommands': prefs.voiceCommands,
+      if (prefs.dictationLanguage case final language?)
+        'dictationLanguage': {'tag': language.tag, 'name': language.name},
+      'recentDictationLanguages': prefs.recentDictationLanguages,
     };
     await _storage.setString(_key, jsonEncode(map));
+  }
+
+  /// A malformed entry falls back to the app language instead of resetting
+  /// every other preference.
+  static DictationLanguage? _dictationLanguageFrom(Object? value) {
+    if (value case {'tag': final String tag, 'name': final String name}) {
+      return DictationLanguage(tag: tag, name: name);
+    }
+    return null;
   }
 
   static Locale _resolveLocale(String? code, List<String> supportedCodes) {

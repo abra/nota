@@ -20,8 +20,16 @@ final class SpeechLocale {
   /// [SpeechSessionConfig.localeId].
   final String id;
 
-  /// Human-readable name in the device language.
+  /// Human-readable name in the device language. Some recognisers have none
+  /// and repeat the [id]; see [displayName].
   final String name;
+
+  /// [id] as a BCP 47 tag; equal for every platform spelling of a locale.
+  String get tag => speechLocaleTag(id);
+
+  /// [name], or the [tag] when the recogniser gave no real name.
+  String get displayName =>
+      name.isEmpty || speechLocaleTag(name) == tag ? tag : name;
 
   @override
   bool operator ==(Object other) =>
@@ -33,6 +41,32 @@ final class SpeechLocale {
   @override
   String toString() => 'SpeechLocale($id, "$name")';
 }
+
+/// Spells a recogniser locale id as a BCP 47 tag: `en_US`, `EN-us` and
+/// `en-US` all become `en-US`, `zh_hant_tw` becomes `zh-Hant-TW`.
+///
+/// Recognisers disagree on separators and case, so ids are compared and
+/// stored in this form.
+String speechLocaleTag(String id) {
+  final subtags = id.split(RegExp('[-_]')).where((s) => s.isNotEmpty).toList();
+  if (subtags.isEmpty) return '';
+  return [
+    subtags.first.toLowerCase(),
+    for (final subtag in subtags.skip(1)) _caseSubtag(subtag),
+  ].join('-');
+}
+
+String _caseSubtag(String subtag) => switch (subtag.length) {
+  // Region: `US`, or a UN M.49 code such as `419`.
+  2 when !_isDigits(subtag) => subtag.toUpperCase(),
+  3 when _isDigits(subtag) => subtag,
+  // Script: `Hans`.
+  4 when !_isDigits(subtag) =>
+    subtag[0].toUpperCase() + subtag.substring(1).toLowerCase(),
+  _ => subtag.toLowerCase(),
+};
+
+bool _isDigits(String s) => s.codeUnits.every((c) => c >= 0x30 && c <= 0x39);
 
 /// Settings for one continuous dictation session.
 final class SpeechSessionConfig {

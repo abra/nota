@@ -36,5 +36,10 @@
   "pauseShort": "छोटा",
   "pauseNormal": "सामान्य",
   "pauseLong": "लंबा",
-  "voiceCommands": "वॉइस कमांड"
+  "voiceCommands": "वॉइस कमांड",
+  "dictationLanguage": "बोलकर लिखने की भाषा",
+  "dictationLanguageApp": "ऐप जैसी",
+  "dictationLanguagesRecent": "हाल में इस्तेमाल",
+  "dictationLanguagesAll": "सभी भाषाएँ",
+  "dictationLanguagesUnavailable": "वाक् पहचान ने भाषाओं की सूची नहीं दी। माइक्रोफ़ोन और वाक् पहचान की अनुमति जाँचें।"
 }

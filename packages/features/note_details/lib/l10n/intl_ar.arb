@@ -55,5 +55,9 @@
   "dictationFailed": "توقف الإملاء بسبب خطأ",
   "openSettings": "الإعدادات",
   "dictateNote": "إملاء ملاحظة",
-  "convertToChecklist": "تحويل الفقرة إلى قائمة مهام"
+  "convertToChecklist": "تحويل الفقرة إلى قائمة مهام",
+  "dictationLanguage": "لغة الإملاء",
+  "dictationLanguagesRecent": "المستخدمة مؤخرًا",
+  "dictationLanguagesAll": "كل اللغات",
+  "dictationLanguagesUnavailable": "لم يعرض التعرّف على الكلام قائمة اللغات. تحقّق من إذن الوصول إلى الميكروفون والتعرّف على الكلام."
 }

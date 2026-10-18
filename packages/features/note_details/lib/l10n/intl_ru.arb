@@ -55,5 +55,9 @@
   "dictationFailed": "Диктовка остановлена из-за ошибки",
   "openSettings": "Настройки",
   "dictateNote": "Надиктовать заметку",
-  "convertToChecklist": "Абзац в чеклист"
+  "convertToChecklist": "Абзац в чеклист",
+  "dictationLanguage": "Язык диктовки",
+  "dictationLanguagesRecent": "Недавние",
+  "dictationLanguagesAll": "Все языки",
+  "dictationLanguagesUnavailable": "Распознавание речи не сообщило список языков. Проверьте доступ к микрофону и распознаванию речи."
 }

@@ -12,6 +12,10 @@ void main() {
       expect(DictationCommands.forLanguage('xx'), isNull);
     });
 
+    test('maps the Mandarin code Android uses onto Chinese', () {
+      expect(DictationCommands.forLanguage('cmn'), same(DictationCommands.zh));
+    });
+
     test('covers every app language', () {
       final codes = DictationCommands.all.map((s) => s.languageCode);
       expect(

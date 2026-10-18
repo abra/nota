@@ -134,4 +134,17 @@ class NoteDetailsLocalizationsDe extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => 'Absatz in Checkliste';
+
+  @override
+  String get dictationLanguage => 'Diktiersprache';
+
+  @override
+  String get dictationLanguagesRecent => 'Zuletzt verwendet';
+
+  @override
+  String get dictationLanguagesAll => 'Alle Sprachen';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'Die Spracherkennung hat keine Sprachen gemeldet. Prüfen Sie den Zugriff auf Mikrofon und Spracherkennung.';
 }

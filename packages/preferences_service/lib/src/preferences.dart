@@ -1,8 +1,9 @@
 import 'dart:ui' show Locale;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:shared/shared.dart'
-    show DictationPause, NoteListDensity, NoteViewMode;
+    show DictationLanguage, DictationPause, NoteListDensity, NoteViewMode;
 
 /// Stores user preferences: theme mode, locale, note view mode and
 /// dictation settings.
@@ -14,7 +15,12 @@ final class Preferences {
     this.noteListDensity = NoteListDensity.threeLines,
     this.dictationPause = DictationPause.normal,
     this.voiceCommands = true,
+    this.dictationLanguage,
+    this.recentDictationLanguages = const [],
   });
+
+  /// How many recently picked dictation languages are remembered.
+  static const maxRecentDictationLanguages = 4;
 
   final ThemeMode themeMode;
   final Locale locale;
@@ -26,6 +32,12 @@ final class Preferences {
 
   /// Whether spoken commands ("new line", "undo", …) are recognised.
   final bool voiceCommands;
+
+  /// Language dictation listens in; `null` follows [locale].
+  final DictationLanguage? dictationLanguage;
+
+  /// Tags of the dictation languages picked lately, newest first.
+  final List<String> recentDictationLanguages;
 
   Preferences copyWith({
     ThemeMode? themeMode,
@@ -41,6 +53,28 @@ final class Preferences {
     noteListDensity: noteListDensity ?? this.noteListDensity,
     dictationPause: dictationPause ?? this.dictationPause,
     voiceCommands: voiceCommands ?? this.voiceCommands,
+    dictationLanguage: dictationLanguage,
+    recentDictationLanguages: recentDictationLanguages,
+  );
+
+  /// Picks the dictation language and moves it to the front of
+  /// [recentDictationLanguages]; `null` follows the app language again.
+  Preferences withDictationLanguage(DictationLanguage? language) => Preferences(
+    themeMode: themeMode,
+    locale: locale,
+    noteViewMode: noteViewMode,
+    noteListDensity: noteListDensity,
+    dictationPause: dictationPause,
+    voiceCommands: voiceCommands,
+    dictationLanguage: language,
+    recentDictationLanguages: language == null
+        ? recentDictationLanguages
+        : List.unmodifiable(
+            [
+              language.tag,
+              ...recentDictationLanguages.where((tag) => tag != language.tag),
+            ].take(maxRecentDictationLanguages),
+          ),
   );
 
   @override
@@ -52,7 +86,9 @@ final class Preferences {
           noteViewMode == other.noteViewMode &&
           noteListDensity == other.noteListDensity &&
           dictationPause == other.dictationPause &&
-          voiceCommands == other.voiceCommands;
+          voiceCommands == other.voiceCommands &&
+          dictationLanguage == other.dictationLanguage &&
+          listEquals(recentDictationLanguages, other.recentDictationLanguages);
 
   @override
   int get hashCode => Object.hash(
@@ -62,5 +98,7 @@ final class Preferences {
     noteListDensity,
     dictationPause,
     voiceCommands,
+    dictationLanguage,
+    Object.hashAll(recentDictationLanguages),
   );
 }

@@ -132,4 +132,17 @@ class NoteDetailsLocalizationsHi extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => 'अनुच्छेद को चेकलिस्ट में';
+
+  @override
+  String get dictationLanguage => 'बोलकर लिखने की भाषा';
+
+  @override
+  String get dictationLanguagesRecent => 'हाल में इस्तेमाल';
+
+  @override
+  String get dictationLanguagesAll => 'सभी भाषाएँ';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'वाक् पहचान ने भाषाओं की सूची नहीं दी। माइक्रोफ़ोन और वाक् पहचान की अनुमति जाँचें।';
 }

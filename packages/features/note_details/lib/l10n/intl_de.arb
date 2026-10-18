@@ -55,5 +55,9 @@
   "dictationFailed": "Das Diktat wurde wegen eines Fehlers beendet",
   "openSettings": "Einstellungen",
   "dictateNote": "Notiz diktieren",
-  "convertToChecklist": "Absatz in Checkliste"
+  "convertToChecklist": "Absatz in Checkliste",
+  "dictationLanguage": "Diktiersprache",
+  "dictationLanguagesRecent": "Zuletzt verwendet",
+  "dictationLanguagesAll": "Alle Sprachen",
+  "dictationLanguagesUnavailable": "Die Spracherkennung hat keine Sprachen gemeldet. Prüfen Sie den Zugriff auf Mikrofon und Spracherkennung."
 }

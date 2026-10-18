@@ -23,6 +23,7 @@ import 'package:nota/app/composition.dart';
 import 'package:nota/app/config/application_config.dart';
 import 'package:nota/app/dependency_container.dart';
 import 'package:nota/app/root_context.dart';
+import 'package:preferences_service/preferences_service.dart';
 import 'package:shared/shared.dart';
 import 'package:speech_service/speech_service.dart';
 import 'package:speech_service/testing.dart';
@@ -82,6 +83,21 @@ Future<void> _snap(
 
 /// Plays a short grocery dialogue into the scripted speech service so the
 /// dictation panel has something to show. Simulators have no recogniser.
+/// What a typical recogniser offers, so the language picker looks real.
+const _demoSpeechLocales = [
+  SpeechLocale(id: 'en_US', name: 'English (United States)'),
+  SpeechLocale(id: 'en_GB', name: 'English (United Kingdom)'),
+  SpeechLocale(id: 'de_DE', name: 'German (Germany)'),
+  SpeechLocale(id: 'es_ES', name: 'Spanish (Spain)'),
+  SpeechLocale(id: 'fr_FR', name: 'French (France)'),
+  SpeechLocale(id: 'it_IT', name: 'Italian (Italy)'),
+  SpeechLocale(id: 'ja_JP', name: 'Japanese (Japan)'),
+  SpeechLocale(id: 'pt_BR', name: 'Portuguese (Brazil)'),
+  SpeechLocale(id: 'ru_RU', name: 'Russian (Russia)'),
+  SpeechLocale(id: 'uk_UA', name: 'Ukrainian (Ukraine)'),
+  SpeechLocale(id: 'cmn-Hans-CN', name: 'Chinese, Mandarin (China)'),
+];
+
 Future<void> _playDictationDemo(ScriptedSpeechService speech) async {
   if (speech.startCalls.length > 1) return;
   Future<void> beat([int ms = 300]) =>
@@ -131,17 +147,17 @@ void main() {
       noteRepository: base.noteRepository,
       imageFiles: base.imageFiles,
       speechService: ScriptedSpeechService(
-        locales: const [SpeechLocale(id: 'en_US', name: 'English (US)')],
+        locales: _demoSpeechLocales,
         onStart: _playDictationDemo,
       ),
     );
     final repo = deps.noteRepository;
     final prefs = deps.preferencesService;
 
-    // Fresh start: English, light, grid, no notes.
+    // Fresh start: English, light, grid, default dictation, no notes.
     await prefs.update(
-      (p) => p.copyWith(
-        locale: const Locale('en'),
+      (_) => const Preferences(
+        locale: Locale('en'),
         themeMode: ThemeMode.light,
         noteViewMode: NoteViewMode.grid,
         noteListDensity: NoteListDensity.threeLines,
@@ -316,6 +332,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2000));
     await tester.pumpAndSettle();
     await _snap(binding, '08_editor_dictation');
+    // The language badge opens the picker; closing it keeps the session.
+    await tester.tap(find.byTooltip('Dictation language'));
+    await tester.pumpAndSettle();
+    await _snap(binding, '08b_dictation_language');
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Dictate'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back));
@@ -354,6 +376,11 @@ void main() {
     await tester.tap(find.text('English'));
     await tester.pumpAndSettle();
     await _snap(binding, '13_preferences_language');
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Same as app'));
+    await tester.pumpAndSettle();
+    await _snap(binding, '13b_preferences_dictation_language');
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.close));

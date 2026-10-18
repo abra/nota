@@ -55,5 +55,9 @@
   "dictationFailed": "语音输入因错误而停止",
   "openSettings": "设置",
   "dictateNote": "语音记笔记",
-  "convertToChecklist": "段落转为清单"
+  "convertToChecklist": "段落转为清单",
+  "dictationLanguage": "语音输入语言",
+  "dictationLanguagesRecent": "最近使用",
+  "dictationLanguagesAll": "所有语言",
+  "dictationLanguagesUnavailable": "语音识别未提供语言列表。请检查麦克风和语音识别权限。"
 }

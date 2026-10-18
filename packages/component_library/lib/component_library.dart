@@ -1,11 +1,13 @@
 export 'src/bottom_sheet_header.dart';
 export 'src/centered_circular_progress_indicator.dart';
+export 'src/choice_list.dart';
 export 'src/empty_state.dart';
 export 'src/error_state.dart';
 export 'src/fade_gradient_overlay.dart';
 export 'src/floating_bar.dart';
 export 'src/floating_panel.dart';
 export 'src/nota_logo.dart';
+export 'src/settings_group.dart';
 export 'src/theme/app_radius.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/app_theme_data.dart';

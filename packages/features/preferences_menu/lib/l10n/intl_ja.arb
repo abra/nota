@@ -36,5 +36,10 @@
   "pauseShort": "短い",
   "pauseNormal": "標準",
   "pauseLong": "長い",
-  "voiceCommands": "音声コマンド"
+  "voiceCommands": "音声コマンド",
+  "dictationLanguage": "音声入力の言語",
+  "dictationLanguageApp": "アプリと同じ",
+  "dictationLanguagesRecent": "最近使った言語",
+  "dictationLanguagesAll": "すべての言語",
+  "dictationLanguagesUnavailable": "音声認識から言語の一覧を取得できませんでした。マイクと音声認識へのアクセスを確認してください。"
 }

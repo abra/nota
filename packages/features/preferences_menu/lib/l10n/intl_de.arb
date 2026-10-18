@@ -36,5 +36,10 @@
   "pauseShort": "Kurz",
   "pauseNormal": "Normal",
   "pauseLong": "Lang",
-  "voiceCommands": "Sprachbefehle"
+  "voiceCommands": "Sprachbefehle",
+  "dictationLanguage": "Diktiersprache",
+  "dictationLanguageApp": "Wie in der App",
+  "dictationLanguagesRecent": "Zuletzt verwendet",
+  "dictationLanguagesAll": "Alle Sprachen",
+  "dictationLanguagesUnavailable": "Die Spracherkennung hat keine Sprachen gemeldet. Prüfen Sie den Zugriff auf Mikrofon und Spracherkennung."
 }

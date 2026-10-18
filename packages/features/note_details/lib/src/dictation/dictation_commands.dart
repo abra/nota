@@ -440,7 +440,13 @@ abstract final class DictationCommands {
 
   static final _byLanguage = {for (final set in all) set.languageCode: set};
 
+  /// Recognisers name some languages by a narrower code; Android lists
+  /// Mandarin as `cmn-Hans-CN`.
+  static const _aliases = {'cmn': 'zh'};
+
   /// The command set for [languageCode], or `null` when none exists.
-  static DictationCommandSet? forLanguage(String languageCode) =>
-      _byLanguage[languageCode.toLowerCase()];
+  static DictationCommandSet? forLanguage(String languageCode) {
+    final code = languageCode.toLowerCase();
+    return _byLanguage[_aliases[code] ?? code];
+  }
 }

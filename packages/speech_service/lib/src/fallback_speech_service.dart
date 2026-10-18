@@ -61,16 +61,20 @@ class FallbackSpeechService implements SpeechService {
     if (active == null) return const [];
     if (!identical(active, _primary)) return active.supportedLocales();
     final primary = await _primary.supportedLocales();
-    final seen = {for (final locale in primary) _normalize(locale.id)};
     // Only the fallback can list languages the primary lacks; it needs to be
     // initialised for that, which also asks for nothing new on iOS.
     if (await _fallback.initialize() != SpeechAvailability.available) {
       return primary;
     }
+    final fallback = await _fallback.supportedLocales();
+    // SpeechAnalyzer reports bare ids; the older recogniser has names.
+    final names = {for (final locale in fallback) locale.tag: locale.name};
+    final seen = <String>{};
     return [
-      ...primary,
-      for (final locale in await _fallback.supportedLocales())
-        if (seen.add(_normalize(locale.id))) locale,
+      for (final locale in primary)
+        if (seen.add(locale.tag)) _withName(locale, names[locale.tag]),
+      for (final locale in fallback)
+        if (seen.add(locale.tag)) locale,
     ];
   }
 
@@ -108,5 +112,10 @@ class FallbackSpeechService implements SpeechService {
     await _events.close();
   }
 
-  static String _normalize(String id) => id.toLowerCase().replaceAll('-', '_');
+  /// Keeps the primary's [locale] id, which is what its [start] expects,
+  /// and borrows a real [name] when the primary had none.
+  static SpeechLocale _withName(SpeechLocale locale, String? name) =>
+      name == null || locale.displayName != locale.tag
+      ? locale
+      : SpeechLocale(id: locale.id, name: name);
 }

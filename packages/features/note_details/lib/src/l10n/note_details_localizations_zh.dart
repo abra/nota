@@ -128,4 +128,16 @@ class NoteDetailsLocalizationsZh extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => '段落转为清单';
+
+  @override
+  String get dictationLanguage => '语音输入语言';
+
+  @override
+  String get dictationLanguagesRecent => '最近使用';
+
+  @override
+  String get dictationLanguagesAll => '所有语言';
+
+  @override
+  String get dictationLanguagesUnavailable => '语音识别未提供语言列表。请检查麦克风和语音识别权限。';
 }

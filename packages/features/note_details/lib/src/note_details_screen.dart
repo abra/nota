@@ -21,6 +21,7 @@ import 'package:toast_service/toast_service.dart';
 
 import 'checklist/quill_checklist_converter.dart';
 import 'dictation/dictation_cubit.dart';
+import 'dictation/dictation_languages.dart';
 import 'dictation/dictation_mode.dart';
 import 'dictation/quill_dictation_sink.dart';
 import 'l10n/note_details_localizations.dart';
@@ -392,14 +393,38 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
     if (!_quillFocusNode.hasFocus) _quillController.moveCursorToEnd();
     // Dictation is hands-free: hide the keyboard and give the note the room.
     _quillFocusNode.unfocus();
+    _dictation.updateSettings(_dictationSettings());
+    _dictation.start(Localizations.localeOf(context), detectMode: true);
+  }
+
+  DictationSettings _dictationSettings() {
     final prefs = widget.preferencesService.current;
-    _dictation.updateSettings(
-      DictationSettings(
-        timing: DictationTiming.forPause(prefs.dictationPause),
-        voiceCommands: prefs.voiceCommands,
+    return DictationSettings(
+      timing: DictationTiming.forPause(prefs.dictationPause),
+      voiceCommands: prefs.voiceCommands,
+      language: prefs.dictationLanguage?.tag,
+    );
+  }
+
+  /// Lets the user dictate in another language than the app's. The choice
+  /// is remembered and a running session switches to it.
+  Future<void> _pickDictationLanguage() async {
+    HapticFeedback.selectionClick();
+    final picked = await showModalBottomSheet<DictationLanguage>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _DictationLanguageSheet(
+        languages: loadDictationLanguages(widget.speechService),
+        selectedTag: _dictation.state.language,
+        recentTags: widget.preferencesService.current.recentDictationLanguages,
       ),
     );
-    _dictation.start(Localizations.localeOf(context), detectMode: true);
+    if (picked == null || !mounted) return;
+    await widget.preferencesService.update(
+      (p) => p.withDictationLanguage(picked),
+    );
+    if (mounted) _dictation.updateSettings(_dictationSettings());
   }
 
   Future<void> _pickImage(BuildContext context) async {
@@ -743,6 +768,7 @@ class _NoteDetailsViewState extends State<NoteDetailsView>
                                 onToggleDictation: () =>
                                     _togglePanel(_SecondaryPanelMode.dictation),
                                 onOpenSettings: widget.openAppSettings,
+                                onPickDictationLanguage: _pickDictationLanguage,
                                 onImagePressed: () => _pickImage(context),
                                 onColorSelected: (color) {
                                   HapticFeedback.selectionClick();
@@ -929,6 +955,7 @@ class _NoteToolbar extends StatelessWidget {
     required this.onColorSelected,
     required this.onNewLine,
     this.onOpenSettings,
+    this.onPickDictationLanguage,
   });
 
   final QuillController controller;
@@ -941,6 +968,7 @@ class _NoteToolbar extends StatelessWidget {
   final VoidCallback onToggleDictation;
   final VoidCallback onImagePressed;
   final OpenAppSettings? onOpenSettings;
+  final VoidCallback? onPickDictationLanguage;
   final ValueChanged<NoteColor> onColorSelected;
   final VoidCallback onNewLine;
 
@@ -970,6 +998,7 @@ class _NoteToolbar extends StatelessWidget {
                 noteColor: noteColor,
                 onColorSelected: onColorSelected,
                 onOpenSettings: onOpenSettings,
+                onPickDictationLanguage: onPickDictationLanguage,
               ),
             ),
           ),
@@ -1186,6 +1215,7 @@ class _SecondaryPanel extends StatelessWidget {
     required this.noteColor,
     required this.onColorSelected,
     this.onOpenSettings,
+    this.onPickDictationLanguage,
   });
 
   final _SecondaryPanelMode mode;
@@ -1193,6 +1223,7 @@ class _SecondaryPanel extends StatelessWidget {
   final NoteColor noteColor;
   final ValueChanged<NoteColor> onColorSelected;
   final OpenAppSettings? onOpenSettings;
+  final VoidCallback? onPickDictationLanguage;
 
   @override
   Widget build(BuildContext context) {
@@ -1206,6 +1237,7 @@ class _SecondaryPanel extends StatelessWidget {
       ),
       _SecondaryPanelMode.dictation => _DictationPanel(
         onOpenSettings: onOpenSettings,
+        onPickLanguage: onPickDictationLanguage,
       ),
     };
     // Panels differ in height (dictation has two rows): grow from the

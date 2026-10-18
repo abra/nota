@@ -65,4 +65,20 @@ class PreferencesLocalizationsRu extends PreferencesLocalizations {
 
   @override
   String get voiceCommands => 'Голосовые команды';
+
+  @override
+  String get dictationLanguage => 'Язык диктовки';
+
+  @override
+  String get dictationLanguageApp => 'Как в приложении';
+
+  @override
+  String get dictationLanguagesRecent => 'Недавние';
+
+  @override
+  String get dictationLanguagesAll => 'Все языки';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'Распознавание речи не сообщило список языков. Проверьте доступ к микрофону и распознаванию речи.';
 }

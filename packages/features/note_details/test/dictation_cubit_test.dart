@@ -369,6 +369,166 @@ void main() {
     });
   });
 
+  group('dictation language', () {
+    const russian = DictationSettings(timing: timing, language: 'ru-RU');
+
+    Future<List<DictationStatus>> statusesDuring(
+      Future<void> Function() action,
+    ) async {
+      final statuses = <DictationStatus>[];
+      final sub = cubit.stream.listen((s) => statuses.add(s.status));
+      await action();
+      await settle();
+      await sub.cancel();
+      return statuses;
+    }
+
+    test('listens in the chosen language instead of the app one', () async {
+      cubit.updateSettings(russian);
+      await cubit.start(en);
+
+      expect(service.lastConfig?.localeId, 'ru_RU');
+      expect(cubit.state.language, 'ru-RU');
+      expect(cubit.state.newLinePhrase, 'новая строка');
+      service.finalText('Молоко новая строка');
+      await settle();
+      expect(sink.inserted, [('Молоко', DictationMode.text)]);
+      expect(
+        sink.newLines,
+        1,
+        reason: 'commands follow the dictation language',
+      );
+    });
+
+    test('reports the recogniser locale it resolved to', () async {
+      await cubit.start(en);
+      expect(cubit.state.language, 'en-US');
+    });
+
+    test('switching the language restarts a running session', () async {
+      await cubit.start(en);
+      service.partial('milk and');
+
+      final statuses = await statusesDuring(
+        () async => cubit.updateSettings(russian),
+      );
+
+      expect(statuses, [DictationStatus.starting, DictationStatus.listening]);
+      expect(service.stopCalls, 1);
+      expect(service.startCalls.map((c) => c.localeId), ['en_US', 'ru_RU']);
+      expect(cubit.state.language, 'ru-RU');
+      expect(cubit.state.newLinePhrase, 'новая строка');
+
+      // The words said before the switch arrive after the stop.
+      service.finalText('Milk and eggs');
+      await settle();
+      expect(sink.inserted, [('Milk and eggs', DictationMode.text)]);
+    });
+
+    test('keeps the session when the language is already in use', () async {
+      await cubit.start(en);
+      cubit.updateSettings(
+        const DictationSettings(timing: timing, language: 'en-US'),
+      );
+      await settle();
+
+      expect(service.startCalls, hasLength(1));
+      expect(service.stopCalls, 0);
+    });
+
+    test('a change while idle applies on the next start', () async {
+      cubit.updateSettings(russian);
+      await settle();
+      expect(service.startCalls, isEmpty);
+
+      await cubit.start(en);
+      expect(service.lastConfig?.localeId, 'ru_RU');
+    });
+
+    test('a change while paused shows at once and listens on resume', () async {
+      await cubit.start(en);
+      await cubit.stop();
+
+      cubit.updateSettings(russian);
+      await settle();
+      expect(cubit.state.status, DictationStatus.idle);
+      expect(cubit.state.language, 'ru-RU');
+      expect(service.startCalls, hasLength(1));
+
+      await cubit.start(en);
+      expect(service.lastConfig?.localeId, 'ru_RU');
+      expect(cubit.state.newLinePhrase, 'новая строка');
+    });
+
+    test(
+      'a new language recovers a session that failed on the old one',
+      () async {
+        cubit.updateSettings(
+          const DictationSettings(timing: timing, language: 'sw-KE'),
+        );
+        await cubit.start(en);
+        expect(cubit.state.problem, DictationProblem.languageUnsupported);
+        expect(cubit.state.language, 'sw-KE');
+
+        cubit.updateSettings(russian);
+        await settle();
+
+        expect(cubit.state.status, DictationStatus.listening);
+        expect(cubit.state.problem, isNull);
+        expect(service.lastConfig?.localeId, 'ru_RU');
+      },
+    );
+
+    test('passes a picked language through when locales are unknown', () async {
+      service.locales = const [];
+      cubit.updateSettings(russian);
+      await cubit.start(en);
+
+      expect(service.lastConfig?.localeId, 'ru-RU');
+      expect(cubit.state.language, 'ru-RU');
+    });
+
+    test('a stop during the restart wins', () async {
+      await cubit.start(en);
+      service.startGate = Completer<void>();
+      cubit.updateSettings(russian);
+      await settle();
+      expect(cubit.state.isStarting, isTrue);
+
+      await cubit.stop();
+      service.startGate!.complete();
+      await settle();
+
+      expect(cubit.state.status, DictationStatus.idle);
+      expect(
+        service.stopCalls,
+        3,
+        reason: 'the restart, the user, and the late session',
+      );
+    });
+
+    test(
+      'a start overtaken by a restart leaves the new session alone',
+      () async {
+        service.startGate = Completer<void>();
+        final first = cubit.start(en);
+        await settle();
+        expect(cubit.state.isStarting, isTrue);
+
+        cubit.updateSettings(russian);
+        await settle();
+        service.startGate!.complete();
+        await first;
+        await settle();
+
+        expect(cubit.state.status, DictationStatus.listening);
+        expect(cubit.state.language, 'ru-RU');
+        expect(service.stopCalls, 1, reason: 'only the restart stops');
+        expect(service.isListening, isTrue);
+      },
+    );
+  });
+
   test('DictationCommands are reachable through the default resolver', () {
     expect(DictationCommands.forLanguage('en'), isNotNull);
   });

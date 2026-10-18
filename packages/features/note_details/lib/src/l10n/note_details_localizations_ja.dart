@@ -128,4 +128,17 @@ class NoteDetailsLocalizationsJa extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => '段落をチェックリストに';
+
+  @override
+  String get dictationLanguage => '音声入力の言語';
+
+  @override
+  String get dictationLanguagesRecent => '最近使った言語';
+
+  @override
+  String get dictationLanguagesAll => 'すべての言語';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      '音声認識から言語の一覧を取得できませんでした。マイクと音声認識へのアクセスを確認してください。';
 }

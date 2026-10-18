@@ -36,5 +36,10 @@
   "pauseShort": "Corta",
   "pauseNormal": "Normal",
   "pauseLong": "Larga",
-  "voiceCommands": "Comandos de voz"
+  "voiceCommands": "Comandos de voz",
+  "dictationLanguage": "Idioma de dictado",
+  "dictationLanguageApp": "Igual que la app",
+  "dictationLanguagesRecent": "Recientes",
+  "dictationLanguagesAll": "Todos los idiomas",
+  "dictationLanguagesUnavailable": "El reconocimiento de voz no ha indicado sus idiomas. Comprueba el acceso al micrófono y al reconocimiento de voz."
 }

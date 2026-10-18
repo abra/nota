@@ -8,7 +8,7 @@ import 'package:note_details/src/l10n/note_details_localizations.dart';
 import 'package:note_details/src/note_details_bloc.dart';
 import 'package:note_details/src/note_details_screen.dart';
 import 'package:preferences_service/preferences_service.dart';
-import 'package:shared/shared.dart' show DictationPause;
+import 'package:shared/shared.dart' show DictationLanguage, DictationPause;
 import 'package:speech_service/speech_service.dart';
 import 'package:speech_service/testing.dart';
 
@@ -22,6 +22,7 @@ Widget _buildView(
   KeepScreenAwake? keepScreenAwake,
   OpenAppSettings? openAppSettings,
   Preferences preferences = const Preferences(),
+  FakePreferencesService? preferencesService,
   bool startDictation = false,
 }) {
   return MaterialApp(
@@ -36,7 +37,8 @@ Widget _buildView(
       value: bloc,
       child: NoteDetailsView(
         speechService: speech,
-        preferencesService: FakePreferencesService(preferences),
+        preferencesService:
+            preferencesService ?? FakePreferencesService(preferences),
         keepScreenAwake: keepScreenAwake,
         openAppSettings: openAppSettings,
         startDictation: startDictation,
@@ -409,6 +411,137 @@ void main() {
       await tester.tap(find.byTooltip('Dictate'));
       await _settle(tester);
       expect(find.text('Settings'), findsNothing);
+    });
+  });
+
+  group('Dictation language', () {
+    late NoteDetailsBloc bloc;
+    late ScriptedSpeechService speech;
+
+    setUp(() {
+      bloc = _newNoteBloc();
+      speech = ScriptedSpeechService(
+        locales: const [
+          SpeechLocale(id: 'en_US', name: 'English (US)'),
+          SpeechLocale(id: 'ru_RU', name: 'Russian (Russia)'),
+          SpeechLocale(id: 'de_DE', name: 'German (Germany)'),
+        ],
+      );
+    });
+
+    tearDown(() async {
+      await bloc.close();
+      await speech.dispose();
+    });
+
+    Finder languageBadge() => find.byTooltip('Dictation language');
+
+    testWidgets('the badge shows the language the session listens in', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildView(bloc, speech));
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      expect(languageBadge(), findsOneWidget);
+      expect(find.text('EN'), findsOneWidget);
+    });
+
+    testWidgets('picking a language switches the session and remembers it', (
+      tester,
+    ) async {
+      final preferences = FakePreferencesService();
+      await tester.pumpWidget(
+        _buildView(bloc, speech, preferencesService: preferences),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      await tester.tap(languageBadge());
+      await _settle(tester);
+
+      expect(find.text('Recent'), findsOneWidget);
+      expect(find.text('All languages'), findsOneWidget);
+      final recentTop = tester.getTopLeft(find.text('Recent')).dy;
+      final allTop = tester.getTopLeft(find.text('All languages')).dy;
+      expect(
+        tester.getTopLeft(find.text('English (US)')).dy,
+        inExclusiveRange(recentTop, allTop),
+        reason: 'the current language leads with its checkmark',
+      );
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+      await tester.tap(find.text('Russian (Russia)'));
+      await _settle(tester);
+
+      expect(find.text('Russian (Russia)'), findsNothing, reason: 'closed');
+      expect(
+        preferences.current.dictationLanguage,
+        const DictationLanguage(tag: 'ru-RU', name: 'Russian (Russia)'),
+      );
+      expect(speech.startCalls.map((c) => c.localeId), ['en_US', 'ru_RU']);
+      expect(find.text('RU'), findsOneWidget);
+      expect(find.byTooltip('Pause dictation'), findsOneWidget);
+    });
+
+    testWidgets('closing the picker keeps the session as it was', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildView(bloc, speech));
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      await tester.tap(languageBadge());
+      await _settle(tester);
+      await tester.tap(find.byTooltip('Close'));
+      await _settle(tester);
+
+      expect(speech.startCalls, hasLength(1));
+      expect(speech.stopCalls, 0);
+      expect(find.text('EN'), findsOneWidget);
+    });
+
+    testWidgets('starts in the remembered language', (tester) async {
+      await tester.pumpWidget(
+        _buildView(
+          bloc,
+          speech,
+          preferences: const Preferences().withDictationLanguage(
+            const DictationLanguage(tag: 'de-DE', name: 'German (Germany)'),
+          ),
+        ),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      expect(speech.lastConfig?.localeId, 'de_DE');
+      expect(find.text('DE'), findsOneWidget);
+    });
+
+    testWidgets('explains an empty language list', (tester) async {
+      await tester.pumpWidget(_buildView(bloc, speech));
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+      speech.locales = const [];
+
+      await tester.tap(languageBadge());
+      await _settle(tester);
+
+      expect(find.textContaining('did not list its languages'), findsOneWidget);
+    });
+
+    testWidgets('gives way to the settings action on a denied permission', (
+      tester,
+    ) async {
+      speech.availability = SpeechAvailability.permissionDenied;
+      await tester.pumpWidget(
+        _buildView(bloc, speech, openAppSettings: () async {}),
+      );
+      await tester.tap(find.byTooltip('Dictate'));
+      await _settle(tester);
+
+      expect(find.text('Settings'), findsOneWidget);
+      expect(languageBadge(), findsNothing);
     });
   });
 

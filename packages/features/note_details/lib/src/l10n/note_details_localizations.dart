@@ -350,6 +350,30 @@ abstract class NoteDetailsLocalizations {
   /// In en, this message translates to:
   /// **'Paragraph to checklist'**
   String get convertToChecklist;
+
+  /// Title of the dictation language picker and tooltip of its button
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation language'**
+  String get dictationLanguage;
+
+  /// Heading of the recently used dictation languages
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get dictationLanguagesRecent;
+
+  /// Heading of every other dictation language
+  ///
+  /// In en, this message translates to:
+  /// **'All languages'**
+  String get dictationLanguagesAll;
+
+  /// Shown when the recogniser returned no languages
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition did not list its languages. Check microphone and speech recognition access.'**
+  String get dictationLanguagesUnavailable;
 }
 
 class _NoteDetailsLocalizationsDelegate

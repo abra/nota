@@ -65,4 +65,20 @@ class PreferencesLocalizationsFr extends PreferencesLocalizations {
 
   @override
   String get voiceCommands => 'Commandes vocales';
+
+  @override
+  String get dictationLanguage => 'Langue de dictée';
+
+  @override
+  String get dictationLanguageApp => 'Comme l’app';
+
+  @override
+  String get dictationLanguagesRecent => 'Récentes';
+
+  @override
+  String get dictationLanguagesAll => 'Toutes les langues';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'La reconnaissance vocale n’a indiqué aucune langue. Vérifiez l’accès au micro et à la reconnaissance vocale.';
 }

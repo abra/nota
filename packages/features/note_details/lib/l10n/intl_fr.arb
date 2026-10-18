@@ -55,5 +55,9 @@
   "dictationFailed": "La dictée s’est arrêtée à cause d’une erreur",
   "openSettings": "Réglages",
   "dictateNote": "Dicter une note",
-  "convertToChecklist": "Paragraphe en liste de tâches"
+  "convertToChecklist": "Paragraphe en liste de tâches",
+  "dictationLanguage": "Langue de dictée",
+  "dictationLanguagesRecent": "Récentes",
+  "dictationLanguagesAll": "Toutes les langues",
+  "dictationLanguagesUnavailable": "La reconnaissance vocale n’a indiqué aucune langue. Vérifiez l’accès au micro et à la reconnaissance vocale."
 }

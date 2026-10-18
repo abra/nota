@@ -55,5 +55,9 @@
   "dictationFailed": "El dictado se detuvo por un error",
   "openSettings": "Ajustes",
   "dictateNote": "Dictar una nota",
-  "convertToChecklist": "Párrafo a lista de tareas"
+  "convertToChecklist": "Párrafo a lista de tareas",
+  "dictationLanguage": "Idioma de dictado",
+  "dictationLanguagesRecent": "Recientes",
+  "dictationLanguagesAll": "Todos los idiomas",
+  "dictationLanguagesUnavailable": "El reconocimiento de voz no ha indicado sus idiomas. Comprueba el acceso al micrófono y al reconocimiento de voz."
 }

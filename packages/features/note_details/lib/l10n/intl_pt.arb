@@ -55,5 +55,9 @@
   "dictationFailed": "O ditado parou devido a um erro",
   "openSettings": "Ajustes",
   "dictateNote": "Ditar uma nota",
-  "convertToChecklist": "Parágrafo em lista de tarefas"
+  "convertToChecklist": "Parágrafo em lista de tarefas",
+  "dictationLanguage": "Idioma do ditado",
+  "dictationLanguagesRecent": "Recentes",
+  "dictationLanguagesAll": "Todos os idiomas",
+  "dictationLanguagesUnavailable": "O reconhecimento de voz não informou os idiomas. Verifique o acesso ao microfone e ao reconhecimento de voz."
 }

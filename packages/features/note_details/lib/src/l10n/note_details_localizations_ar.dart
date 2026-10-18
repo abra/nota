@@ -132,4 +132,17 @@ class NoteDetailsLocalizationsAr extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => 'تحويل الفقرة إلى قائمة مهام';
+
+  @override
+  String get dictationLanguage => 'لغة الإملاء';
+
+  @override
+  String get dictationLanguagesRecent => 'المستخدمة مؤخرًا';
+
+  @override
+  String get dictationLanguagesAll => 'كل اللغات';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'لم يعرض التعرّف على الكلام قائمة اللغات. تحقّق من إذن الوصول إلى الميكروفون والتعرّف على الكلام.';
 }

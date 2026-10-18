@@ -36,5 +36,10 @@
   "pauseShort": "قصير",
   "pauseNormal": "عادي",
   "pauseLong": "طويل",
-  "voiceCommands": "الأوامر الصوتية"
+  "voiceCommands": "الأوامر الصوتية",
+  "dictationLanguage": "لغة الإملاء",
+  "dictationLanguageApp": "مثل التطبيق",
+  "dictationLanguagesRecent": "المستخدمة مؤخرًا",
+  "dictationLanguagesAll": "كل اللغات",
+  "dictationLanguagesUnavailable": "لم يعرض التعرّف على الكلام قائمة اللغات. تحقّق من إذن الوصول إلى الميكروفون والتعرّف على الكلام."
 }

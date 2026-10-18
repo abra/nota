@@ -4,7 +4,7 @@ import 'dart:ui' show Locale;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared/shared.dart' show DictationPause;
+import 'package:shared/shared.dart' show DictationLanguage, DictationPause;
 import 'package:speech_service/speech_service.dart';
 
 import 'dictation_commands.dart';
@@ -53,12 +53,17 @@ final class DictationSettings {
   const DictationSettings({
     this.timing = const DictationTiming(),
     this.voiceCommands = true,
+    this.language,
   });
 
   final DictationTiming timing;
 
   /// Whether spoken commands are recognised and hinted at.
   final bool voiceCommands;
+
+  /// BCP 47 tag of the language to listen in; `null` follows the app
+  /// language given to [DictationCubit.start].
+  final String? language;
 }
 
 /// Drives one dictation session.
@@ -66,7 +71,9 @@ final class DictationSettings {
 /// Starts and stops the [SpeechService], exposes partial transcripts and
 /// commits finished utterances to the [DictationSink] according to the
 /// current [DictationMode]. Spoken commands at the end of an utterance are
-/// executed after the text before them is inserted.
+/// executed after the text before them is inserted. Both the recogniser and
+/// the commands use the dictation language, which may differ from the app
+/// language.
 class DictationCubit extends Cubit<DictationState> {
   DictationCubit({
     required SpeechService service,
@@ -84,6 +91,7 @@ class DictationCubit extends Cubit<DictationState> {
   final DictationSink _sink;
   final DictationCommandSet? Function(String languageCode) _commandsFor;
   DictationSettings _settings;
+  Locale? _appLocale;
   String? _languageCode;
 
   DictationSettings get settings => _settings;
@@ -100,21 +108,32 @@ class DictationCubit extends Cubit<DictationState> {
   /// awaiting the platform notices it has been superseded.
   int _startToken = 0;
 
-  /// Starts listening in [locale].
+  /// Starts listening in [DictationSettings.language], or in [appLocale]
+  /// when the settings leave the language to the app.
   ///
   /// With [detectMode] the mode follows the line under the cursor, so
   /// dictation continues the structure the user was writing. Without it the
   /// current mode is kept (resume after a pause).
-  Future<void> start(Locale locale, {bool detectMode = false}) async {
+  Future<void> start(Locale appLocale, {bool detectMode = false}) async {
     if (state.isActive) return;
+    _appLocale = appLocale;
+    await _run(detectMode ? _sink.modeAtCursor() : state.mode);
+  }
+
+  /// The language the settings ask for: the chosen one or the app's.
+  String get _requestedLanguage =>
+      _settings.language ?? _appLocale!.toLanguageTag();
+
+  Future<void> _run(DictationMode mode) async {
     final token = ++_startToken;
-    final mode = detectMode ? _sink.modeAtCursor() : state.mode;
+    final tag = _requestedLanguage;
     emit(
       state.copyWith(
         status: DictationStatus.starting,
         mode: mode,
         partialText: '',
         problem: null,
+        language: tag,
       ),
     );
 
@@ -133,17 +152,16 @@ class DictationCubit extends Cubit<DictationState> {
     if (_isSuperseded(token)) return;
     String? localeId;
     if (locales.isNotEmpty) {
-      localeId = resolveSpeechLocaleId(
-        available: locales,
-        languageCode: locale.languageCode,
-        countryCode: locale.countryCode,
-      );
+      localeId = resolveSpeechLocaleIdForTag(available: locales, tag: tag);
       if (localeId == null) return _fail(DictationProblem.languageUnsupported);
+    } else if (_settings.language != null) {
+      // The platform could not enumerate its locales. A language the user
+      // picked goes through as is and the recogniser judges it.
+      localeId = tag;
     }
-    // An empty list means the platform could not enumerate its locales;
-    // the device default is the best remaining guess.
+    // Otherwise the device default is the best remaining guess.
     _localeId = localeId;
-    _languageCode = locale.languageCode;
+    _languageCode = DictationLanguage.languageCodeOf(tag);
     _commands = _resolveCommands();
     _subscription ??= _service.events.listen(_onEvent);
 
@@ -155,16 +173,38 @@ class DictationCubit extends Cubit<DictationState> {
       return;
     }
     if (_isSuperseded(token)) {
-      // Stopped while the recogniser was starting.
-      await _service.stop();
+      // Stopped while the recogniser was starting. A newer start that is
+      // still running owns the recogniser now and must keep it.
+      if (!state.isActive) await _service.stop();
       return;
     }
     emit(
       state.copyWith(
         status: DictationStatus.listening,
         newLinePhrase: _commands?.primaryPhrase(DictationCommand.newLine),
+        language: localeId == null ? tag : speechLocaleTag(localeId),
       ),
     );
+  }
+
+  /// Restarts the session in the language of the current settings. The
+  /// utterance in progress still lands in the note: stopping the recogniser
+  /// delivers its final transcript.
+  Future<void> _restart() async {
+    _startToken++;
+    soundLevel.value = 0;
+    emit(
+      state.copyWith(
+        status: DictationStatus.starting,
+        partialText: '',
+        problem: null,
+        language: _requestedLanguage,
+      ),
+    );
+    await _service.stop();
+    // A stop() or close() in the meantime wins.
+    if (isClosed || !state.isStarting) return;
+    await _run(state.mode);
   }
 
   /// Stops listening. The last utterance may still be committed afterwards.
@@ -184,8 +224,22 @@ class DictationCubit extends Cubit<DictationState> {
   }
 
   /// Applies new preferences, to the running session as well.
+  ///
+  /// A different language restarts a running or failed session in it; the
+  /// other settings apply without a restart.
   void updateSettings(DictationSettings settings) {
+    final languageChanged = settings.language != _settings.language;
     _settings = settings;
+    if (languageChanged &&
+        _appLocale != null &&
+        _requestedLanguage != state.language) {
+      if (state.isActive || state.status == DictationStatus.failed) {
+        unawaited(_restart());
+        return;
+      }
+      // Paused: show the new language now; the next start listens in it.
+      emit(state.copyWith(language: _requestedLanguage));
+    }
     _commands = _resolveCommands();
     if (state.isListening) {
       _service.reconfigure(_configFor(state.mode));

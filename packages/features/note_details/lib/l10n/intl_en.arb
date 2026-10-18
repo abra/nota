@@ -89,5 +89,21 @@
   "dictateNote": "Dictate a note",
   "@dictateNote": {},
   "convertToChecklist": "Paragraph to checklist",
-  "@convertToChecklist": {}
+  "@convertToChecklist": {},
+  "dictationLanguage": "Dictation language",
+  "@dictationLanguage": {
+    "description": "Title of the dictation language picker and tooltip of its button"
+  },
+  "dictationLanguagesRecent": "Recent",
+  "@dictationLanguagesRecent": {
+    "description": "Heading of the recently used dictation languages"
+  },
+  "dictationLanguagesAll": "All languages",
+  "@dictationLanguagesAll": {
+    "description": "Heading of every other dictation language"
+  },
+  "dictationLanguagesUnavailable": "Speech recognition did not list its languages. Check microphone and speech recognition access.",
+  "@dictationLanguagesUnavailable": {
+    "description": "Shown when the recogniser returned no languages"
+  }
 }

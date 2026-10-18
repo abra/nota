@@ -132,4 +132,17 @@ class NoteDetailsLocalizationsRu extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => 'Абзац в чеклист';
+
+  @override
+  String get dictationLanguage => 'Язык диктовки';
+
+  @override
+  String get dictationLanguagesRecent => 'Недавние';
+
+  @override
+  String get dictationLanguagesAll => 'Все языки';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'Распознавание речи не сообщило список языков. Проверьте доступ к микрофону и распознаванию речи.';
 }

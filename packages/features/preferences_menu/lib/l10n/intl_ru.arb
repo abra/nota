@@ -36,5 +36,10 @@
   "pauseShort": "Короткая",
   "pauseNormal": "Обычная",
   "pauseLong": "Длинная",
-  "voiceCommands": "Голосовые команды"
+  "voiceCommands": "Голосовые команды",
+  "dictationLanguage": "Язык диктовки",
+  "dictationLanguageApp": "Как в приложении",
+  "dictationLanguagesRecent": "Недавние",
+  "dictationLanguagesAll": "Все языки",
+  "dictationLanguagesUnavailable": "Распознавание речи не сообщило список языков. Проверьте доступ к микрофону и распознаванию речи."
 }

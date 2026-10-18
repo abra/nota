@@ -65,4 +65,20 @@ class PreferencesLocalizationsEn extends PreferencesLocalizations {
 
   @override
   String get voiceCommands => 'Voice commands';
+
+  @override
+  String get dictationLanguage => 'Dictation language';
+
+  @override
+  String get dictationLanguageApp => 'Same as app';
+
+  @override
+  String get dictationLanguagesRecent => 'Recent';
+
+  @override
+  String get dictationLanguagesAll => 'All languages';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'Speech recognition did not list its languages. Check microphone and speech recognition access.';
 }

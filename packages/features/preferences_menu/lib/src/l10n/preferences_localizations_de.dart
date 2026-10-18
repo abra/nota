@@ -65,4 +65,20 @@ class PreferencesLocalizationsDe extends PreferencesLocalizations {
 
   @override
   String get voiceCommands => 'Sprachbefehle';
+
+  @override
+  String get dictationLanguage => 'Diktiersprache';
+
+  @override
+  String get dictationLanguageApp => 'Wie in der App';
+
+  @override
+  String get dictationLanguagesRecent => 'Zuletzt verwendet';
+
+  @override
+  String get dictationLanguagesAll => 'Alle Sprachen';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'Die Spracherkennung hat keine Sprachen gemeldet. Prüfen Sie den Zugriff auf Mikrofon und Spracherkennung.';
 }

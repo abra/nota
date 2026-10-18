@@ -65,4 +65,20 @@ class PreferencesLocalizationsAr extends PreferencesLocalizations {
 
   @override
   String get voiceCommands => 'الأوامر الصوتية';
+
+  @override
+  String get dictationLanguage => 'لغة الإملاء';
+
+  @override
+  String get dictationLanguageApp => 'مثل التطبيق';
+
+  @override
+  String get dictationLanguagesRecent => 'المستخدمة مؤخرًا';
+
+  @override
+  String get dictationLanguagesAll => 'كل اللغات';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'لم يعرض التعرّف على الكلام قائمة اللغات. تحقّق من إذن الوصول إلى الميكروفون والتعرّف على الكلام.';
 }

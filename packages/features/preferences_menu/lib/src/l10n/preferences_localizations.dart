@@ -224,6 +224,36 @@ abstract class PreferencesLocalizations {
   /// In en, this message translates to:
   /// **'Voice commands'**
   String get voiceCommands;
+
+  /// Title of the dictation language picker and tooltip of its button
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation language'**
+  String get dictationLanguage;
+
+  /// Choice that makes dictation follow the app language
+  ///
+  /// In en, this message translates to:
+  /// **'Same as app'**
+  String get dictationLanguageApp;
+
+  /// Heading of the recently used dictation languages
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get dictationLanguagesRecent;
+
+  /// Heading of every other dictation language
+  ///
+  /// In en, this message translates to:
+  /// **'All languages'**
+  String get dictationLanguagesAll;
+
+  /// Shown when the recogniser returned no languages
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition did not list its languages. Check microphone and speech recognition access.'**
+  String get dictationLanguagesUnavailable;
 }
 
 class _PreferencesLocalizationsDelegate

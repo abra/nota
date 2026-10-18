@@ -41,6 +41,33 @@ String? resolveSpeechLocaleId({
   return candidates.first;
 }
 
+/// Picks the recogniser locale for a BCP 47 [tag], such as a chosen
+/// dictation language or the app locale.
+///
+/// The locale with the same tag wins in whatever spelling the platform uses
+/// (`ru_RU` for `ru-RU`); otherwise [resolveSpeechLocaleId] picks one of the
+/// same language, preferring the tag's region.
+String? resolveSpeechLocaleIdForTag({
+  required Iterable<SpeechLocale> available,
+  required String tag,
+}) {
+  final wanted = speechLocaleTag(tag);
+  for (final locale in available) {
+    if (locale.tag == wanted) return locale.id;
+  }
+  final subtags = wanted.split('-');
+  return resolveSpeechLocaleId(
+    available: available,
+    languageCode: subtags.first,
+    countryCode: subtags.skip(1).where(_isRegion).firstOrNull,
+  );
+}
+
+/// Region subtags are upper-case letters or digits after [speechLocaleTag].
+bool _isRegion(String subtag) =>
+    subtag.length == 2 && subtag == subtag.toUpperCase() ||
+    subtag.length == 3 && int.tryParse(subtag) != null;
+
 String _normalize(String id) => id.toLowerCase().replaceAll('-', '_');
 
 String _languageOf(String id) {

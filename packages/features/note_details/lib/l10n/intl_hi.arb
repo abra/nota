@@ -55,5 +55,9 @@
   "dictationFailed": "त्रुटि के कारण डिक्टेशन रुक गया",
   "openSettings": "सेटिंग्स",
   "dictateNote": "बोलकर नोट लिखें",
-  "convertToChecklist": "अनुच्छेद को चेकलिस्ट में"
+  "convertToChecklist": "अनुच्छेद को चेकलिस्ट में",
+  "dictationLanguage": "बोलकर लिखने की भाषा",
+  "dictationLanguagesRecent": "हाल में इस्तेमाल",
+  "dictationLanguagesAll": "सभी भाषाएँ",
+  "dictationLanguagesUnavailable": "वाक् पहचान ने भाषाओं की सूची नहीं दी। माइक्रोफ़ोन और वाक् पहचान की अनुमति जाँचें।"
 }

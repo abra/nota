@@ -133,4 +133,17 @@ class NoteDetailsLocalizationsFr extends NoteDetailsLocalizations {
 
   @override
   String get convertToChecklist => 'Paragraphe en liste de tâches';
+
+  @override
+  String get dictationLanguage => 'Langue de dictée';
+
+  @override
+  String get dictationLanguagesRecent => 'Récentes';
+
+  @override
+  String get dictationLanguagesAll => 'Toutes les langues';
+
+  @override
+  String get dictationLanguagesUnavailable =>
+      'La reconnaissance vocale n’a indiqué aucune langue. Vérifiez l’accès au micro et à la reconnaissance vocale.';
 }

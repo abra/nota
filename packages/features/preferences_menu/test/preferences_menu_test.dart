@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,7 +19,10 @@ Future<PreferencesService> _createService() => PreferencesService.create(
   supportedCodes: _testLanguages.map((l) => l.code).toList(),
 );
 
-Widget _buildMenu(PreferencesService service) {
+Widget _buildMenu(
+  PreferencesService service, {
+  Future<List<DictationLanguage>> Function()? loadDictationLanguages,
+}) {
   return MaterialApp(
     localizationsDelegates: const [
       PreferencesLocalizations.delegate,
@@ -29,6 +34,7 @@ Widget _buildMenu(PreferencesService service) {
       body: PreferencesMenu(
         service: service,
         supportedLanguages: _testLanguages,
+        loadDictationLanguages: loadDictationLanguages,
       ),
     ),
   );
@@ -188,6 +194,138 @@ void main() {
       await tester.pump();
 
       expect(find.text('Русский'), findsOneWidget);
+    });
+  });
+
+  group('Dictation language', () {
+    const ru = DictationLanguage(tag: 'ru-RU', name: 'Russian (Russia)');
+    const enUs = DictationLanguage(tag: 'en-US', name: 'English (US)');
+    const de = DictationLanguage(tag: 'de-DE', name: 'German (Germany)');
+
+    Future<PreferencesService> pumpMenu(
+      WidgetTester tester,
+      Future<List<DictationLanguage>> Function() load,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final service = await _createService();
+      await tester.pumpWidget(
+        _buildMenu(service, loadDictationLanguages: load),
+      );
+      return service;
+    }
+
+    testWidgets('has no row without a way to list the languages', (
+      tester,
+    ) async {
+      final service = await _createService();
+      await tester.pumpWidget(_buildMenu(service));
+
+      expect(find.text('Dictation language'), findsNothing);
+    });
+
+    testWidgets('follows the app language until one is picked', (
+      tester,
+    ) async {
+      await pumpMenu(tester, () async => [ru, enUs]);
+
+      expect(find.text('Dictation language'), findsOneWidget);
+      expect(find.text('Same as app'), findsOneWidget);
+    });
+
+    testWidgets('lists the recogniser languages once, after loading', (
+      tester,
+    ) async {
+      final languages = Completer<List<DictationLanguage>>();
+      var loads = 0;
+      await pumpMenu(tester, () {
+        loads++;
+        return languages.future;
+      });
+
+      await tester.tap(find.text('Same as app'));
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      languages.complete([ru, enUs, de]);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('All languages'), findsOneWidget);
+      expect(find.text('Recent'), findsNothing, reason: 'nothing picked yet');
+      expect(
+        tester.getTopLeft(find.text('English (US)')).dy,
+        lessThan(tester.getTopLeft(find.text('German (Germany)')).dy),
+      );
+      expect(
+        tester.getTopLeft(find.text('German (Germany)')).dy,
+        lessThan(tester.getTopLeft(find.text('Russian (Russia)')).dy),
+      );
+      expect(loads, 1);
+    });
+
+    testWidgets('picking a language stores it and shows it on the main page', (
+      tester,
+    ) async {
+      final service = await pumpMenu(tester, () async => [ru, enUs]);
+
+      await tester.tap(find.text('Same as app'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Russian (Russia)'));
+      await tester.pumpAndSettle();
+
+      expect(service.current.dictationLanguage, ru);
+      expect(service.current.recentDictationLanguages, ['ru-RU']);
+      expect(find.text('Preferences'), findsOneWidget);
+      expect(find.text('Russian (Russia)'), findsOneWidget);
+    });
+
+    testWidgets('shows recent languages first and can follow the app again', (
+      tester,
+    ) async {
+      final service = await pumpMenu(tester, () async => [ru, enUs, de]);
+      await tester
+          .element(find.byType(AnimatedSize))
+          .read<PreferencesCubit>()
+          .update((p) => p.withDictationLanguage(de).withDictationLanguage(ru));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Russian (Russia)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recent'), findsOneWidget);
+      final recentTop = tester.getTopLeft(find.text('Recent')).dy;
+      final allTop = tester.getTopLeft(find.text('All languages')).dy;
+      for (final name in ['Russian (Russia)', 'German (Germany)']) {
+        final top = tester.getTopLeft(find.text(name)).dy;
+        expect(top, inExclusiveRange(recentTop, allTop), reason: name);
+      }
+      expect(
+        tester.getTopLeft(find.text('English (US)')).dy,
+        greaterThan(allTop),
+      );
+
+      await tester.tap(find.text('Same as app'));
+      await tester.pumpAndSettle();
+
+      expect(service.current.dictationLanguage, isNull);
+      expect(find.text('Same as app'), findsOneWidget);
+    });
+
+    testWidgets('explains an empty list and still offers the app language', (
+      tester,
+    ) async {
+      await pumpMenu(tester, () async => const []);
+
+      await tester.tap(find.text('Same as app'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('did not list its languages'),
+        findsOneWidget,
+      );
+      expect(find.text('Same as app'), findsOneWidget);
     });
   });
 }

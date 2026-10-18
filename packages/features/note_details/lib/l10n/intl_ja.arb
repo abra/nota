@@ -55,5 +55,9 @@
   "dictationFailed": "エラーのため音声入力を停止しました",
   "openSettings": "設定",
   "dictateNote": "音声でメモ",
-  "convertToChecklist": "段落をチェックリストに"
+  "convertToChecklist": "段落をチェックリストに",
+  "dictationLanguage": "音声入力の言語",
+  "dictationLanguagesRecent": "最近使った言語",
+  "dictationLanguagesAll": "すべての言語",
+  "dictationLanguagesUnavailable": "音声認識から言語の一覧を取得できませんでした。マイクと音声認識へのアクセスを確認してください。"
 }
